@@ -1,0 +1,20 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "server for ucn project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tom Lodge",
+  "license": "MIT",
+  "dependencies": {
+    "amqplib": "^0.3.2",
+    "bluebird": "^2.9.30",
+    "body-parser": "^1.13.1",
+    "express": "^4.13.0",
+    "hbs": "^3.1.0",
+    "http": "0.0.0",
+    "sqlite3": "^3.0.8"
+  }
+}
