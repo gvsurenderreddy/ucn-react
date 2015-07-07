@@ -31,7 +31,10 @@ var Main = React.createClass({
                     margin:{left: 10, right:10, top:10, bottom:10}
                 };
 
-   var data = [1,2,3,4,5];
+
+   var data = [{x:10, y:20},{x:20, y:30},{x:3, y:34},{x:45, y: 67}].map(function(item){
+      return {x:Math.ceil(300*Math.random()), y:Math.ceil(300*Math.random())}
+   });
 
    return <div>
               <h3 onClick={this._handleClick}>Main</h3>
@@ -48,5 +51,4 @@ var Main = React.createClass({
      this.setState(getStateFromStores());
   }
 });
-
 module.exports = Main;
