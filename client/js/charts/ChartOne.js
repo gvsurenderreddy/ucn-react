@@ -19,26 +19,24 @@ ChartOne.prototype.initialise = function(data, node, opts){
 };
 
 ChartOne.prototype.update = function(data){
+    //guard against empty data;
+    if (!data || !data.timerange || !data.timerange.from)
+      return
 
-  var circles = this.svg.selectAll("circle")
-      .data(data);
+    var cdata = data.keys.map(function(d){
+          return d*1000;
+    });
 
-  //create new
-  circles.enter()
-         .append("circle")
-         .style("fill", "red")
-         .on("click", ActionCreators.clicked);
-
-  //update current
-  circles.transition()
-         .duration(1000)
-         .attr("cx", function(d){return d.x})
-         .attr("cy", function(d){return d.y})
-         .attr("r", 20)
-
-  //remove old
-  circles.exit()
-         .remove();
+    //pull out all hosts
+    var browsers = stack(Object.keys(data.hosts).map(function(name){
+      return {
+        name:name,
+        //do a data.keys map here and give 0 if no sorresponding entry in data.hosts!
+        values: data.hosts[name].map(function(d, i){
+          return {date:cdata[i], y:+d};
+        })
+      };
+    }));
 };
 
 ChartOne.prototype._addListeners = function(){

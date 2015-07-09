@@ -3,7 +3,8 @@ var keyMirror = require('keymirror');
 module.exports = {
 
 	ActionTypes: keyMirror({
-			MAIN_CLICKED: null
+			MAIN_CLICKED: null,
+			RECEIVED_RAW_BROWSING_DATA: null,
   }),
 
   PayloadSources: keyMirror({

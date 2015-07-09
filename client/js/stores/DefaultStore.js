@@ -48,7 +48,7 @@ DefaultStore.dispatchToken = AppDispatcher.register(function(action) {
       _clickcount += 1;
       DefaultStore.emitChange();
       break;
-
+      
     default:
       // no op
   }
