@@ -44,10 +44,30 @@ module.exports = {
       });
     },*/
 
-    fetch_latest_ts_for_hosts: function(hosts){
+    fetch_min_ts_for_hosts: function(hosts, smallest){
+      var hstr = hosts.map(function(host){return "\'" + host + "\'"}).join();
+      var sql = "SELECT min(u.ts) as ts FROM URLS u WHERE u.host IN (" + hstr + ") AND u.ts != '' AND u.ts >= " + smallest;
+
+      return db.serializeAsync()
+
+      .then(function(){
+        return db.allAsync(sql)
+      })
+
+      .then(function(rows){
+        console.log("min rows are");
+        console.log(rows[0]);
+        return rows[0];
+      },function(err){
+          console.log(err);
+          return [];
+      });
+    },
+
+    fetch_max_ts_for_hosts: function(hosts){
 
       var hstr = hosts.map(function(host){return "\'" + host + "\'"}).join();
-      var sql = "SELECT max(u.ts) as ts FROM URLS u WHERE u.host IN (" + hstr + ") AND ts != ''";
+      var sql = "SELECT max(u.ts) as ts FROM URLS u WHERE u.host IN (" + hstr + ") AND u.ts != ''";
 
       return db.serializeAsync()
 
@@ -56,6 +76,8 @@ module.exports = {
         })
 
         .then(function(rows){
+          console.log("max rows are");
+          console.log(rows[0]);
           return rows[0];
         },function(err){
             console.log(err);

@@ -25,7 +25,7 @@ var Main = React.createClass({
 
    var options ={
                     height: 400,
-                    width: 600,
+                    width: 1000,
                     xaxis:{orientation:'bottom'},
                     yaxis:{orientation:'left'},
                     margin:{left: 10, right:10, top:10, bottom:10}

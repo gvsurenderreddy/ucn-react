@@ -26,11 +26,14 @@ app.get('/hv/test', function(req, res){
 }),
 
 app.get('/hv/browsing', function(req,res){
-  db.fetch_latest_ts_for_hosts(hosts).then(function(to){
-    return {from:to.ts - AWEEKAGO, to:to.ts}
-  }).then(function(timerange){
+  db.fetch_max_ts_for_hosts(hosts).then(function(max){
+      return [max.ts, db.fetch_min_ts_for_hosts(hosts, max.ts-AWEEKAGO)];
+  //db.fetch_latest_ts_for_hosts(hosts).then(function(to){
+    //return {from:to.ts - AWEEKAGO, to:to.ts}
+  }).spread(function(maxts, min){
+    var timerange = {from:min.ts, to:maxts};
     var bin = 60 * 60;
-    return [bin,timerange, db.fetch_binned_browsing_for_hosts(hosts, bin, timerange.from, timerange.to)]
+    return [bin,timerange,db.fetch_binned_browsing_for_hosts(hosts, bin, timerange.from, timerange.to)]
   }).spread(function(bin,timerange, binned){
     res.send({
       timerange: timerange,
