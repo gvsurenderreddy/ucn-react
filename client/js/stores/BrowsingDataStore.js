@@ -13,40 +13,60 @@ var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _timerange, _bin, _data, _keys,
+var _data, _filtered,
+
+_update_filtered_data = function(range){
+
+},
 
 _update_data = function(data){
-  _timerange = data.timerange;
-  _bin = data.bin;
-  _data = data.binned;
-  _keys = Utils.binkeys(_bin, _timerange.from, _timerange.to);
+
+  console.log("ok go some data");
+  console.log(data);
+
+  var keys = Utils.binkeys(data.bin, data.timerange.from, data.timerange.to);
+
+  var _bins = data.binned.reduce(function(acc, item){
+      acc[item.host] =  acc[item.host]  || {};
+      acc[item.host][item.bin] = item.total;
+      return acc;
+  },{});
+
+  var hosts = Object.keys(_bins);
+
+  //create browsing as:
+  //[{name:hostname, values:[{date:javascriptts, y:number},..], name:hostname2, values:[{date:javascriptts, y:number}]];
+
+  var browsing = hosts.map(function(host){
+    return {
+      name:host,
+      //do a data.keys map here and give 0 if no sorresponding entry in data.hosts!
+      values: keys.map(function(d){
+          //console.log("looking up key " + (d) + " for host " + host);
+          return {
+            date: d*1000,
+            y: _bins[host][d] ? +(_bins[host][d]) : 0
+          }
+      })
+    }
+  });
+
+  _filtered = _data ={
+      keys: keys,
+      hosts: hosts,
+      browsing: browsing,
+  }
+
 };
 
 var BrowsingDataStore = assign({}, EventEmitter.prototype, {
 
   data(){
-    return{
-      timerange: this.timerange(),
-      browsing: this.browsing(),
-      bin: this.bin(),
-      keys: this.keys()
-    }
-  },
-  
-  browsing(){
     return _data || {};
   },
 
-  timerange(){
-    return _timerange || {};
-  },
-
-  bin(){
-    return _bin || -1
-  },
-
-  keys(){
-    return _keys || [];
+  filtered(){
+    return _filtered || {};
   },
 
   emitChange: function() {
@@ -70,8 +90,6 @@ var BrowsingDataStore = assign({}, EventEmitter.prototype, {
 
 // Register callback to handle all updates
 BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
-  console.log("seen an action");
-  console.log(action);
 
   switch(action.type) {
 
@@ -79,6 +97,11 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
       _update_data(action.rawData);
       BrowsingDataStore.emitChange();
       break;
+
+    case ActionTypes.RANGE_CHANGE:
+        _update_filtered_data(action.range);
+        BrowsingDataStore.emitChange();
+        break;
 
     default:
       // no op

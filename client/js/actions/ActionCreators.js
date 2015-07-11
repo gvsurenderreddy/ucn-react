@@ -11,5 +11,13 @@ module.exports = {
       type: ActionTypes.MAIN_CLICKED,
       data: {},
     });
+  },
+
+  rangechange: function(range){
+    AppDispatcher.dispatch({
+      type: ActionTypes.RANGE_CHANGE,
+      range: range,
+    });
   }
+  
 };

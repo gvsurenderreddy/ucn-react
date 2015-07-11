@@ -1,6 +1,6 @@
 var fn = require("./fn");
-var ChartOne = require('../charts/ChartOne');
-var ChartTwo = require('../charts/ChartTwo');
+var Browsing = require('../charts/Browsing');
+var Zoom = require('../charts/Zoom');
 var d3 = require('../lib/d3.min');
 
 var ChartFactory = function(type, data, node, options){
@@ -47,7 +47,7 @@ ChartFactory.prototype.initialise = function(data, node, opts){
 }
 
 //attach all chart types as static properties
-ChartFactory.ChartOne = ChartOne;
-ChartFactory.ChartTwo = ChartTwo;
+ChartFactory.Browsing = Browsing;
+ChartFactory.Zoom = Zoom;
 
 module.exports = ChartFactory;

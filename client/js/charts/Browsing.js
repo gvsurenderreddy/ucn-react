@@ -2,13 +2,11 @@ var d3 = require('../lib/d3.min');
 var fn = require('../utils/fn');
 var ActionCreators = require('../actions/ActionCreators');
 
-
-
-ChartOne = function(){
+Browsing = function(){
 
 };
 
-ChartOne.prototype.initialise = function(data, node, opts){
+Browsing.prototype.initialise = function(data, node, opts){
 
   var self = this;
 
@@ -22,7 +20,6 @@ ChartOne.prototype.initialise = function(data, node, opts){
 
   this.colour = function(host){
       this.colourchart[host] = this.colourchart[host] || colours[(colourcount++) % colours.length]
-      console.log("returning"  + this.colourchart[host] + " for " + host)
       return this.colourchart[host];
   }
 
@@ -51,43 +48,17 @@ ChartOne.prototype.initialise = function(data, node, opts){
   this._addListeners();
 };
 
-ChartOne.prototype.update = function(data){
+Browsing.prototype.update = function(data){
     var self = this;
     //guard against empty data;
-    if (!data || !data.timerange || !data.timerange.from)
-      return
+    if (!data || !data.browsing){
+      console.log("no data yet..");
+      return;
+    }
 
-    var cdata = data.keys.map(function(d){
-          return d;
-    });
+    var browsers = this.stack(data.browsing);
 
-
-    var bins = data.browsing.reduce(function(acc, item){
-        acc[item.host] =  acc[item.host]  || {};
-        acc[item.host][item.bin] = item.total;
-        return acc;
-    },{});
-
-    this.hosts = Object.keys(bins);
-    //create browswers as:
-    //[{name:hostname, values:[{date:javascriptts, y:number},..], name:hostname2, values:[{date:javascriptts, y:number}]];
-
-    var browsers = this.stack(this.hosts.map(function(host){
-      //
-      return {
-        name:host,
-        //do a data.keys map here and give 0 if no sorresponding entry in data.hosts!
-        values: cdata.map(function(d){
-            //console.log("looking up key " + (d) + " for host " + host);
-            return {
-              date: d*1000,
-              y: bins[host][d] ? +(bins[host][d]) : 0
-            }
-        })
-      };
-    }));
-
-    this.x.domain(d3.extent(cdata, function(d){return d*1000}));
+    this.x.domain(d3.extent(data.keys, function(d){return d*1000}));
 
     this.y.domain([0, d3.max(browsers, function(c){
         return d3.max(c.values, function(d) {return d.y0 +d.y});
@@ -95,6 +66,7 @@ ChartOne.prototype.update = function(data){
 
     var chart = this.svg.selectAll("g.chart");
 
+    //need to add exit!
     var browser = chart.selectAll("browser")
                        .data(browsers)
                        .enter()
@@ -107,15 +79,14 @@ ChartOne.prototype.update = function(data){
       .style("fill", function(d){return self.colour(d.name)})
       .style("fill-opacity", 0.2)
       .style("stroke", function(d){return self.colour(d.name)})
-      .style("stroke-opacity", 1.0)
+      .style("stroke-opacity", 1.0);
+};
+
+Browsing.prototype._addListeners = function(){
 
 };
 
-ChartOne.prototype._addListeners = function(){
-
-};
-
-ChartOne.prototype._removeListeners = function(){
+Browsing.prototype._removeListeners = function(){
 
 };
 
@@ -127,4 +98,4 @@ _onMouseOut = function(){
 
 };
 
-module.exports = ChartOne;
+module.exports = Browsing;

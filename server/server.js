@@ -31,10 +31,12 @@ app.get('/hv/browsing', function(req,res){
   //db.fetch_latest_ts_for_hosts(hosts).then(function(to){
     //return {from:to.ts - AWEEKAGO, to:to.ts}
   }).spread(function(maxts, min){
+    console.log("ok am here...")
     var timerange = {from:min.ts, to:maxts};
     var bin = 60 * 60;
     return [bin,timerange,db.fetch_binned_browsing_for_hosts(hosts, bin, timerange.from, timerange.to)]
   }).spread(function(bin,timerange, binned){
+    console.log("nice - am here so returning data");
     res.send({
       timerange: timerange,
       bin: bin,
