@@ -10,19 +10,17 @@ var EventEmitter = require('events').EventEmitter;
 var Constants = require('../constants/Constants');
 var Utils = require('../utils/Utils');
 var assign = require('object-assign');
+var d3 = require('../lib/d3.min');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
 var _data, _filtered,
 
 _update_filtered_data = function(range){
-
+  _filtered.range = range;
 },
 
 _update_data = function(data){
-
-  console.log("ok go some data");
-  console.log(data);
 
   var keys = Utils.binkeys(data.bin, data.timerange.from, data.timerange.to);
 
@@ -51,11 +49,14 @@ _update_data = function(data){
     }
   });
 
+
   _filtered = _data ={
       keys: keys,
       hosts: hosts,
       browsing: browsing,
   }
+
+  _filtered.range = d3.extent(keys, function(d){return d*1000});
 
 };
 

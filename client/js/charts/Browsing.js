@@ -49,6 +49,8 @@ Browsing.prototype.initialise = function(data, node, opts){
 };
 
 Browsing.prototype.update = function(data){
+
+
     var self = this;
     //guard against empty data;
     if (!data || !data.browsing){
@@ -57,15 +59,12 @@ Browsing.prototype.update = function(data){
     }
 
     var browsers = this.stack(data.browsing);
-
-    this.x.domain(d3.extent(data.keys, function(d){return d*1000}));
+  
+    this.x.domain(data.range);
 
     this.y.domain([0, d3.max(browsers, function(c){
         return d3.max(c.values, function(d) {return d.y0 +d.y});
     })]);
-
-    console.log("data is");
-    console.log(browsers);
 
     var chart = this.svg.selectAll("g.chart");
 

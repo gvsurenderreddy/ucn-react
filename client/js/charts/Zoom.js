@@ -84,7 +84,7 @@ Zoom.prototype.update = function(data){
                      .data(browsers, function(d){
                         return d.name;
                      });
-
+  //enter
   zoom.enter()
       .append("g")
       .attr("class", "browser")
@@ -95,9 +95,11 @@ Zoom.prototype.update = function(data){
       .style("stroke", function(d){return self.colour(d.name)})
       .style("stroke-opacity", 1.0)
 
+  //update
   zoom.selectAll("path.area")
       .attr("d", function(d) {return self.area(d.values);})
 
+  //exit!
   zoom.exit()
       .remove()
 };
