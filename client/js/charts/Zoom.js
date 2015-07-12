@@ -16,7 +16,7 @@ Zoom.prototype.initialise = function(data, node, opts){
                   .x(this.x)
                   .on("brush", function(){
                       var xrange = this.brush.empty() ? this.x.domain() : this.brush.extent();
-                      //ActionCreators.rangechange(xrange);
+                      ActionCreators.rangechange(xrange);
                   }.bind(this))
                   .on("brushend", function(){
                       console.log("brush end");
@@ -80,19 +80,26 @@ Zoom.prototype.update = function(data){
 
   var chart = this.svg.selectAll("g.zoom");
 
-  var zoom = chart.selectAll("browser")
-                     .data(browsers)
-                     .enter()
-                     .append("g")
-                     .attr("class", "browser")
+  var zoom = chart.selectAll("g.browser")
+                     .data(browsers, function(d){
+                        return d.name;
+                     });
 
-  zoom.append("path")
-    .attr("class", "area")
-    .attr("d", function(d) {return self.area(d.values);})
-    .style("fill", function(d){return self.colour(d.name)})
-    .style("fill-opacity", 0.2)
-    .style("stroke", function(d){return self.colour(d.name)})
-    .style("stroke-opacity", 1.0)
+  zoom.enter()
+      .append("g")
+      .attr("class", "browser")
+      .append("path")
+      .attr("class", "area")
+      .style("fill", function(d){return self.colour(d.name)})
+      .style("fill-opacity", 0.2)
+      .style("stroke", function(d){return self.colour(d.name)})
+      .style("stroke-opacity", 1.0)
+
+  zoom.selectAll("path.area")
+      .attr("d", function(d) {return self.area(d.values);})
+
+  zoom.exit()
+      .remove()
 };
 
 

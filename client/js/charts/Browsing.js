@@ -64,22 +64,40 @@ Browsing.prototype.update = function(data){
         return d3.max(c.values, function(d) {return d.y0 +d.y});
     })]);
 
+    console.log("data is");
+    console.log(browsers);
+
     var chart = this.svg.selectAll("g.chart");
 
     //need to add exit!
-    var browser = chart.selectAll("browser")
-                       .data(browsers)
-                       .enter()
-                       .append("g")
-                       .attr("class", "browser")
+    var browser = chart.selectAll("g.browser")
+                       .data(browsers, function(d){return d.name});
+    //enter
+    browser.enter()
+           .append("g")
+           .attr("class", "browser")
+           .append("path")
+           .attr("class", "area")
+           .style("fill", function(d){return self.colour(d.name)})
+           .style("fill-opacity", 0.2)
+           .style("stroke", function(d){return self.colour(d.name)})
+           .style("stroke-opacity", 1.0)
 
-    browser.append("path")
-      .attr("class", "area")
-      .attr("d", function(d) {return self.area(d.values);})
-      .style("fill", function(d){return self.colour(d.name)})
-      .style("fill-opacity", 0.2)
-      .style("stroke", function(d){return self.colour(d.name)})
-      .style("stroke-opacity", 1.0);
+
+    //update
+    browser.selectAll("path.area")
+          .attr("d", function(d) {return self.area(d.values);})
+
+    //exit
+    browser
+          .exit()
+          .remove(function(d){
+            console.log("removing");
+            console.log(d);
+          })
+
+
+
 };
 
 Browsing.prototype._addListeners = function(){
