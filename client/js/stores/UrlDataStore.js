@@ -12,12 +12,16 @@ var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _clickcount = 0;
+var _urls = [];
 
-var DefaultStore = assign({}, EventEmitter.prototype, {
+_update_raw_url_data = function(data){
+  _urls = data.urls || [];
+}
 
-  clickCount: function(){
-    return _clickcount;
+var UrlDataStore = assign({}, EventEmitter.prototype, {
+
+  urls: function(){
+    return _urls;
   },
 
   emitChange: function() {
@@ -40,18 +44,20 @@ var DefaultStore = assign({}, EventEmitter.prototype, {
 });
 
 // Register callback to handle all updates
-DefaultStore.dispatchToken = AppDispatcher.register(function(action) {
+UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
   switch(action.type) {
 
-  	case ActionTypes.MAIN_CLICKED:
-      _clickcount += 1;
-      DefaultStore.emitChange();
+  	case ActionTypes.RAW_URL_DATA:
+      console.log("store seen urls!!");
+      console.log(action);
+      _update_raw_url_data(action.rawUrls)
+      UrlDataStore.emitChange();
       break;
-      
+
     default:
       // no op
   }
 });
 
-module.exports = DefaultStore;
+module.exports = UrlDataStore;

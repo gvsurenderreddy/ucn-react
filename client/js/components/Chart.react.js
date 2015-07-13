@@ -18,7 +18,6 @@ var Chart = React.createClass({
       this.getDOMNode(),
       this.props.options
     );
-
   },
 
   componentDidUpdate(){

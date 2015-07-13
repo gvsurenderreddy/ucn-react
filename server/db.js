@@ -85,6 +85,17 @@ module.exports = {
         });
     },
 
+    fetch_urls_for_hosts: function(hosts, from, to){
+      var hstr = hosts.map(function(host){return "\'" + host + "\'"}).join();
+      var sql = "SELECT tld as url, count(tld) as total from urls WHERE host in ("+hstr+")  AND (ts >= "+from+" AND ts <= "+to+") GROUP BY url ORDER BY total DESC ";
+      
+      return db.serializeAsync().then(function(){
+          return db.allAsync(sql);
+      }).then(function (rows){
+          return rows;
+      });
+    },
+
     fetch_binned_browsing_for_hosts: function(hosts, bin, from, to){
        var hstr = hosts.map(function(host){return "\'" + host + "\'"}).join();
        var sql = "SELECT (ts/" + bin + ") * " + bin + " as bin, host,  COUNT(tld) as total from urls WHERE host in ("+hstr+")  AND (ts >= "+from+" AND ts <= "+to+") GROUP BY host, bin ORDER BY host, bin";

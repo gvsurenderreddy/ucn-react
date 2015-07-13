@@ -14,29 +14,37 @@ app.set('view engine', 'html');
 
 app.engine('html', hbs.__express);
 var server = http.createServer(app);
-var AWEEKAGO = 30 * 24 * 60 * 60;
+var SINCE = (365/2) * 24 * 60 * 60;
 
-var hosts = ["10.2.0.6", "10.2.0.5", "10.1.0.6", "10.1.0.5", "10.2.0.19", "10.2.0.20","10.1.0.19", "10.1.0.20"];
+var hosts = ["10.2.0.6", "10.2.0.5", "10.1.0.6", "10.1.0.5"];
 
 app.get('/hv/test', function(req, res){
-  console.log("ok seen hv/test!");
   db.fetch_latest_ts_for_hosts(hosts).then(function(result){
       res.send("thanks");
   });
 }),
 
+app.get('/hv/urls', function(req,res){
+
+    var fromts = req.query.from;
+    var tots = req.query.to;
+    db.fetch_urls_for_hosts(hosts, fromts, tots).then(function(urls){
+        res.send({
+          urls:urls
+        });
+    });
+}),
+
 app.get('/hv/browsing', function(req,res){
   db.fetch_max_ts_for_hosts(hosts).then(function(max){
-      return [max.ts, db.fetch_min_ts_for_hosts(hosts, max.ts-AWEEKAGO)];
+      return [max.ts, db.fetch_min_ts_for_hosts(hosts, max.ts-SINCE)];
   //db.fetch_latest_ts_for_hosts(hosts).then(function(to){
     //return {from:to.ts - AWEEKAGO, to:to.ts}
   }).spread(function(maxts, min){
-    console.log("ok am here...")
     var timerange = {from:min.ts, to:maxts};
     var bin = 60 * 60;
     return [bin,timerange,db.fetch_binned_browsing_for_hosts(hosts, bin, timerange.from, timerange.to)]
   }).spread(function(bin,timerange, binned){
-    console.log("nice - am here so returning data");
     res.send({
       timerange: timerange,
       bin: bin,

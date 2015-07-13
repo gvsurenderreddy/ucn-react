@@ -100,9 +100,9 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
       break;
 
     case ActionTypes.RANGE_CHANGE:
-        _update_filtered_data(action.range);
-        BrowsingDataStore.emitChange();
-        break;
+      _update_filtered_data(action.range);
+      BrowsingDataStore.emitChange();
+      break;
 
     default:
       // no op

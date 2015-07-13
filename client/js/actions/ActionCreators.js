@@ -1,6 +1,6 @@
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var Constants = require('../constants/Constants');
-
+var WebAPIUtils = require('../utils/WebAPIUtils');
 var ActionTypes = Constants.ActionTypes;
 
 module.exports = {
@@ -18,6 +18,10 @@ module.exports = {
       type: ActionTypes.RANGE_CHANGE,
       range: range,
     });
+    WebAPIUtils.fetch_urls({
+      from: Math.floor(range[0]/1000),
+      to: Math.floor(range[1]/1000),
+    });
   }
-  
+
 };
