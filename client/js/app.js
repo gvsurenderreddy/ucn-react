@@ -17,13 +17,13 @@ var App = React.createClass({
   render: function(){
     return(
       <div>
-        <RouteHandler />
         <div className="navigation">
           <ul className="navbar inline-list">
             <li><Link to="timeline">timeline</Link></li>
             <li><Link to="categories">categorisation</Link></li>
           </ul>
         </div>
+        <RouteHandler />
       </div>
     );
   }

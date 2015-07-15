@@ -175,13 +175,14 @@ Browsing.prototype.urlhistory = function(data){
           .enter()
           .append("line")
           .attr("class", "ts")
-          .style("stroke", function(d){return "#000000"});
+          .style("stroke", function(d){return "#000000"})
+          .style("stroke-opacity", 0.4)
 
    //update and new
    this.svg.selectAll("line.ts")
-          .attr("y1", -6)
+          .attr("y1", 0)
           .attr("x1", function(d){return this.x(d*1000)}.bind(this))
-          .attr("y2", this.opts.height+7)
+          .attr("y2", this.opts.height)
           .attr("x2", function(d){return this.x(d*1000)}.bind(this))
 
 

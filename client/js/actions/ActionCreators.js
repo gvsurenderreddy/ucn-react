@@ -6,7 +6,7 @@ var ActionTypes = Constants.ActionTypes;
 module.exports = {
 
   clicked: function() {
-    console.log("clicked!!");
+   
     AppDispatcher.dispatch({
       type: ActionTypes.MAIN_CLICKED,
       data: {},
@@ -14,6 +14,10 @@ module.exports = {
   },
 
   urlclicked: function(url){
+    AppDispatcher.dispatch({
+      type: ActionTypes.URL_CLICKED,
+      url: url,
+    });
     WebAPIUtils.fetch_url_history(url);
   },
 

@@ -59,7 +59,7 @@ text {
 }
 
 a{
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .node circle {
@@ -85,5 +85,4 @@ path.link {
 
 .active{
   font-weight: bold;
-  font-size: 130%;
 }

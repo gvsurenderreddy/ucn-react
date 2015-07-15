@@ -13,6 +13,7 @@ var assign = require('object-assign');
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
 var _urls = [];
+var _selected = "";
 
 _update_raw_url_data = function(data){
   _urls = data.urls || [];
@@ -22,6 +23,10 @@ var UrlDataStore = assign({}, EventEmitter.prototype, {
 
   urls: function(){
     return _urls;
+  },
+
+  selected: function(){
+    return _selected;
   },
 
   emitChange: function() {
@@ -49,12 +54,15 @@ UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
   switch(action.type) {
 
   	case ActionTypes.RAW_URL_DATA:
-      console.log("store seen urls!!");
-      console.log(action);
       _update_raw_url_data(action.rawUrls)
       UrlDataStore.emitChange();
       break;
     
+    case ActionTypes.URL_CLICKED:
+      _selected = action.url;
+      UrlDataStore.emitChange();
+      break;
+
     default:
       // no op
   }

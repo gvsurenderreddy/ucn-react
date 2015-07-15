@@ -3,6 +3,7 @@ var express = require('express');
 var bodyparser = require('body-parser');
 var hbs = require('hbs');
 var db = require('./db');
+var pgdb = require('./pgdb');
 var util = require('./util');
 var app = express();
 
@@ -16,10 +17,10 @@ app.engine('html', hbs.__express);
 var server = http.createServer(app);
 var SINCE = (365/2) * 24 * 60 * 60;
 
-var hosts = ["10.2.0.6", "10.2.0.5", "10.1.0.6", "10.1.0.5"];
+var hosts = [/*"10.2.0.6",*/ "10.2.0.5", /*"10.1.0.6",*/ "10.1.0.5"];
 
 app.get('/hv/test', function(req, res){
-  db.fetch_latest_ts_for_hosts(hosts).then(function(result){
+  pgdb.fetch_hosts().then(function(result){
       res.send("thanks");
   });
 }),

@@ -101,7 +101,7 @@ Categories.prototype.update = function(data){
       .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
       .attr("dy", ".35em")
       .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
-      .text(function(d) { return d.name + " ("  + ((d.size/data.size)*100).toFixed(2) + ")"; })
+      .text(function(d) { return d.name + " ("  + ((d.size/self.root.size)*100).toFixed(2) + ")"; })
       .style("fill-opacity", 1e-6);
 
   // Transition nodes to their new position.
@@ -110,7 +110,7 @@ Categories.prototype.update = function(data){
       .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
   nodeUpdate.select("circle")
-      .attr("r", function(d) { return 5}) //Math.max(3,(d.size/data.size) * 20)})
+      .attr("r", function(d) { return Math.max(3,(d.size/self.root.size) * 20)})
       .style("fill", function(d) { 
             return self.nodeselected(d) ? "#ff0000" : d._children ? "lightsteelblue" : "#fff"; 
       });

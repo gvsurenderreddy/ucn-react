@@ -8,6 +8,7 @@ module.exports = {
 			RAW_URL_DATA: null,
 			RAW_URL_HISTORY_DATA: null,
 			RAW_CATEGORY_DATA:null,
+			URL_CLICKED:null,
   }),
 
   PayloadSources: keyMirror({
