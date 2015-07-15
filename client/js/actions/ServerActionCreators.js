@@ -18,6 +18,20 @@ module.exports = {
       type: ActionTypes.RAW_URL_DATA,
       rawUrls: data,
     });
+  },
+
+  receivedURLHistoryData: function(data){
+    AppDispatcher.dispatch({
+      type: ActionTypes.RAW_URL_HISTORY_DATA,
+      rawData: data,
+    });
+  },
+
+  receivedCategoryData: function(data){
+    AppDispatcher.dispatch({
+      type: ActionTypes.RAW_CATEGORY_DATA,
+      rawData: data,
+    });
   }
 
 };

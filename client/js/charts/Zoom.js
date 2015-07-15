@@ -7,7 +7,7 @@ Zoom = function(){
 
 Zoom.prototype.initialise = function(data, node, opts){
   var self = this;
-
+  this.opts = opts;
   this.x  = d3.time.scale().range([0,opts.width]);
   this.y  = d3.scale.linear().range([opts.height,0]);
   this.xAxis = d3.svg.axis().scale(this.x).orient("bottom");
@@ -53,22 +53,24 @@ Zoom.prototype.initialise = function(data, node, opts){
   var zoom = this.svg.append("g")
                      .attr("class", "zoom");
 
-
-   this.svg.append("g")
-              .attr("class", "x axis")
-              .attr("transform", "translate(0," + opts.height + ")")
-              .call(this.xAxis);
-
-   this.svg.append("g")
-              .attr("class", "y axis")
-              .call(this.yAxis);
-              
   zoom.append("g")
       .attr("class", "x brush")
       .call(self.brush)
       .selectAll("rect")
       .attr("y", -6)
       .attr("height", opts.height + 7);
+
+  this.svg.append("g")
+             .attr("class", "x axis")
+             .attr("transform", "translate(0," + opts.height + ")")
+             .call(this.xAxis);
+
+  this.svg.append("g")
+             .attr("class", "y axis")
+             .call(this.yAxis);
+
+  this.svg.append("g")
+          .attr("class","historyoverlay");
 
   this.update(data);
 };
@@ -120,10 +122,35 @@ Zoom.prototype.update = function(data){
 
   this.svg.select(".y.axis")
           .call(this.yAxis);
+
+  if (data.urlhistory){
+    this.urlhistory(data.urlhistory);
+  }
   //exit!
   zoom.exit()
       .remove()
 };
 
+Zoom.prototype.urlhistory = function(data){
+
+    var overlay = this.svg.select("g.historyoverlay")
+
+    var timestamps = overlay.selectAll("line.ts")
+                            .data(data, function(d){return d});
+    timestamps
+          .enter()
+          .append("line")
+          .attr("class", "ts")
+          .style("stroke", function(d){return "#000000"});
+
+    this.svg.selectAll("line.ts")
+           .attr("y1", -6)
+           .attr("x1", function(d){return this.x(d*1000)}.bind(this))
+           .attr("y2", this.opts.height+7)
+           .attr("x2", function(d){return this.x(d*1000)}.bind(this))
+
+    timestamps.exit()
+           .remove();
+};
 
 module.exports = Zoom;

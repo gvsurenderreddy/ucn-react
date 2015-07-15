@@ -35,6 +35,22 @@ app.get('/hv/urls', function(req,res){
     });
 }),
 
+
+app.get('/hv/categories', function(req,res){
+    var url = req.query.url;
+    db.fetch_categories_for_hosts(hosts).then(function(categories){
+        res.send(categories);
+    });
+}),
+app.get('/hv/urls/history', function(req,res){
+    var url = req.query.url;
+    db.fetch_ts_for_url(hosts, url).then(function(ts){
+        res.send({
+          timestamps:ts
+        });
+    });
+}),
+
 app.get('/hv/browsing', function(req,res){
   db.fetch_max_ts_for_hosts(hosts).then(function(max){
       return [max.ts, db.fetch_min_ts_for_hosts(hosts, max.ts-SINCE)];

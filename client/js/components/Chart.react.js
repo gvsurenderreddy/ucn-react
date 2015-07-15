@@ -25,7 +25,7 @@ var Chart = React.createClass({
   },
 
   componentWillUnmount: function(){
-      this._chart.remove();
+      //this._chart.remove();
   },
 
   render: function(){

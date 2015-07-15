@@ -13,6 +13,10 @@ module.exports = {
     });
   },
 
+  urlclicked: function(url){
+    WebAPIUtils.fetch_url_history(url);
+  },
+
   rangechange: function(range){
     AppDispatcher.dispatch({
       type: ActionTypes.RANGE_CHANGE,

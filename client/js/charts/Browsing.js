@@ -11,13 +11,29 @@ Browsing = function(){
 Browsing.prototype.initialise = function(data, node, opts){
 
   var self = this;
-
+  this.opts = opts;
 
   this.x  = d3.time.scale().range([0,opts.width]);
 	this.y  = d3.scale.linear().range([opts.height,0]);
 
   this.xAxis = d3.svg.axis().scale(this.x).orient("bottom");
   this.yAxis = d3.svg.axis().scale(this.y).orient("left");
+
+  this.brush = d3.svg.brush()
+                  .x(this.x)
+                  .on("brushend", function(){
+                      var xrange = this.brush.empty() ? this.x.domain() : this.brush.extent();
+                      ActionCreators.rangechange(xrange);
+                      this.brush.extent([0,0]);
+                      this.svg.select(".brush")
+                              .select("rect.extent")
+                              .attr("width",0)
+
+
+                  }.bind(this))
+                  .on("brush", function(){
+                      console.log("brush end");
+                  });
 
   var  colours = ["#7bb6a4","#e5cf58","#cd804a","#445662","#d35a51", "#3f3b3c"];
 
@@ -59,6 +75,13 @@ Browsing.prototype.initialise = function(data, node, opts){
   this.svg.append("g")
           .attr("class", "chart");
 
+this.svg.append("g")
+              .attr("class", "x brush")
+              .call(self.brush)
+              .selectAll("rect")
+              .attr("y", -6)
+              .attr("height", opts.height + 7);
+
   this.svg.append("g")
              .attr("class", "x axis")
              .attr("transform", "translate(0," + opts.height + ")")
@@ -67,6 +90,9 @@ Browsing.prototype.initialise = function(data, node, opts){
   this.svg.append("g")
              .attr("class", "y axis")
              .call(this.yAxis);
+
+ this.svg.append("g")
+         .attr("class","historyoverlay");
 
   this.update(data);
   this._addListeners();
@@ -83,9 +109,6 @@ Browsing.prototype.update = function(data){
     }
 
     var browsers = this.stack(data.browsing);
-
-    console.log("rnage is ");
-    console.log(data.range);
 
     this.x.domain(data.range);
 
@@ -132,10 +155,38 @@ Browsing.prototype.update = function(data){
             .duration(ANIMATION_DURATION)
             .call(this.yAxis);
 
+    if (data.urlhistory){
+      this.urlhistory(data.urlhistory);
+    }
     //exit
     browser
           .exit()
           .remove();
+};
+
+Browsing.prototype.urlhistory = function(data){
+
+    var overlay = this.svg.select("g.historyoverlay")
+
+    var timestamps = overlay.selectAll("line.ts")
+                            .data(data, function(d){return d});
+    //enter
+    timestamps
+          .enter()
+          .append("line")
+          .attr("class", "ts")
+          .style("stroke", function(d){return "#000000"});
+
+   //update and new
+   this.svg.selectAll("line.ts")
+          .attr("y1", -6)
+          .attr("x1", function(d){return this.x(d*1000)}.bind(this))
+          .attr("y2", this.opts.height+7)
+          .attr("x2", function(d){return this.x(d*1000)}.bind(this))
+
+
+    timestamps.exit()
+           .remove();
 };
 
 Browsing.prototype._addListeners = function(){

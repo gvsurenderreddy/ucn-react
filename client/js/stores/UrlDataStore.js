@@ -54,7 +54,7 @@ UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
       _update_raw_url_data(action.rawUrls)
       UrlDataStore.emitChange();
       break;
-
+    
     default:
       // no op
   }

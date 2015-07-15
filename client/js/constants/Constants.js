@@ -6,6 +6,8 @@ module.exports = {
 			RECEIVED_RAW_BROWSING_DATA: null,
 			RANGE_CHANGE: null,
 			RAW_URL_DATA: null,
+			RAW_URL_HISTORY_DATA: null,
+			RAW_CATEGORY_DATA:null,
   }),
 
   PayloadSources: keyMirror({

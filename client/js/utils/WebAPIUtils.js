@@ -31,5 +31,33 @@ module.exports ={
           ServerActionCreators.receivedURLData(res.body);
          }
      });
+  },
+
+  fetch_url_history: function(url) {
+
+    request
+      .get('/hv/urls/history')
+      .set('Accept', 'application/json')
+      .query({url:url})
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          ServerActionCreators.receivedURLHistoryData(res.body);
+         }
+     });
+  },
+
+  fetch_category_data: function(){
+    request
+      .get('/hv/categories')
+      .set('Accept', 'application/json')
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          ServerActionCreators.receivedCategoryData(res.body);
+         }
+     });
   }
 }

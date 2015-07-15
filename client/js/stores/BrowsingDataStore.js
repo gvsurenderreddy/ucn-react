@@ -14,10 +14,15 @@ var d3 = require('../lib/d3.min');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _data, _filtered,
+var _data, _url_history,
 
 _update_filtered_data = function(range){
-  _filtered.range = range;
+  _data.range = range;
+},
+
+_update_raw_url_history_data = function(data){
+   _url_history = data.timestamps;
+  _data.urlhistory = _url_history;
 },
 
 _update_data = function(data){
@@ -50,13 +55,13 @@ _update_data = function(data){
   });
 
 
-  _filtered = _data ={
+  _data ={
       keys: keys,
       hosts: hosts,
       browsing: browsing,
+      range:  d3.extent(keys, function(d){return d*1000}),
+      urlhistory: _url_history || []
   }
-
-  _filtered.range = d3.extent(keys, function(d){return d*1000});
 
 };
 
@@ -64,10 +69,6 @@ var BrowsingDataStore = assign({}, EventEmitter.prototype, {
 
   data(){
     return _data || {};
-  },
-
-  filtered(){
-    return _filtered || {};
   },
 
   emitChange: function() {
@@ -101,6 +102,11 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
     case ActionTypes.RANGE_CHANGE:
       _update_filtered_data(action.range);
+      BrowsingDataStore.emitChange();
+      break;
+
+    case ActionTypes.RAW_URL_HISTORY_DATA:
+      _update_raw_url_history_data(action.rawData)
       BrowsingDataStore.emitChange();
       break;
 

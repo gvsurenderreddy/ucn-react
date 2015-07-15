@@ -1,6 +1,7 @@
 var fn = require("./fn");
 var Browsing = require('../charts/Browsing');
 var Zoom = require('../charts/Zoom');
+var Categories = require('../charts/Categories');
 var d3 = require('../lib/d3.min');
 
 var ChartFactory = function(type, data, node, options){
@@ -49,5 +50,6 @@ ChartFactory.prototype.initialise = function(data, node, opts){
 //attach all chart types as static properties
 ChartFactory.Browsing = Browsing;
 ChartFactory.Zoom = Zoom;
+ChartFactory.Categories = Categories;
 
 module.exports = ChartFactory;
