@@ -18,6 +18,7 @@ module.exports = {
 	fetch_hosts: function(){
 		var sql = "SELECT * FROM http3 LIMIT 10";
       	return _client.queryAsync(sql).then(function(result){
+		console.log(result.rows);
       		return result.rows;
       	},function(err){
       		console.log(err);
