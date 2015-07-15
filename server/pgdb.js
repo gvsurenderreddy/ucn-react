@@ -7,8 +7,10 @@ Promise.promisifyAll(pg);
 var _client = new pg.Client(config.database.url);
 
 _client.connect(function(err){
-	console.log(err);
-	throw err;
+	if (err){
+		console.log(err);
+		throw err;
+	}
 });
 
 module.exports = {
