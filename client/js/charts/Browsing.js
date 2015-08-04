@@ -10,6 +10,10 @@ Browsing = function(){
 
 Browsing.prototype.initialise = function(data, node, opts){
 
+  console.log("IN BROWSING INIT!!!");
+  console.log(node);
+  
+  var start = Date.now();
   var self = this;
   this.opts = opts;
 
@@ -96,11 +100,13 @@ this.svg.append("g")
 
   this.update(data);
   this._addListeners();
+  var end = Date.now();
+  console.log("inited in " + (end-start) + "ms");
 };
 
 Browsing.prototype.update = function(data){
-
-
+	var start = Date.now();
+	var end;
     var self = this;
     //guard against empty data;
     if (!data || !data.browsing){
@@ -109,13 +115,23 @@ Browsing.prototype.update = function(data){
     }
 
     var browsers = this.stack(data.browsing);
-
+	
+	end = Date.now();
+	console.log("STACK -- CREATED IN ");
+	console.log((end-start) + " ms ");
+	console.log("************************");
+	
     this.x.domain(data.range);
 
     this.y.domain([0, d3.max(browsers, function(c){
         return d3.max(c.values.filter(function(item){return item.date >= data.range[0] && item.date <= data.range[1]}), function(d) {return d.y0 +d.y});
     })]);
 
+	end = Date.now();
+	console.log("y domain -- CREATED IN ");
+	console.log((end-start) + " ms ");
+	console.log("************************");
+	
     //update the scales
     this.xAxis.scale(this.x);
     this.yAxis.scale(this.y);
@@ -136,23 +152,31 @@ Browsing.prototype.update = function(data){
            .style("stroke", function(d){return self.colour(d.name)})
            .style("stroke-opacity", 1.0)
 
-
+	end = Date.now();
+	console.log("new path -- CREATED IN ");
+	console.log((end-start) + " ms ");
+	console.log("************************");
+	
     //update
     browser.selectAll("path.area")
-          .transition()
-          .duration(ANIMATION_DURATION)
+          //.transition()
+          //.duration(ANIMATION_DURATION)
           .attr("d", function(d) {return self.area(d.values);})
 
+	end = Date.now();
+	console.log("update  path -- CREATED IN ");
+	console.log((end-start) + " ms ");
+	console.log("************************");
     //update axes
 
     this.svg.select(".x.axis")
-            .transition()
-            .duration(ANIMATION_DURATION)
+            //.transition()
+            //.duration(ANIMATION_DURATION)
             .call(this.xAxis);
 
     this.svg.select(".y.axis")
-            .transition()
-            .duration(ANIMATION_DURATION)
+            //.transition()
+            //.duration(ANIMATION_DURATION)
             .call(this.yAxis);
 
     if (data.urlhistory){
@@ -162,6 +186,11 @@ Browsing.prototype.update = function(data){
     browser
           .exit()
           .remove();
+          
+    end = Date.now();
+	console.log("BROWSING -- UPDATED IN ");
+	console.log((end-start) + " ms ");
+	console.log("************************");
 };
 
 Browsing.prototype.urlhistory = function(data){

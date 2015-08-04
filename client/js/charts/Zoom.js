@@ -6,6 +6,9 @@ Zoom = function(){
 };
 
 Zoom.prototype.initialise = function(data, node, opts){
+
+  console.log("IN ZOOOM INIT!!!");
+  console.log(node);
   var self = this;
   this.opts = opts;
   this.x  = d3.time.scale().range([0,opts.width]);
@@ -105,14 +108,14 @@ Zoom.prototype.update = function(data){
       .append("g")
       .attr("class", "browser")
       .append("path")
-      .attr("class", "area")
+      .attr("class", "zoomarea")
       .style("fill", function(d){return self.colour(d.name)})
       .style("fill-opacity", 0.6)
       .style("stroke", function(d){return self.colour(d.name)})
       .style("stroke-opacity", 1.0)
 
   //update
-  zoom.selectAll("path.area")
+  zoom.selectAll("path.zoomarea")
       .attr("d", function(d) {return self.area(d.values);})
 
   //update axes

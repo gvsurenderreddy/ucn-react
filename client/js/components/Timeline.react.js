@@ -27,7 +27,7 @@ var Timeline = React.createClass({
   },
 
   render: function(){
-
+   console.log("rendering chart...");
    var browsingoptions = {
                     height: 300,
                     width: 800,

@@ -5,14 +5,22 @@ var ActionTypes = Constants.ActionTypes;
 
 module.exports = {
 
-  receiveBrowsingData: function(data) {
+  receivedBrowsingData: function(data) {
 
     AppDispatcher.dispatch({
-      type: ActionTypes.RECEIVED_RAW_BROWSING_DATA,
+      type: ActionTypes.RAW_BROWSING_DATA,
       rawData: data,
     });
   },
 
+  receivedActivityData: function(data) {
+
+    AppDispatcher.dispatch({
+      type: ActionTypes.RAW_ACTIVITY_DATA,
+      rawData: data,
+    });
+  },
+  
   receivedURLData: function(data){
     AppDispatcher.dispatch({
       type: ActionTypes.RAW_URL_DATA,

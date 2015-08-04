@@ -9,7 +9,7 @@ function getStateFromStores() {
       urls: UrlDataStore.urls(),
       selected: UrlDataStore.selected()
     }
-};
+}
 
 var Urls = React.createClass({
 
@@ -26,12 +26,27 @@ var Urls = React.createClass({
   },
 
   render: function(){
+  	
+  	var urlstyle ={
+  		height: 310,
+  		overflowY: "auto",
+  	};
+  	
+  	var linestyle = {
+  	  fontSize:"70%"
+  	};
+  	
     var urls = this.state.urls.map(function(url){
 
       return <Url handleClick={this._handleClick} selected={this.state.selected==url.url} url={url.url} total={url.total}/>
     }.bind(this));
-
-    return <div style={{height:310, overflowY:'auto'}}><ul className="no-bullet" style={{fontSize:'70%'}}>{{urls}}</ul></div>
+	
+	return (<div style={urlstyle}>
+				<ul className="no-bullet" style={linestyle}>
+					{urls}
+				</ul>
+			</div>)
+ 	
   },
 
   _handleClick: function(url){
@@ -41,6 +56,7 @@ var Urls = React.createClass({
   _onChange: function() {
      this.setState(getStateFromStores());
   }
+  
 });
 
 var Url = React.createClass({
@@ -54,4 +70,5 @@ var Url = React.createClass({
   }
 
 });
+
 module.exports = Urls;

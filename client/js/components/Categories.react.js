@@ -3,6 +3,7 @@ var ActionCreators = require('../actions/ActionCreators');
 var CategoryStore = require('../stores/CategoryStore');
 var WebAPIUtils = require('../utils/WebAPIUtils');
 var Chart = require('./Chart.react');
+
 function getStateFromStores() {
     return {
       categories: CategoryStore.data()

@@ -2,8 +2,6 @@ var React = require('react');
 var fn = require('../utils/fn');
 var ChartFactory = require('../utils/ChartFactory');
 
-
-
 var Chart = React.createClass({
 
   propTypes:{
@@ -20,7 +18,8 @@ var Chart = React.createClass({
     );
   },
 
-  componentDidUpdate(){
+  componentDidUpdate: function(){
+  	  console.log("updating chart!");
       this._chart.update(this.props.data);
   },
 
@@ -34,7 +33,7 @@ var Chart = React.createClass({
    )
   },
 
-  _handleClick(){
+  _handleClick: function(){
     ActionCreators.clicked();
   },
 

@@ -67,7 +67,7 @@ _update_data = function(data){
 
 var BrowsingDataStore = assign({}, EventEmitter.prototype, {
 
-  data(){
+  data: function(){
     return _data || {};
   },
 
@@ -95,7 +95,7 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
   switch(action.type) {
 
-  	case ActionTypes.RECEIVED_RAW_BROWSING_DATA:
+  	case ActionTypes.RAW_BROWSING_DATA:
       _update_data(action.rawData);
       BrowsingDataStore.emitChange();
       break;

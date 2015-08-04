@@ -2,31 +2,32 @@
  * Copyright (c) 2015, Tom Lodge
  * All rights reserved.
  *
- * DefaultStore
+ * ActivityDataStore
  */
 
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var Constants = require('../constants/Constants');
+var Utils = require('../utils/Utils');
 var assign = require('object-assign');
+var d3 = require('../lib/d3.min');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _urls = [];
-var _selected = "";
+var _data,
 
-var _update_raw_url_data = function(data){
-  _urls = data.urls || [];
-}
+var _update_filtered_data = function(range){
+  _data.range = range;
+};
 
-var UrlDataStore = assign({}, EventEmitter.prototype, {
+var _update_data = function(data){
 
-  urls: function(){
-    return _urls;
-  },
+};
 
-  selected: function(){
-    return _selected;
+var ActivityDataStore = assign({}, EventEmitter.prototype, {
+
+  data: function(){
+    return _data || {};
   },
 
   emitChange: function() {
@@ -49,23 +50,24 @@ var UrlDataStore = assign({}, EventEmitter.prototype, {
 });
 
 // Register callback to handle all updates
-UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
+ActivityDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
   switch(action.type) {
 
-  	case ActionTypes.RAW_URL_DATA:
-      _update_raw_url_data(action.rawUrls)
-      UrlDataStore.emitChange();
+  	case ActionTypes.RAW_ACTIVITY_DATA:
+      _update_data(action.rawData);
+      ActivityDataStore.emitChange();
       break;
-    
-    case ActionTypes.URL_CLICKED:
-      _selected = action.url;
-      UrlDataStore.emitChange();
+
+    case ActionTypes.RANGE_CHANGE:
+      _update_filtered_data(action.range);
+      ActivityDataStore.emitChange();
       break;
+
 
     default:
       // no op
   }
 });
 
-module.exports = UrlDataStore;
+module.exports = ActivityDataStore;

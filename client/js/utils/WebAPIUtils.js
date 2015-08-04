@@ -5,22 +5,36 @@ module.exports ={
 
   fetch_browsing: function(family) {
     request
-      .get('/hv/browsing')
+      .get('/viz-dev/browsing')
       .set('Accept', 'application/json')
       .query({family:family})
       .end(function(err, res){
         if (err){
           console.log(err);
         }else{
-          ServerActionCreators.receiveBrowsingData(res.body);
+          ServerActionCreators.receivedBrowsingData(res.body);
          }
      });
   },
 
+  fetch_activity: function(family) {
+    request
+      .get('/viz-dev/activity')
+      .set('Accept', 'application/json')
+      .query({family:family})
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          ServerActionCreators.receivedActivityData(res.body);
+         }
+     });
+  },
+  
   fetch_urls: function(timerange) {
 
     request
-      .get('/hv/urls')
+      .get('/viz-dev/urls')
       .set('Accept', 'application/json')
       .query(timerange)
       .end(function(err, res){
@@ -36,7 +50,7 @@ module.exports ={
   fetch_url_history: function(url) {
 
     request
-      .get('/hv/urls/history')
+      .get('/viz-dev/urls/history')
       .set('Accept', 'application/json')
       .query({url:url})
       .end(function(err, res){
@@ -50,7 +64,7 @@ module.exports ={
 
   fetch_category_data: function(){
     request
-      .get('/hv/categories')
+      .get('/viz-dev/categories')
       .set('Accept', 'application/json')
       .end(function(err, res){
         if (err){

@@ -16,33 +16,11 @@ module.exports = {
 	       return db.eachAsync("SELECT DISTINCT host FROM urls", function(err,row){
 	         results.push(row.host);
 	       }).then(function(){
-	           console.log("got results!");
-	           console.log(results);
 	          return results;
 	       });
       });
     },
 
-    /*fetch_latest_ts_for_hosts: function(hosts){
-      console.log("laetst ts for hosts!");
-      var results = [];
-
-      return db.serializeAsync().then(function(){
-
-        var hstr = hosts.map(function(host){return "\'" + host + "\'"}).join();
-
-        //how do we parameterise this?
-
-        var sql = "SELECT max(u.ts) as ts FROM URLS u WHERE u.host IN (" + hstr + ") AND ts != ''";
-
-        return db.allAsync(sql).then(function(rows){
-            return rows[0];
-        }, function(err){
-            console.log(err);
-            return [];
-        });
-      });
-    },*/
 
     fetch_min_ts_for_hosts: function(hosts, smallest){
       var hstr = hosts.map(function(host){return "\'" + host + "\'"}).join();
