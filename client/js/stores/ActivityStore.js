@@ -55,15 +55,16 @@ ActivityDataStore.dispatchToken = AppDispatcher.register(function(action) {
   switch(action.type) {
 
   	case ActionTypes.RAW_ACTIVITY_DATA:
-      _update_data(action.rawData);
-      ActivityDataStore.emitChange();
-      break;
+  	 	console.log("Activity store --- received activity data!!");
+  	 	console.log(action.rawData);
+      	_update_data(action.rawData);
+      	ActivityDataStore.emitChange();
+      	break;
 
     case ActionTypes.RANGE_CHANGE:
-      _update_filtered_data(action.range);
-      ActivityDataStore.emitChange();
-      break;
-
+      	_update_filtered_data(action.range);
+      	ActivityDataStore.emitChange();
+      	break;
 
     default:
       // no op

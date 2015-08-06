@@ -58,7 +58,17 @@ var Timeline = React.createClass({
                   <Urls/>
                 </div>
               </div>
+              <div className="row fullWidth">
+              	<ul className="inline-list">
+              		<li><a href="#" onClick={this._fetchActivity}>overlay activity</a></li>
+              	</ul> 
+              </div>
           </div>
+  },
+  
+  _fetchActivity: function(){
+  	console.log("fetching activity!");
+  	WebAPIUtils.fetch_activity("afamily");
   },
 
   _onChange: function() {
