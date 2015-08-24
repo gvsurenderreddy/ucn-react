@@ -16,12 +16,16 @@ var _parentfor = {};
 var _nodefor = {};
 var _totalsize = 0;
 var _data = {};
+var _selectednode = null;
+var _urls = [];
+
+_node_selected = function(node){
+  _urls = node.urls || [];
+};
 
 _updatetree = function(data){
     var _tree = _buildtree(data);
-    _data = {name:"browsing", size:_totalsize, children:_tree}
-    console.log("data is");
-    console.log(_data);
+    _data = {name:"browsing", size:_totalsize, children:_tree};
 };
 
 _buildtree = function(data){
@@ -55,7 +59,7 @@ _buildtree = function(data){
                 _createnewparent(lastkey, key, node.ts, node.tld);
             }
             else{ //this is a brand new node
-                _createroot(_tree, key, node.ts, node.tld)
+                _createroot(_tree, key, node.ts, node.tld);
             }
             lastkey = key;
         });
@@ -81,7 +85,7 @@ _createnewparent = function(parentkey, key, ts, tld){
 
   var parent = _nodefor[parentkey];
   parent.children = parent.children || {};
-  parent.children[key] = {name:key, size: ts.length, ts:ts, urls:tld}
+  parent.children[key] = {name:key, size: ts.length, ts:ts, urls:tld};
   _parentfor[key] = parent;
   _nodefor[key] = parent.children[key];
 };
@@ -89,7 +93,7 @@ _createnewparent = function(parentkey, key, ts, tld){
 _createroot = function(_tree, key, ts, tld){
 
   ts = ts.split(",");
-  _tree[key] = {name:key, size: ts.length, ts:ts, urls:tld.split(",")}
+  _tree[key] = {name:key, size: ts.length, ts:ts, urls:tld.split(",")};
   _nodefor[key] = _tree[key];
 };
 
@@ -105,7 +109,7 @@ _convertchildrentoarrays = function(_tree){
               ts: node.ts,
               urls: node.urls,
               size: node.size,
-          }
+          };
         }
 
         return {
@@ -114,7 +118,7 @@ _convertchildrentoarrays = function(_tree){
           urls: node.urls,
           size: node.size,
           children:  _convertchildrentoarrays(node.children)
-        }
+        };
 
     });
 };
@@ -133,6 +137,10 @@ _getextrafor = function(node){
 };
 
 var CategoryStore = assign({}, EventEmitter.prototype, {
+
+  urls: function(){
+    return _urls;
+  },
 
   data: function(){
     return _data;
@@ -167,6 +175,13 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
       CategoryStore.emitChange();
       break;
 
+    case ActionTypes.CATEGORY_NODE_SELECTED:
+      console.log("on the stroe, category selecetd");
+      console.log(action.node);
+      _node_selected(action.node);
+      CategoryStore.emitChange();
+      break;
+    
     default:
       // no op
   }

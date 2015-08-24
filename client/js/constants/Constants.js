@@ -11,6 +11,7 @@ module.exports = {
 			RAW_CATEGORY_DATA:null,
 			RAW_ACTIVITY_DATA:null,
 			URL_CLICKED:null,
+			CATEGORY_NODE_SELECTED: null,
   }),
 
   PayloadSources: keyMirror({

@@ -8,7 +8,7 @@ function getStateFromStores() {
     return {
       urls: UrlDataStore.urls(),
       selected: UrlDataStore.selected()
-    }
+    };
 }
 
 var Urls = React.createClass({
@@ -38,14 +38,14 @@ var Urls = React.createClass({
   	
     var urls = this.state.urls.map(function(url){
 
-      return <Url handleClick={this._handleClick} selected={this.state.selected==url.url} url={url.url} total={url.total}/>
+      return <Url handleClick={this._handleClick} selected={this.state.selected==url.url} url={url.url} total={url.total}/>;
     }.bind(this));
 	
 	return (<div style={urlstyle}>
 				<ul className="no-bullet" style={linestyle}>
 					{urls}
 				</ul>
-			</div>)
+			</div>);
  	
   },
 
@@ -62,7 +62,7 @@ var Urls = React.createClass({
 var Url = React.createClass({
 
   render: function(){
-    return <li  className={cx({'active': this.props.selected})} onClick={this._onClick}>{this.props.url} <span>({this.props.total})</span></li>
+    return <li  className={cx({'active': this.props.selected})} onClick={this._onClick}>{this.props.url} <span>({this.props.total})</span></li>;
   },
 
   _onClick: function(){

@@ -86,3 +86,7 @@ path.link {
 .active{
   font-weight: bold;
 }
+
+.button{
+  padding: 0;
+}

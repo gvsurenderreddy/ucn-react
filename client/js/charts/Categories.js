@@ -1,4 +1,4 @@
-var ActionCreators = require('../actions/ActionCreators');
+var CategoryActionCreators = require('../actions/CategoryActionCreators');
 var d3 = require('../lib/d3.min');
 var i = 0;
 
@@ -90,7 +90,7 @@ Categories.prototype.update = function(data){
             this.toggle(d);
             this.selectnode(d); 
             this.update(d);  
-            //self.getextrafor(d);
+            CategoryActionCreators.categoryselected({ts: d.ts, urls: d.urls, name: d.name});
           }.bind(this));
 
   nodeEnter.append("svg:circle")
@@ -110,7 +110,7 @@ Categories.prototype.update = function(data){
       .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
   nodeUpdate.select("circle")
-      .attr("r", function(d) { return Math.max(3,(d.size/self.root.size) * 20)})
+      .attr("r", function(d) { return Math.max(3,(d.size/self.root.size) * 20);})
       .style("fill", function(d) { 
             return self.nodeselected(d) ? "#ff0000" : d._children ? "lightsteelblue" : "#fff"; 
       });

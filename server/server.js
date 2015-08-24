@@ -89,6 +89,12 @@ app.get('/viz/categories', function(req,res){
     });
 }),
 
+app.get('/viz/categories/match', function(req, res){
+   var partial = req.query.partial;
+   db.fetch_matching_categories(partial).then(function(categories){
+      res.send(categories);
+   });
+}),
 
 app.get('/hv_old/urls', function(req,res){
 

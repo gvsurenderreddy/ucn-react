@@ -64,7 +64,7 @@ module.exports ={
 
   fetch_category_data: function(){
     request
-      .get('/viz-dev/categories')
+      .get('/viz/categories')
       .set('Accept', 'application/json')
       .end(function(err, res){
         if (err){
@@ -73,5 +73,20 @@ module.exports ={
           ServerActionCreators.receivedCategoryData(res.body);
          }
      });
-  }
-}
+  },
+
+  match_categories: function(partial){
+    request
+      .get('/viz/categories/match')
+      .set('Accept', 'application/json')
+      .query({partial:partial})
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          console.log("got");
+          console.log(res.body);
+        }
+     });
+  },
+};

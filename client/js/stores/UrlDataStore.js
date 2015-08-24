@@ -17,7 +17,7 @@ var _selected = "";
 
 var _update_raw_url_data = function(data){
   _urls = data.urls || [];
-}
+};
 
 var UrlDataStore = assign({}, EventEmitter.prototype, {
 
@@ -54,7 +54,7 @@ UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
   switch(action.type) {
 
   	case ActionTypes.RAW_URL_DATA:
-      _update_raw_url_data(action.rawUrls)
+      _update_raw_url_data(action.rawUrls);
       UrlDataStore.emitChange();
       break;
     
