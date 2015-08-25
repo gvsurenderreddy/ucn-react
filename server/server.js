@@ -27,7 +27,7 @@ app.get('/viz/test', function(req, res){
   	  return max;	
 	 
   }).then(function(max){
-  	 return [max.ts, pgdb.fetch_min_ts_for_device(device, max.ts-SINCE)]
+  	 return [max.ts, pgdb.fetch_min_ts_for_device(device, max.ts-SINCE)];
   }).spread(function(maxts, min){
   	 res.send({success:true, data:{from:maxts, to:min[0].ts}});
   });
@@ -39,7 +39,7 @@ app.get('/viz/browsing', function(req,res){
   }).spread(function(maxts, min){
     var timerange = {from:min.ts, to:maxts};
     var bin = 60 * 60;
-    return [bin,timerange,pgdb.fetch_binned_browsing_for_device(device, bin, timerange.from, timerange.to)]
+    return [bin,timerange,pgdb.fetch_binned_browsing_for_device(device, bin, timerange.from, timerange.to)];
   }).spread(function(bin,timerange, binned){
     res.send({
       timerange: timerange,
@@ -54,7 +54,7 @@ app.get('/viz/activity', function(req,res){
     return [max.ts, pgdb.fetch_min_ts_for_device(device, max.ts-SINCE)];
   }).spread(function(maxts, min){
     var timerange = {from:min.ts, to:maxts};
-  	return pgdb.fetch_activity_for_device(device, timerange.from, timerange.to)  
+  	return pgdb.fetch_activity_for_device(device, timerange.from, timerange.to);  
   }).then(function(data){
   	console.log(data);
   	res.send(data);
@@ -96,6 +96,13 @@ app.get('/viz/categories/match', function(req, res){
    });
 }),
 
+app.get('/viz/urls/match', function(req,res){
+   var partial = req.query.partial;
+   db.fetch_matching_categories_for_url(partial, hosts).then(function(categories){
+      res.send(categories);
+   });
+}),
+
 app.get('/hv_old/urls', function(req,res){
 
     var fromts = req.query.from;
@@ -126,7 +133,7 @@ app.get('/hv_old/browsing', function(req,res){
   }).spread(function(maxts, min){
     var timerange = {from:min.ts, to:maxts};
     var bin = 60 * 60;
-    return [bin,timerange,db.fetch_binned_browsing_for_hosts(hosts, bin, timerange.from, timerange.to)]
+    return [bin,timerange,db.fetch_binned_browsing_for_hosts(hosts, bin, timerange.from, timerange.to)];
   }).spread(function(bin,timerange, binned){
     res.send({
       timerange: timerange,

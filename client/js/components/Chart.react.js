@@ -18,8 +18,9 @@ var Chart = React.createClass({
     );
   },
 
+
+
   componentDidUpdate: function(){
-  	  console.log("updating chart!");
       this._chart.update(this.props.data);
   },
 
@@ -30,7 +31,7 @@ var Chart = React.createClass({
   render: function(){
    return (
     <div className={'chart ' + fn.dasherize(this.props.type)}></div>
-   )
+   );
   },
 
   _handleClick: function(){

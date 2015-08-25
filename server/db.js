@@ -91,7 +91,22 @@ module.exports = {
         return db.serializeAsync().then(function(){
           return db.allAsync(sql);
         }).then(function (rows){
-          return rows;
+          return rows.map(function(item){
+            return item.classification;
+          });
+        });
+    },
+
+    fetch_matching_categories_for_url: function(partial, hosts){
+        var hstr = hosts.map(function(host){return "\'" + host + "\'";}).join();
+        var sql = "SELECT DISTINCT(u.tld) as tld, c.classification FROM URLS u LEFT JOIN CLASSIFICATION c ON c.tld = u.tld  WHERE u.tld LIKE '%" + partial + "%' AND u.host IN (" + hstr + ") AND c.success = 1";
+        console.log(sql);
+        
+        return db.serializeAsync().then(function(){
+            return db.allAsync(sql);
+        }).then(function (rows){
+            console.log(rows);
+            return rows;
         });
     },
 

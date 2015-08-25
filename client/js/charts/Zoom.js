@@ -7,8 +7,6 @@ Zoom = function(){
 
 Zoom.prototype.initialise = function(data, node, opts){
 
-  console.log("IN ZOOOM INIT!!!");
-  console.log(node);
   var self = this;
   this.opts = opts;
   this.x  = d3.time.scale().range([0,opts.width]);
@@ -31,20 +29,20 @@ Zoom.prototype.initialise = function(data, node, opts){
   this.colourchart = {};
 
   this.colour = function(host){
-      this.colourchart[host] = this.colourchart[host] || colours[(colourcount++) % colours.length]
+      this.colourchart[host] = this.colourchart[host] || colours[(colourcount++) % colours.length];
       return this.colourchart[host];
-  }
+  };
 
   this.stack = d3.layout.stack()
                  .offset("zero")
-                 .values(function(d) {return d.values})
-                 .x(function(d){return self.x(d.date)})
-                 .y(function(d){return d.y});
+                 .values(function(d) {return d.values;})
+                 .x(function(d){return self.x(d.date);})
+                 .y(function(d){return d.y;});
 
   this.area = d3.svg.area()
                 .interpolate("basis")
-                .x(function(d) {return self.x(d.date)})
-                .y0(function(d) {return self.y(d.y0)})
+                .x(function(d) {return self.x(d.date);})
+                .y0(function(d) {return self.y(d.y0);})
                 .y1(function(d) {return self.y(d.y0 + d.y);}),
 
   this.svg = d3.select(node).append('svg')
@@ -88,10 +86,10 @@ Zoom.prototype.update = function(data){
 
   var browsers = this.stack(data.browsing);
 
-  this.x.domain(d3.extent(data.keys, function(d){return d*1000}));
+  this.x.domain(d3.extent(data.keys, function(d){return d*1000;}));
 
   this.y.domain([0, d3.max(browsers, function(c){
-      return d3.max(c.values, function(d) {return d.y0 +d.y});
+      return d3.max(c.values, function(d) {return d.y0 +d.y;});
   })]);
   //update the scales
   this.xAxis.scale(this.x);
@@ -109,14 +107,14 @@ Zoom.prototype.update = function(data){
       .attr("class", "browser")
       .append("path")
       .attr("class", "zoomarea")
-      .style("fill", function(d){return self.colour(d.name)})
+      .style("fill", function(d){return self.colour(d.name);})
       .style("fill-opacity", 0.6)
-      .style("stroke", function(d){return self.colour(d.name)})
-      .style("stroke-opacity", 1.0)
+      .style("stroke", function(d){return self.colour(d.name);})
+      .style("stroke-opacity", 1.0);
 
   //update
   zoom.selectAll("path.zoomarea")
-      .attr("d", function(d) {return self.area(d.values);})
+      .attr("d", function(d) {return self.area(d.values);});
 
   //update axes
 
@@ -131,26 +129,26 @@ Zoom.prototype.update = function(data){
   }
   //exit!
   zoom.exit()
-      .remove()
+      .remove();
 };
 
 Zoom.prototype.urlhistory = function(data){
 
-    var overlay = this.svg.select("g.historyoverlay")
+    var overlay = this.svg.select("g.historyoverlay");
 
     var timestamps = overlay.selectAll("line.ts")
-                            .data(data, function(d){return d});
+                            .data(data, function(d){return d;});
     timestamps
           .enter()
           .append("line")
           .attr("class", "ts")
-          .style("stroke", function(d){return "#000000"});
+          .style("stroke", function(d){return "#000000";});
 
     this.svg.selectAll("line.ts")
            .attr("y1", 0)
-           .attr("x1", function(d){return this.x(d*1000)}.bind(this))
+           .attr("x1", function(d){return this.x(d*1000);}.bind(this))
            .attr("y2", this.opts.height)
-           .attr("x2", function(d){return this.x(d*1000)}.bind(this))
+           .attr("x2", function(d){return this.x(d*1000);}.bind(this));
 
     timestamps.exit()
            .remove();

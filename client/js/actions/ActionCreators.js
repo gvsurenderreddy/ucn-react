@@ -7,14 +7,14 @@ module.exports = {
 
   clicked: function() {
    
-    AppDispatcher.dispatch({
+    AppDispatcher.handleViewAction({
       type: ActionTypes.MAIN_CLICKED,
       data: {},
     });
   },
 
   urlclicked: function(url){
-    AppDispatcher.dispatch({
+    AppDispatcher.handleViewAction({
       type: ActionTypes.URL_CLICKED,
       url: url,
     });
@@ -22,7 +22,7 @@ module.exports = {
   },
 
   rangechange: function(range){
-    AppDispatcher.dispatch({
+    AppDispatcher.handleViewAction({
       type: ActionTypes.RANGE_CHANGE,
       range: range,
     });

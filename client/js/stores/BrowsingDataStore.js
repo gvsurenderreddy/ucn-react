@@ -106,7 +106,7 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
       break;
 
     case ActionTypes.RAW_URL_HISTORY_DATA:
-      _update_raw_url_history_data(action.rawData)
+      _update_raw_url_history_data(action.rawData);
       BrowsingDataStore.emitChange();
       break;
 

@@ -14,13 +14,39 @@ Categories.prototype.toggle = function(d) {
     d.children = d._children;
     d._children = null;
   }
-},
+};
 
-Categories.prototype.initialise = function(root, node, opts){
+Categories.prototype.reset = function(){
+
+  var toggleAll = function(d){
+
+    if (d.children) {
+      d.children.forEach(toggleAll);
+      this.toggle(d);
+    }
+  }.bind(this);
+
+  //collapse everything to begin with
+  if(this.root.children){
+    this.root.children.forEach(function(d){
+      if (d.children) {
+        d.children.forEach(toggleAll);
+        this.toggle(d);
+      }
+    }.bind(this));
+  }
+};
+
+Categories.prototype.initialise = function(data, node, opts){
   
   
   var self = this;
-  this.root = root;
+  this.root = data.categories;
+  
+  this.expanded = data.expanded.map(function(category){
+    return category.classification;
+  });
+
   this.opts = opts;
   this._selected = {},
   this.tree = d3.layout.tree().size([opts.height, opts.width]),
@@ -29,34 +55,17 @@ Categories.prototype.initialise = function(root, node, opts){
   this.nodefor = {},
   this.diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; });
 
-
   this.svg = d3.select(node).append('svg')
               .attr('width', opts.width + opts.margin.left + opts.margin.right)
               .attr('height', opts.height + opts.margin.top + opts.margin.bottom)
               .append('g')
               .attr('transform', 'translate(' + opts.margin.left + ',' + opts.margin.top + ')');
  
-  root.x0 = opts.height / 2;
-  root.y0 = 0;
+  this.root.x0 = opts.height / 2;
+  this.root.y0 = 0;
 
-  var toggleAll = function(d){
-    if (d.children) {
-      d.children.forEach(toggleAll);
-      self.toggle(d);
-    }
-  };
-
-  if(root.children){
-    root.children.forEach(function(d){
-      if (d.children) {
-        d.children.forEach(toggleAll);
-        self.toggle(d);
-      }
-    });
-  }
-
-  this.update(root);
-
+  this.reset();
+  this.generate(this.root);
 };
 
 Categories.prototype.selectnode = function(node){
@@ -69,7 +78,16 @@ Categories.prototype.nodeselected = function(node){
 
 Categories.prototype.update = function(data){
   
+  if (data.expanded && data.expanded.length > 1){
+    console.log("--- UPDATING ----");
+    this.reset();
+    this.generate(this.root);
+  }
+};
 
+
+Categories.prototype.generate = function(data){
+  
   var self = this;
   var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
@@ -89,8 +107,8 @@ Categories.prototype.update = function(data){
       .on("click", function(d) { 
             this.toggle(d);
             this.selectnode(d); 
-            this.update(d);  
-            CategoryActionCreators.categoryselected({ts: d.ts, urls: d.urls, name: d.name});
+            this.generate(d);  
+            CategoryActionCreators.categoryselected({ts: d.ts, urls: d.urls, name: d.name, path:d.path});
           }.bind(this));
 
   nodeEnter.append("svg:circle")

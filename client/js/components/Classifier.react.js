@@ -7,6 +7,7 @@ var ENTER_KEY_CODE = 13;
 function getStateFromStores() {
     return {
       urls: CategoryStore.urls(),
+      matches: CategoryStore.categorymatches(),
     };
 }
 
@@ -25,6 +26,14 @@ var Classifier = React.createClass({
   },
 
   render: function(){
+    var simple ={
+      textDecoration: 'none',
+      fontSize: '10px',
+    };
+
+    var matches = this.state.matches.map(function(match){
+      return <li><a style={simple} href='#'>{match}</a></li>;
+    });
     //dedup urls
     var urls = Object.keys(this.state.urls.reduce(function(acc, url){
       acc[url] = url;
@@ -35,7 +44,8 @@ var Classifier = React.createClass({
 
     return  <div>
               <Typeahead />
-              <ul>{urls}</ul>
+              <ul className="no-bullet">{matches}</ul>
+              <ul className="no-bullet">{urls}</ul>
             </div>;
   },
   
@@ -56,18 +66,21 @@ Typeahead = React.createClass({
 
 
   render: function(){
-    return (<div className="row">
-              <div className="large-12 columns">
-                  <div className="row collapse">
-                    <div className="small-9 columns">
-                        <input type="text"  value={this.state.text} onChange={this._onChange} onKeyDown={this._onKeyDown} placeholder="category" />
+    return (<div>
+             
+              <div className="row">
+                <div className="large-12 columns">
+                    <div className="row collapse">
+                      <div className="small-9 columns">
+                          <input type="text"  value={this.state.text} onChange={this._onChange} onKeyDown={this._onKeyDown} placeholder="category" />
+                      </div>
+                      <div className="small-3 columns">
+                        <a href="#" className="button postfix">find</a>
+                      </div>
                     </div>
-                    <div className="small-3 columns">
-                      <a href="#" className="button postfix">find</a>
-                    </div>
-                  </div>
+                </div>
               </div>
-          </div>);
+            </div>);
   },
 
   _onChange: function(event, value) {

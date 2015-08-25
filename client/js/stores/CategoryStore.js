@@ -18,17 +18,27 @@ var _totalsize = 0;
 var _data = {};
 var _selectednode = null;
 var _urls = [];
+var _categorymatches = [];
+var _urlmatches = [];
 
-_node_selected = function(node){
+var _updatecategorymatches = function(matches){
+    _categorymatches = matches;
+};
+
+var _updateurlmatches = function(matches){
+    _urlmatches = matches;
+};
+
+var _node_selected = function(node){
   _urls = node.urls || [];
 };
 
-_updatetree = function(data){
+var _updatetree = function(data){
     var _tree = _buildtree(data);
     _data = {name:"browsing", size:_totalsize, children:_tree};
 };
 
-_buildtree = function(data){
+var _buildtree = function(data){
 
      _totalsize = 0;
     var _tree = {};
@@ -65,10 +75,6 @@ _buildtree = function(data){
         });
     });
 
-  //	Object.keys(extra).forEach(function(key){
-    //		extra[key] = {ts: extra[key].ts.split(","), urls: extra[key].urls.split(",")};
-    //});
-
     //now need to turn all children objects into arrays for format required by d3
    
     var arraytree = _convertchildrentoarrays(_tree);
@@ -78,26 +84,26 @@ _buildtree = function(data){
     });
 };
 
-_createnewparent = function(parentkey, key, ts, tld){
+var _createnewparent = function(parentkey, key, ts, tld){
   //will have already added tlds,size to this node
   ts = ts.split(",");
   tld = tld.split(",");
 
   var parent = _nodefor[parentkey];
   parent.children = parent.children || {};
-  parent.children[key] = {name:key, size: ts.length, ts:ts, urls:tld};
+  parent.children[key] = {name:key, path:parent.path + "/" + key, size: ts.length, ts:ts, urls:tld};
   _parentfor[key] = parent;
   _nodefor[key] = parent.children[key];
 };
 
-_createroot = function(_tree, key, ts, tld){
+var _createroot = function(_tree, key, ts, tld){
 
   ts = ts.split(",");
-  _tree[key] = {name:key, size: ts.length, ts:ts, urls:tld.split(",")};
+  _tree[key] = {name:key, path:key, size: ts.length, ts:ts, urls:tld.split(",")};
   _nodefor[key] = _tree[key];
 };
 
-_convertchildrentoarrays = function(_tree){
+var _convertchildrentoarrays = function(_tree){
     return Object.keys(_tree).map(function(key){
          //base case - if no chilren, don't do anything.
         var node = _tree[key];
@@ -106,6 +112,7 @@ _convertchildrentoarrays = function(_tree){
 
             return{
               name:node.name,
+              path: node.path,
               ts: node.ts,
               urls: node.urls,
               size: node.size,
@@ -114,6 +121,7 @@ _convertchildrentoarrays = function(_tree){
 
         return {
           name:node.name,
+          path:node.path,
           ts: node.ts,
           urls: node.urls,
           size: node.size,
@@ -124,11 +132,11 @@ _convertchildrentoarrays = function(_tree){
 };
 
 
-_getparentfor = function(key){
+var _getparentfor = function(key){
   return _parentfor[key];
 };
 
-_getextrafor = function(node){
+var _getextrafor = function(node){
   //var details = extra[node.name]
   var details = {ts: node.ts, urls: node.urls, name: node.name};
   details.percentage = ((node.size/_totalsize)*100).toFixed(2);
@@ -144,6 +152,14 @@ var CategoryStore = assign({}, EventEmitter.prototype, {
 
   data: function(){
     return _data;
+  },
+
+  categorymatches: function(){
+    return _categorymatches;
+  },
+
+  urlmatches: function(){
+    return _urlmatches;
   },
 
   emitChange: function() {
@@ -167,18 +183,27 @@ var CategoryStore = assign({}, EventEmitter.prototype, {
 
 // Register callback to handle all updates
 CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
-
-  switch(action.type) {
+ 
+  switch(action.action.type) {
 
   	case ActionTypes.RAW_CATEGORY_DATA:
-      _updatetree(action.rawData);
+      _updatetree(action.action.rawData);
+      CategoryStore.emitChange();
+      break;
+
+    case ActionTypes.RAW_CATEGORY_MATCHES:
+      _updatecategorymatches(action.action.rawData);
+      CategoryStore.emitChange();
+      break;
+
+    case ActionTypes.RAW_URL_MATCHES:
+      _updateurlmatches(action.action.rawData);
       CategoryStore.emitChange();
       break;
 
     case ActionTypes.CATEGORY_NODE_SELECTED:
-      console.log("on the stroe, category selecetd");
-      console.log(action.node);
-      _node_selected(action.node);
+      _updateurlmatches([]);
+      _node_selected(action.action.node);
       CategoryStore.emitChange();
       break;
     

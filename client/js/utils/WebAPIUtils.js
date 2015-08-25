@@ -68,8 +68,10 @@ module.exports ={
       .set('Accept', 'application/json')
       .end(function(err, res){
         if (err){
+          console.log("hmm errror");
           console.log(err);
         }else{
+          console.log("ok - firing receieved category data");
           ServerActionCreators.receivedCategoryData(res.body);
          }
      });
@@ -84,9 +86,23 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-          console.log("got");
-          console.log(res.body);
+          ServerActionCreators.receivedCategoryMatches(res.body);
         }
      });
+  },
+
+  match_urls: function(partial){
+    request
+      .get('/viz/urls/match')
+      .set('Accept', 'application/json')
+      .query({partial:partial})
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          ServerActionCreators.receivedURLMatches(res.body);
+        }
+     });
+
   },
 };

@@ -8,7 +8,7 @@ module.exports = {
   categoryselected: function(node){
     console.log("ok category selected");
     console.log(node);
-    AppDispatcher.dispatch({
+    AppDispatcher.handleViewAction({
       type: ActionTypes.CATEGORY_NODE_SELECTED,
       node: node,
     });
