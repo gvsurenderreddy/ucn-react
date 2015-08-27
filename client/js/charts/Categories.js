@@ -7,6 +7,7 @@ Categories = function(){
 };
 
 Categories.prototype.toggle = function(d) {
+
   if (d.children) {
     d._children = d.children;
     d.children = null;
@@ -37,18 +38,70 @@ Categories.prototype.reset = function(){
   }
 };
 
+Categories.prototype.collapse = function(d){
+  
+  if (d.children) {
+    d._children = d.children;
+    d.children = null;
+  }
+};
+
+Categories.prototype.expandpath = function(path, tree){
+  var top = path.shift();
+  
+  var subtree = tree.filter(function(item){
+    return item.name === top;
+  }).reduce(function(acc, item){
+    return item;
+  },{});
+
+  if (subtree._children){
+    subtree.children = subtree._children;
+    subtree._children = null;
+  }
+
+  if (path.length > 0 && subtree.children){
+    this.expandpath(path, subtree.children);
+  }
+};
+
+Categories.prototype.collapseAll = function(){
+
+  var collapseChildren = function(d){
+    if (d.children) {
+      d.children.forEach(collapseChildren);
+      this.collapse(d);
+    }
+  }.bind(this);
+
+  if(this.root.children){
+    this.root.children.forEach(function(d){
+      if (d.children) {
+        d.children.forEach(collapseChildren);
+        this.collapse(d);
+      }
+    }.bind(this));
+
+    this.collapse(this.root);
+  }
+
+};
+
 Categories.prototype.initialise = function(data, node, opts){
-  
-  
+ 
   var self = this;
   this.root = data.categories;
   
-  this.expanded = data.expanded.map(function(category){
-    return category.classification;
-  });
+ this.classifications = Object.keys(data.expanded.map(function(item){
+      return item.classification;
+  }).reduce(function(acc, key){
+      acc[key] = key;
+      return acc;
+  },{}));
 
   this.opts = opts;
   this._selected = {},
+  this._found = [],
   this.tree = d3.layout.tree().size([opts.height, opts.width]),
 
   this.parentfor = {},
@@ -63,7 +116,6 @@ Categories.prototype.initialise = function(data, node, opts){
  
   this.root.x0 = opts.height / 2;
   this.root.y0 = 0;
-
   this.reset();
   this.generate(this.root);
 };
@@ -72,15 +124,49 @@ Categories.prototype.selectnode = function(node){
       _selected = node;
 };
 
+
+Categories.prototype.pathfound = function(path){
+  return this.classifications.indexOf("/"+path) != -1;
+};
+
 Categories.prototype.nodeselected = function(node){
   return this._selected.name ? this._selected.name == node.name : false;
 };
 
 Categories.prototype.update = function(data){
+
   
-  if (data.expanded && data.expanded.length > 1){
-    console.log("--- UPDATING ----");
-    this.reset();
+  if (data.expanded && data.expanded.length > 0){
+    
+    this.classifications = Object.keys(data.expanded.map(function(item){
+      return item.classification;
+    }).reduce(function(acc, key){
+      acc[key] = key;
+      return acc;
+    },{}));
+    
+    
+    this.collapseAll();
+    
+    var find = function(tree){
+      if (tree._children){
+        tree._children.forEach(function(child){
+          if (this.classifications.indexOf("/"+child.path) !== -1){
+            this.expandpath(child.path.split("/"), this.root._children);
+          }
+          if (child._children){
+            find(child);
+          }
+        }.bind(this));
+      }
+    }.bind(this);
+
+
+    find(this.root);
+
+    this.root.children = this.root._children;
+    this.root._children = null;
+
     this.generate(this.root);
   }
 };
@@ -130,7 +216,16 @@ Categories.prototype.generate = function(data){
   nodeUpdate.select("circle")
       .attr("r", function(d) { return Math.max(3,(d.size/self.root.size) * 20);})
       .style("fill", function(d) { 
-            return self.nodeselected(d) ? "#ff0000" : d._children ? "lightsteelblue" : "#fff"; 
+            if (self.nodeselected(d)){
+              return  "#ff0000";
+            }else if (d.path && self.pathfound(d.path)){
+              return "#00ff00";
+            }
+            else if (d._children){
+              return "lightsteelblue";
+            }else{
+              return "#fff"; 
+            }
       });
 
   nodeUpdate.select("text")

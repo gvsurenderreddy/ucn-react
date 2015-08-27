@@ -70,14 +70,7 @@ Typeahead = React.createClass({
              
               <div className="row">
                 <div className="large-12 columns">
-                    <div className="row collapse">
-                      <div className="small-9 columns">
-                          <input type="text"  value={this.state.text} onChange={this._onChange} onKeyDown={this._onKeyDown} placeholder="category" />
-                      </div>
-                      <div className="small-3 columns">
-                        <a href="#" className="button postfix">find</a>
-                      </div>
-                    </div>
+                  <input type="text"  value={this.state.text} onChange={this._onChange} onKeyDown={this._onKeyDown} placeholder="category" />    
                 </div>
               </div>
             </div>);

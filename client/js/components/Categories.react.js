@@ -56,6 +56,11 @@ var Categories = React.createClass({
                       <LocateURL />
                   </div>
               </div>
+               <div className="row fullWidth">
+                  <div className="large-4 columns">
+                      <h4> Most visited unclassified </h4>
+                  </div>
+              </div>
               <div className="row fullWidth">
                 <div className="small-9 columns" style={{overflowY:'auto'}}>
                   {chart}
@@ -87,7 +92,7 @@ var LocateURL = React.createClass({
                 <div className="large-4 columns">
                     <div className="row collapse">
                       <div className="small-9 columns">
-                          <input type="text"  value={this.state.text} onChange={this._onChange} onKeyDown={this._onKeyDown} placeholder="category" />
+                          <input type="text"  value={this.state.text} onChange={this._onChange} onKeyDown={this._onKeyDown} placeholder="find url" />
                       </div>
                       <div className="small-3 columns">
                         <a onTouchTap={this._matchURLS} className="button postfix">find</a>
