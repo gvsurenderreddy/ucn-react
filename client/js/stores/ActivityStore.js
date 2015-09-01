@@ -52,6 +52,8 @@ var ActivityDataStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 ActivityDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
+  var action = action.action;
+ 
   switch(action.type) {
 
   	case ActionTypes.RAW_ACTIVITY_DATA:

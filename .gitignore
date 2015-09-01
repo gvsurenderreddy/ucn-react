@@ -5,3 +5,5 @@ server/config.js
 *.db
 client/npm-debug.log
 server/npm-debug.log
+server/scripts/config.py
+server/scripts/venv

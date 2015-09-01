@@ -18,7 +18,7 @@ var server = http.createServer(app);
 var SINCE = (365/2) * 24 * 60 * 60;
 
 var hosts = [/*"10.2.0.6",*/ "10.2.0.5", /*"10.1.0.6",*/ "10.1.0.5"];
-var device = 15;
+var device = 2;
 
 //the /viz routes are used on the fr server and call the hostview postgres db
 

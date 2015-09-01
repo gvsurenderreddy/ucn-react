@@ -18,6 +18,7 @@ var Timeline = React.createClass({
   },
 
   componentDidMount: function(){
+  	console.log("component mounted for brwsogn data stire");
     BrowsingDataStore.addChangeListener(this._onChange);
     WebAPIUtils.fetch_browsing("afamily");
   },

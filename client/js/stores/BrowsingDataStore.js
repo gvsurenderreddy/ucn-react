@@ -26,7 +26,7 @@ _update_raw_url_history_data = function(data){
 },
 
 _update_data = function(data){
-
+  console.log("browing data store - updating data");
   var keys = Utils.binkeys(data.bin, data.timerange.from, data.timerange.to);
 
   var _bins = data.binned.reduce(function(acc, item){
@@ -36,7 +36,7 @@ _update_data = function(data){
   },{});
 
   var hosts = Object.keys(_bins);
-
+	
   //create browsing as:
   //[{name:hostname, values:[{date:javascriptts, y:number},..], name:hostname2, values:[{date:javascriptts, y:number}]];
 
@@ -63,6 +63,8 @@ _update_data = function(data){
       urlhistory: _url_history || []
   }
 
+  console.log("data is ");
+  console.log(_data);
 };
 
 var BrowsingDataStore = assign({}, EventEmitter.prototype, {
@@ -93,9 +95,16 @@ var BrowsingDataStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
+  console.log("browingd ata store atcion");
+  console.log(action);
+  
+  var action = action.action;
+  
   switch(action.type) {
 
   	case ActionTypes.RAW_BROWSING_DATA:
+  	  console.log("******** seen the raw broswing data!");
+  	  console.log(action.rawData);
       _update_data(action.rawData);
       BrowsingDataStore.emitChange();
       break;

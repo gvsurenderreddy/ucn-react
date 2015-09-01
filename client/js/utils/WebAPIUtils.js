@@ -5,21 +5,23 @@ module.exports ={
 
   fetch_browsing: function(family) {
     request
-      .get('/viz-dev/browsing')
+      .get('/viz/browsing')
       .set('Accept', 'application/json')
       .query({family:family})
       .end(function(err, res){
         if (err){
           console.log(err);
         }else{
-          ServerActionCreators.receivedBrowsingData(res.body);
-         }
+         	console.log("OK GOT BROWSING DTAA");
+         	console.log(res.body);
+    		ServerActionCreators.receivedBrowsingData(res.body);
+        }
      });
   },
 
   fetch_activity: function(family) {
     request
-      .get('/viz-dev/activity')
+      .get('/viz/activity')
       .set('Accept', 'application/json')
       .query({family:family})
       .end(function(err, res){
@@ -34,7 +36,7 @@ module.exports ={
   fetch_urls: function(timerange) {
 
     request
-      .get('/viz-dev/urls')
+      .get('/viz/urls')
       .set('Accept', 'application/json')
       .query(timerange)
       .end(function(err, res){
@@ -50,7 +52,7 @@ module.exports ={
   fetch_url_history: function(url) {
 
     request
-      .get('/viz-dev/urls/history')
+      .get('/viz/urls/history')
       .set('Accept', 'application/json')
       .query({url:url})
       .end(function(err, res){
