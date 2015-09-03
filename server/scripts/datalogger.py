@@ -78,18 +78,36 @@ class DataLogger( object ):
 					
 					print items[2].split(".")[0]
 					print items[4]
-					url = {'ts':items[2].split(".")[0], 'host':items[4], 'tld':tld, 'domain':domain, 'path': path}
+					#url = {'ts':items[2].split(".")[0], 'host':items[4], 'tld':tld, 'domain':domain, 'path': path}
+					url = {'ts':items[2].replace(".",""), 
+							'host':items[4], 
+							'tld':tld, 
+							'domain':domain, 
+							'path': path, 
+							'verb':items[7],
+							'clength':items[6],
+							'statuscode':items[5].split("/")[1],
+							'dest':items[11].split("/")[1],
+							'contenttype':items[12],
+						}
+					print url
 					try:
-						print "inserting %s %s %s %s %s %s" % (url['ts'], url['host'],url['tld'], url['domain'], url['path'], 'squid')
-						# lookup IP in ip -> device.id table
-						# insert device.id / data into the http3 table!
-						#self.conn.execute("INSERT INTO URLS(ts, host, tld, domain, path, datasource) VALUES(?,?,?,?,?,?)", (url['ts'], url['host'],url['tld'], url['domain'], url['path'], 'squid'))
+						#print "inserting %s %s %s %s %s %s" % (url['ts'], url['host'],url['tld'], url['domain'], url['path'], 'squid')
+						sql = "SELECT deviceid from vpnips WHERE ip=%s"
+						data = (url['host'],)
+						self.cur.execute(sql,data)
+						deviceid =  self.cur.fetchone()
+						
+						
+						sql = "INSERT INTO http3 (id, httpverb, httpverbparam, httpstatuscode, httphost, contenttype, contentlength, src, dest, timestamp) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+						data = (deviceid,url['verb'],url['path'], url['statuscode'],url['tld'], url['contenttype'], url['clength'], url['host'], url['dest'], url['ts'])			
+						self.cur.execute(sql,data)
 					except Exception, e:
+						print e
 						logger.error("error inserting url %s" % str(url))
 
 		#commit now..
-#		try:
-#			self.conn.commit()
-#				
-#		except Exception, e:
-#			logger.error("error bulk committing urls")				
+		try:
+			self.conn.commit()				
+		except Exception, e:
+			logger.error("error bulk committing urls")				
