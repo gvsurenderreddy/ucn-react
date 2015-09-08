@@ -6,7 +6,6 @@ var ActionTypes = Constants.ActionTypes;
 module.exports = {
 
   receivedBrowsingData: function(data) {
-	console.log("IN SERVER ACTION CREATORS -- sending a rawData action...");
     AppDispatcher.handleServerAction({
       type: ActionTypes.RAW_BROWSING_DATA,
       rawData: data,

@@ -1,29 +1,37 @@
 var request = require('superagent');
+var extend = require('extend');
+
 var ServerActionCreators = require('../actions/ServerActionCreators');
+
+var params = location.search.substring(1).split('&').reduce(function(acc, pair){
+    var nv = pair.split("=");
+    acc[nv[0]]=nv[1];
+    return acc;
+},{});
 
 module.exports ={
 
-  fetch_browsing: function(family) {
+  fetch_browsing: function() {
+  	console.log("fetching browsing with");
+  	console.log(params);
     request
       .get('/viz/browsing')
       .set('Accept', 'application/json')
-      .query({family:family})
+      .query(params)
       .end(function(err, res){
         if (err){
           console.log(err);
         }else{
-         	console.log("OK GOT BROWSING DTAA");
-         	console.log(res.body);
     		ServerActionCreators.receivedBrowsingData(res.body);
         }
      });
   },
 
-  fetch_activity: function(family) {
+  fetch_activity: function() {
     request
       .get('/viz/activity')
       .set('Accept', 'application/json')
-      .query({family:family})
+      .query(params)
       .end(function(err, res){
         if (err){
           console.log(err);
@@ -38,7 +46,7 @@ module.exports ={
     request
       .get('/viz/urls')
       .set('Accept', 'application/json')
-      .query(timerange)
+      .query(extend(timerange,params))
       .end(function(err, res){
         if (err){
           console.log(err);
@@ -54,7 +62,7 @@ module.exports ={
     request
       .get('/viz/urls/history')
       .set('Accept', 'application/json')
-      .query({url:url})
+      .query(extend({url:url},params))
       .end(function(err, res){
         if (err){
           console.log(err);
@@ -68,6 +76,7 @@ module.exports ={
     request
       .get('/viz/categories')
       .set('Accept', 'application/json')
+      .query(params)
       .end(function(err, res){
         if (err){
           console.log("hmm errror");
@@ -97,7 +106,7 @@ module.exports ={
     request
       .get('/viz/urls/match')
       .set('Accept', 'application/json')
-      .query({partial:partial})
+      .query(extend({partial:partial},params))
       .end(function(err, res){
         if (err){
           console.log(err);

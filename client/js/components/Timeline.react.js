@@ -12,15 +12,16 @@ function getStateFromStores() {
 }; 
 
 var Timeline = React.createClass({
-
+    
   getInitialState: function() {
     return getStateFromStores();
   },
 
   componentDidMount: function(){
-  	console.log("component mounted for brwsogn data stire");
     BrowsingDataStore.addChangeListener(this._onChange);
-    WebAPIUtils.fetch_browsing("afamily");
+    
+  
+    WebAPIUtils.fetch_browsing();
   },
 
   componentWillUnmount: function(){
@@ -28,7 +29,6 @@ var Timeline = React.createClass({
   },
 
   render: function(){
-   console.log("rendering chart...");
    var browsingoptions = {
                     height: 300,
                     width: 800,
@@ -69,7 +69,7 @@ var Timeline = React.createClass({
   
   _fetchActivity: function(){
   	console.log("fetching activity!");
-  	WebAPIUtils.fetch_activity("afamily");
+  	WebAPIUtils.fetch_activity();
   },
 
   _onChange: function() {

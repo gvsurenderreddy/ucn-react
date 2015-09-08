@@ -81,4 +81,30 @@ module.exports = {
 		});
 	},  
 	
+	fetch_device_id_for_device: function(device){
+	
+		var sql = "SELECT id FROM devices WHERE devicename='" + device + "'";
+	
+		return _execute_sql(sql).then(function(results){
+			return results.reduce(function(acc, obj){
+				return obj.id || null;
+			},null);
+		});
+	},
+	
+	fetch_categories_for_device: function(deviceid){
+		
+      	//var sql="SELECT classification, array_agg(distinct httphost) AS urls, count(httphost) as total FROM CLASSIFICATION c, http3 h WHERE c.success = 1 AND c.tld=h.httphost AND h.id=" + deviceid + " GROUP BY classification"
+      	
+      	var sql="SELECT classification, array_agg(distinct httphost) AS tld, count(httphost) as size FROM CLASSIFICATION c, http3 h WHERE c.success = 1 AND c.tld=h.httphost AND h.id=" + deviceid + " GROUP BY classification"
+      	
+      	return _execute_sql(sql).then(function(results){
+			return results.map(function(result){
+				var classification = result.classification.split("/");
+            	classification.shift();
+				return {classification:classification, tld:result.tld, size:parseInt(result.size)};
+			});
+		});
+	},
+	
 }

@@ -1,0 +1,20 @@
+doctype html
+html(lang="en")
+	head
+		link(href="/viz/css/foundation/css/foundation.min.css",rel="stylesheet")
+		title admin
+	body 
+		table
+			thead
+				tr
+					th family
+					th devices
+			tbody
+				each family in families
+					tr
+						td!=family.username
+						td
+							ul(class="inline-list")
+								each device in family.devices
+									li
+										a(href="/viz?device="+family.username+"."+device)!=device
