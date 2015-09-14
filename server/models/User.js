@@ -23,6 +23,17 @@ var UserSchema = new db.Schema({
     resetpasswdtoken: {type:String, required: false, unique: false}
 });
 
+
+
+
+UserSchema.statics.serializeUser = function(user, cb) {
+    cb(null, user._id);
+};
+
+UserSchema.statics.deserializeUser = function(userid, cb) {
+    require('./User').findById(userid, cb);
+};
+
 UserSchema.statics.findUserByName = function(username, cb) {
     require('./User').findOne({isadmin : false, username : username}, cb);
 };
