@@ -12,6 +12,13 @@ module.exports = {
     });
   },
 
+  receivedZoomedInData: function(data) {
+    AppDispatcher.handleServerAction({
+      type: ActionTypes.RAW_ZOOM_DATA,
+      rawData: data,
+    });
+  },
+  
   receivedActivityData: function(data) {
 
     AppDispatcher.handleServerAction({

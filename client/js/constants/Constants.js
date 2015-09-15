@@ -7,6 +7,7 @@ module.exports = {
 		RAW_URL_DATA: null,
 		RAW_URL_HISTORY_DATA: null,
 		RAW_BROWSING_DATA: null,
+		RAW_ZOOM_DATA: null,
 		RAW_CATEGORY_DATA:null,
 		RAW_CATEGORY_MATCHES: null,
 		RAW_URL_MATCHES: null,

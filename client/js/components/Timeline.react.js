@@ -8,6 +8,7 @@ var WebAPIUtils = require('../utils/WebAPIUtils');
 function getStateFromStores() {
     return {
       data: BrowsingDataStore.data(),
+      zoomdata: BrowsingDataStore.zoomdata(),
     }
 }; 
 
@@ -19,8 +20,6 @@ var Timeline = React.createClass({
 
   componentDidMount: function(){
     BrowsingDataStore.addChangeListener(this._onChange);
-    
-  
     WebAPIUtils.fetch_browsing();
   },
 
@@ -53,7 +52,7 @@ var Timeline = React.createClass({
               </div>
               <div className="row fullWidth">
                 <div className="small-9 columns" style={{overflowY:'auto'}}>
-                  <Chart type="Browsing" data={this.state.data} options={browsingoptions}/>
+                  <Chart type="Browsing" data={this.state.zoomdata} options={browsingoptions}/>
                 </div>
                 <div className="small-3 columns">
                   <Urls/>

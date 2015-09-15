@@ -14,7 +14,7 @@ var d3 = require('../lib/d3.min');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _data, _url_history,
+var _data, _url_history,_zoomdata;
 
 _update_filtered_data = function(range){
   _data.range = range;
@@ -25,8 +25,16 @@ _update_raw_url_history_data = function(data){
   _data.urlhistory = _url_history;
 },
 
+_update_zoom_data = function(data){
+	_zoomdata = _format_data(data);
+},
+
 _update_data = function(data){
-  console.log("browing data store - updating data");
+  _data = _format_data(data);
+};
+
+_format_data = function(data){
+
   var keys = Utils.binkeys(data.bin, data.timerange.from, data.timerange.to);
 
   var _bins = data.binned.reduce(function(acc, item){
@@ -55,16 +63,13 @@ _update_data = function(data){
   });
 
 
-  _data ={
+  return {
       keys: keys,
       hosts: hosts,
       browsing: browsing,
       range:  d3.extent(keys, function(d){return d*1000}),
       urlhistory: _url_history || []
   }
-
-  console.log("data is ");
-  console.log(_data);
 };
 
 var BrowsingDataStore = assign({}, EventEmitter.prototype, {
@@ -73,6 +78,10 @@ var BrowsingDataStore = assign({}, EventEmitter.prototype, {
     return _data || {};
   },
 
+  zoomdata: function(){
+  	return _zoomdata || _data || {};
+  },
+  
   emitChange: function() {
     this.emit(CHANGE_EVENT);
   },
@@ -95,20 +104,22 @@ var BrowsingDataStore = assign({}, EventEmitter.prototype, {
 // Register callback to handle all updates
 BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
-  console.log("browingd ata store atcion");
-  console.log(action);
-  
   var action = action.action;
   
   switch(action.type) {
 
   	case ActionTypes.RAW_BROWSING_DATA:
-  	  console.log("******** seen the raw broswing data!");
-  	  console.log(action.rawData);
+  	 console.log("RECEIVED SOME NEW BROWSING DATA");
       _update_data(action.rawData);
       BrowsingDataStore.emitChange();
       break;
-
+      
+    case ActionTypes.RAW_ZOOM_DATA:
+      console.log("RECEIVED SOME NEW ZOOM DATA");
+      _update_zoom_data(action.rawData);
+      BrowsingDataStore.emitChange();
+	  break;
+    
     case ActionTypes.RANGE_CHANGE:
       _update_filtered_data(action.range);
       BrowsingDataStore.emitChange();

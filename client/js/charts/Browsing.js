@@ -15,7 +15,7 @@ Browsing.prototype.initialise = function(data, node, opts){
   this.opts = opts;
 
   this.x  = d3.time.scale().range([0,opts.width]);
-	this.y  = d3.scale.linear().range([opts.height,0]);
+  this.y  = d3.scale.linear().range([opts.height,0]);
 
   this.xAxis = d3.svg.axis().scale(this.x).orient("bottom");
   this.yAxis = d3.svg.axis().scale(this.y).orient("left");
@@ -76,7 +76,7 @@ Browsing.prototype.initialise = function(data, node, opts){
   this.svg.append("g")
           .attr("class", "chart");
 
-this.svg.append("g")
+  this.svg.append("g")
               .attr("class", "x brush")
               .call(self.brush)
               .selectAll("rect")
@@ -102,8 +102,7 @@ this.svg.append("g")
 };
 
 Browsing.prototype.update = function(data){
-	var start = Date.now();
-	var end;
+		
     var self = this;
     //guard against empty data;
     if (!data || !data.browsing){
@@ -112,23 +111,13 @@ Browsing.prototype.update = function(data){
     }
 
     var browsers = this.stack(data.browsing);
-	
-	end = Date.now();
-	console.log("STACK -- CREATED IN ");
-	console.log((end-start) + " ms ");
-	console.log("************************");
-	
+
     this.x.domain(data.range);
 
     this.y.domain([0, d3.max(browsers, function(c){
         return d3.max(c.values.filter(function(item){return item.date >= data.range[0] && item.date <= data.range[1];}), function(d) {return d.y0 +d.y;});
     })]);
 
-	end = Date.now();
-	console.log("y domain -- CREATED IN ");
-	console.log((end-start) + " ms ");
-	console.log("************************");
-	
     //update the scales
     this.xAxis.scale(this.x);
     this.yAxis.scale(this.y);
@@ -149,10 +138,6 @@ Browsing.prototype.update = function(data){
            .style("stroke", function(d){return self.colour(d.name);})
            .style("stroke-opacity", 1.0)
 
-	end = Date.now();
-	console.log("new path -- CREATED IN ");
-	console.log((end-start) + " ms ");
-	console.log("************************");
 	
     //update
     browser.selectAll("path.area")
@@ -160,10 +145,6 @@ Browsing.prototype.update = function(data){
           //.duration(ANIMATION_DURATION)
           .attr("d", function(d) {return self.area(d.values);});
 
-	end = Date.now();
-	console.log("update  path -- CREATED IN ");
-	console.log((end-start) + " ms ");
-	console.log("************************");
     //update axes
 
     this.svg.select(".x.axis")
@@ -184,10 +165,6 @@ Browsing.prototype.update = function(data){
           .exit()
           .remove();
           
-    end = Date.now();
-	console.log("BROWSING -- UPDATED IN ");
-	console.log((end-start) + " ms ");
-	console.log("************************");
 };
 
 Browsing.prototype.urlhistory = function(data){

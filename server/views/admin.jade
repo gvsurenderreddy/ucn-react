@@ -12,9 +12,9 @@ html(lang="en")
 			tbody
 				each family in families
 					tr
-						td!=family.username
+						td!=family.family
 						td
 							ul(class="inline-list")
 								each device in family.devices
 									li
-										a(href="/viz?device="+family.username+"."+device)!=device
+										a(href="/viz/device?device="+family.username+"."+device)!=device

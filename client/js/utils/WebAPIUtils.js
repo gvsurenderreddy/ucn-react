@@ -27,6 +27,24 @@ module.exports ={
      });
   },
 
+  fetch_browsing_range: function(range) {
+  	console.log("fetching browsing range!!!");
+    request
+      .get('/viz/browsing')
+      .set('Accept', 'application/json')
+      .query(extend(range,params))
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+    	  console.log("ok got some data");
+    	  console.log(res.body);
+    	  ServerActionCreators.receivedZoomedInData(res.body);
+        }
+     });
+  
+  },
+  
   fetch_activity: function() {
     request
       .get('/viz/activity')

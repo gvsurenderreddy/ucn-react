@@ -21,8 +21,6 @@ router.use(function(req, res, next) {
 });
 
 router.get('/', function(req,res,next){
-	console.log("ok user is");
-	console.log(req.user);
 	
 	User.findAllUsers().then(function(users){
 		return users;

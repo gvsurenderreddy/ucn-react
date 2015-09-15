@@ -25,8 +25,15 @@ module.exports = {
     AppDispatcher.handleViewAction({
       type: ActionTypes.RANGE_CHANGE,
       range: range,
+   });
+    
+	WebAPIUtils.fetch_urls({
+      from: Math.floor(range[0]/1000),
+      to: Math.floor(range[1]/1000),
     });
-    WebAPIUtils.fetch_urls({
+  	
+  	//should only do this if range requires a change from current bin.
+    WebAPIUtils.fetch_browsing_range({
       from: Math.floor(range[0]/1000),
       to: Math.floor(range[1]/1000),
     });
