@@ -49,7 +49,7 @@ var DeviceSchema = new db.Schema({
 
 /** Device. */
 DeviceSchema.statics.findDeviceByLogin = function(login, cb) {
-    require('./Device').findOne({login : login}, cb);
+    return require('./Device').findOneAsync({login : login}, cb);
 };
 
 /** Device list. */

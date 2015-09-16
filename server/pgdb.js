@@ -107,4 +107,26 @@ module.exports = {
 		});
 	},
 	
+	insert_token_for_device: function(deviceid, api, token){
+		var values = [deviceid,api,token,Date.now()].join("','");
+		
+		var sql = "SELECT * FROM tokens WHERE deviceid = '" + deviceid + "' AND api = '" + api + "'";
+		
+		return _execute_sql(sql).then(function(result){
+			if (result.length > 0){
+			   sql = "UPDATE tokens SET token = '" + token + "', lastupdate='" + Date.now() + "' WHERE deviceid ='" + deviceid  + "' AND api = '" + api + "'"; 
+			}else{
+			   sql = "INSERT INTO tokens (deviceid, api, token,lastupdate) VALUES ('"+ values +"')";
+			}
+			console.log(sql);
+			
+			return _execute_sql(sql);
+		}).then(function(result){
+			console.log("got result");
+			console.log(result);
+			return true;
+		});
+		
+	},
+	
 }

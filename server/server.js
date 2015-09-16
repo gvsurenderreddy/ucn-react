@@ -9,12 +9,12 @@ var pgdb = require('./pgdb');
 var User 	= require('./models/User');
 var Device = require('./models/Device');
 var passport = require('passport');
-
 var app = express();
 
 //set up middleware to support POSTs
 app.use(bodyparser.urlencoded({extended:false}));
 app.use(bodyparser.json());
+
 
 //statically served content from the static dir
 app.use('/viz/', express.static("static"));
@@ -24,7 +24,6 @@ app.set('view engine', 'jade');
 
 app.engine('html', hbs.__express);
 var server = http.createServer(app);
-
 
 //set up session management
 const hour = 3600000;
@@ -40,7 +39,9 @@ passport.deserializeUser(User.deserializeUser);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// main routes
+app.use('/viz/movescallback', require('./routes/moves'));
+
+// main (authenticated) routes
 app.use('/viz/admin/', require('./routes/vizadmin'));
 app.use('/viz', require('./routes/viz'));
 
