@@ -23,6 +23,7 @@ _update_filtered_data = function(range){
 _update_raw_url_history_data = function(data){
    _url_history = data.timestamps;
   _data.urlhistory = _url_history;
+  _zoomdata.urlhistory = _url_history;
 },
 
 _update_zoom_data = function(data){
@@ -109,13 +110,11 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
   switch(action.type) {
 
   	case ActionTypes.RAW_BROWSING_DATA:
-  	 console.log("RECEIVED SOME NEW BROWSING DATA");
       _update_data(action.rawData);
       BrowsingDataStore.emitChange();
       break;
       
     case ActionTypes.RAW_ZOOM_DATA:
-      console.log("RECEIVED SOME NEW ZOOM DATA");
       _update_zoom_data(action.rawData);
       BrowsingDataStore.emitChange();
 	  break;

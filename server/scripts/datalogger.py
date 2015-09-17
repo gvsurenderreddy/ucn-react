@@ -6,7 +6,6 @@ import psycopg2
 logger = logging.getLogger( "collect_logger" )
 
 def reconnect(fn):
-	print "in conncet decorator"
 	""" decorator to reconnect to the database if needed """
 	def wrapped(self, *args, **kwargs):
 		if self.connected is not True:
@@ -44,7 +43,29 @@ class DataLogger( object ):
 			except Exception, e:
 				print e
 				print "unable to connect to the database!"
-				
+	
+	
+	@reconnect
+	def remove_zones(self, deviceid, date):
+		try:
+			sql = "DELETE FROM zones WHERE deviceid = %s AND date = %s"
+			data = (deviceid,date)
+			self.cur.execute(sql,data)
+			self.conn.commit()
+		except Exception, e:
+			logger.error("error removing zones %s %s" % (deviceid, date))
+
+	@reconnect
+	def insert_zones(self, zones):
+		try:
+			for zone in zones:
+				sql = "INSERT INTO zones(deviceid, date, locationid, name, lat, lng, enter, exit) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
+				data = (zone['deviceid'],zone['date'],zone['locationid'], zone['name'], zone['lat'], zone['lng'], zone['enter'], zone['exit'])
+				self.cur.execute(sql,data)
+			self.conn.commit()
+		except Exception, e:
+			logger.error("error inserting zones %s" % str(zones))
+			
  	@reconnect
  	def bulk_insert_urls(self, content):
 		logger.debug("in bulk insert urls")

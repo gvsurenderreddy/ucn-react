@@ -118,8 +118,6 @@ module.exports = {
 			}else{
 			   sql = "INSERT INTO tokens (deviceid, api, token,lastupdate) VALUES ('"+ values +"')";
 			}
-			console.log(sql);
-			
 			return _execute_sql(sql);
 		}).then(function(result){
 			console.log("got result");

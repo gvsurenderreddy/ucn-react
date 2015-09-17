@@ -36,7 +36,7 @@ var Timeline = React.createClass({
                     margin:{left: 40, right:10, top:10, bottom:60}
                 };
 
-  var zoomoptions = {
+   var zoomoptions = {
                    height: 100,
                    width: 1000,
                    xaxis:{orientation:'bottom'},

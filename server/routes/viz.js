@@ -43,8 +43,11 @@ router.get('/browsing', function(req,res, next){
   if (from && to){
   	console.log(req.query.from + "->" + req.query.to);
   }
+  console.log("device is ");
+  console.log(device);
   
   pgdb.fetch_device_id_for_device(device).then(function(deviceid){
+  	console.log("got device id " + deviceid);
   	return deviceid;
   })
   .then(function(deviceid){
