@@ -63,13 +63,21 @@ router.get('/browsing', function(req,res, next){
     var timerange = {from:min.ts, to:maxts};
     var bin = difference >= (6 * 60 * 60) ? 60*60 : difference > (2 * 60) ? 60 : 1;
 	console.log("Set bin to "  + bin);    
-    return [bin,timerange,pgdb.fetch_binned_browsing_for_device(deviceid, bin, timerange.from, timerange.to)];
+    return [
+    			bin,
+    			timerange, 
+    			pgdb.fetch_binned_browsing_for_device(deviceid, bin, timerange.from, timerange.to), 
+    			pgdb.fetch_urls_for_device(deviceid, timerange.from, timerange.to)
+    		];
   })
-  .spread(function(bin,timerange, binned){
+  .spread(function(bin,timerange,binned,urls){
     res.send({
-      timerange: timerange,
-      bin: bin,
-      binned  : binned,
+    			browsing:{
+      						timerange: timerange,
+      						bin: bin,
+      						binned  : binned,
+      					},
+      			urls: urls
     });
   });
 });
@@ -84,6 +92,21 @@ router.get('/activity', function(req,res, next){
   	res.send(data);
   });	
 });
+
+router.get('/location', function(req,res, next){
+  var from = req.query.from;
+  var to   = req.query.to;
+  var device = req.query.device;
+  
+  pgdb.fetch_device_id_for_device(device).then(function(deviceid){
+  	return deviceid;
+  }).then(function(deviceid){
+   	return pgdb.fetch_locations_for_device(deviceid, from, to);
+  }).then(function(data){
+  	res.send({locations:data});
+  });
+});
+
 
 router.get('/urls', function(req,res, next){
 

@@ -4,14 +4,13 @@ module.exports = {
 
 	ActionTypes: keyMirror({	
 		RANGE_CHANGE: null,
-		RAW_URL_DATA: null,
 		RAW_URL_HISTORY_DATA: null,
 		RAW_BROWSING_DATA: null,
-		RAW_ZOOM_DATA: null,
 		RAW_CATEGORY_DATA:null,
 		RAW_CATEGORY_MATCHES: null,
 		RAW_URL_MATCHES: null,
 		RAW_ACTIVITY_DATA:null,
+		RAW_LOCATION_DATA:null,
 		URL_CLICKED:null,
 		CATEGORY_NODE_SELECTED: null,
   }),

@@ -18,8 +18,6 @@ var Chart = React.createClass({
     );
   },
 
-
-
   componentDidUpdate: function(){
       this._chart.update(this.props.data);
   },

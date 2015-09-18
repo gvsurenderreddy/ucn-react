@@ -81,6 +81,26 @@ module.exports = {
 		});
 	},  
 	
+	fetch_locations_for_device: function(deviceid, from, to){
+		
+		var sql = "SELECT name, enter, exit, lat, lng FROM ZONES where deviceid=" + deviceid; 
+		
+		if (from && to){
+			sql += " AND (enter >= " + from + " AND exit <= " + to + ")";
+		}
+		console.log(sql);
+		
+		return _execute_sql(sql).then(function(results){
+			return results.map(function(result){
+				return {
+					name: result.name.trim() === "" ? result.lat+","+result.lng : result.name,
+					enter: result.enter,
+					exit: result.exit
+				}
+			});
+		});
+	},
+	
 	fetch_device_id_for_device: function(device){
 	
 		var sql = "SELECT id FROM devices WHERE devicename='" + device + "'";

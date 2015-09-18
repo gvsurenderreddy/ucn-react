@@ -92,11 +92,15 @@ Browsing.prototype.initialise = function(data, node, opts){
              .attr("class", "y axis")
              .call(this.yAxis);
 
- this.svg.append("g")
+  //placeholders for overlays..
+  this.svg.append("g")
          .attr("class","historyoverlay");
 
-  this.update(data);
-  this._addListeners();
+ this.svg.append("g")
+         .attr("class","locationoverlay");
+ 
+  //this.update(data);
+  //this._addListeners();
   var end = Date.now();
   console.log("inited in " + (end-start) + "ms");
 };
@@ -156,15 +160,24 @@ Browsing.prototype.update = function(data){
             //.transition()
             //.duration(ANIMATION_DURATION)
             .call(this.yAxis);
-
-    if (data.urlhistory){
-      this.urlhistory(data.urlhistory);
-    }
     //exit
     browser
           .exit()
           .remove();
+    
+    //handle overlays!
           
+	if (data.urlhistory){
+      this.urlhistory(data.urlhistory);
+	}
+	//if (data.locations){
+	//  this.locations(data.locations);
+	//}    
+};
+
+Browsing.prototype.locations = function(data){
+ 	var overlay = this.svg.select("g.locationoverlay");
+
 };
 
 Browsing.prototype.urlhistory = function(data){

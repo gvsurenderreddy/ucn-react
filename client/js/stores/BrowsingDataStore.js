@@ -14,23 +14,28 @@ var d3 = require('../lib/d3.min');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _data, _url_history,_zoomdata;
+var _data, _zoomdata, _urlhistory;
 
-_update_filtered_data = function(range){
+var _update_filtered_data = function(range){
   _data.range = range;
-},
+};
 
-_update_raw_url_history_data = function(data){
-   _url_history = data.timestamps;
-  _data.urlhistory = _url_history;
-  _zoomdata.urlhistory = _url_history;
-},
+var _update_location_data = function(data){
+  //_data.locations = data.locations;	
+  //_zoomdata.locations  = data.locations;
+};
 
-_update_zoom_data = function(data){
+var _update_raw_url_history_data = function(data){
+  _urlhistory  = data.timestamps;
+  _data.urlhistory = _urlhistory;
+  _zoomdata.urlhistory =_urlhistory;
+};
+
+var _update_zoom_data = function(data){
 	_zoomdata = _format_data(data);
-},
+};
 
-_update_data = function(data){
+var _update_data = function(data){
   _data = _format_data(data);
 };
 
@@ -69,7 +74,7 @@ _format_data = function(data){
       hosts: hosts,
       browsing: browsing,
       range:  d3.extent(keys, function(d){return d*1000}),
-      urlhistory: _url_history || []
+      urlhistory: _urlhistory || []
   }
 };
 
@@ -110,25 +115,35 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
   switch(action.type) {
 
   	case ActionTypes.RAW_BROWSING_DATA:
-      _update_data(action.rawData);
+      _update_data(action.rawData.browsing);   
+      console.log("Browsing: update_data, emitting change");
       BrowsingDataStore.emitChange();
       break;
       
     case ActionTypes.RAW_ZOOM_DATA:
-      _update_zoom_data(action.rawData);
+      _update_zoom_data(action.rawData.browsing);
+       console.log("Browsing: update_zoom_data, emitting change");
       BrowsingDataStore.emitChange();
 	  break;
     
     case ActionTypes.RANGE_CHANGE:
       _update_filtered_data(action.range);
+      console.log("Browsing: range change, emitting change");
       BrowsingDataStore.emitChange();
       break;
 
     case ActionTypes.RAW_URL_HISTORY_DATA:
       _update_raw_url_history_data(action.rawData);
+      console.log("Browsing: url hustory, emitting change");
+      BrowsingDataStore.emitChange();
+      break;	   	
+	
+	case ActionTypes.RAW_LOCATION_DATA:
+      _update_location_data(action.rawData);
+       console.log("Browsing: location data, emitting change");
       BrowsingDataStore.emitChange();
       break;
-
+      
     default:
       // no op
   }

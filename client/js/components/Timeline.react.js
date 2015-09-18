@@ -8,7 +8,7 @@ var WebAPIUtils = require('../utils/WebAPIUtils');
 function getStateFromStores() {
     return {
       data: BrowsingDataStore.data(),
-      zoomdata: BrowsingDataStore.zoomdata(),
+      zoomdata: BrowsingDataStore.zoomdata(), 
     }
 }; 
 
@@ -61,6 +61,7 @@ var Timeline = React.createClass({
               <div className="row fullWidth">
               	<ul className="inline-list">
               		<li><a href="#" onClick={this._fetchActivity}>overlay activity</a></li>
+              		<li><a href="#" onClick={this._fetchLocation}>overlay locations</a></li>
               	</ul> 
               </div>
           </div>
@@ -71,6 +72,11 @@ var Timeline = React.createClass({
   	WebAPIUtils.fetch_activity();
   },
 
+  _fetchLocation: function(){
+  	console.log("fetching location!");
+  	WebAPIUtils.fetch_location();
+  },
+  
   _onChange: function() {
      this.setState(getStateFromStores());
   }

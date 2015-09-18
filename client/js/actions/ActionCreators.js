@@ -27,16 +27,27 @@ module.exports = {
       range: range,
    });
     
+    
+    //aha this is the problem - as two incoming messages will cause a double dispatch!
+    //rewrite so that either all data is returned in a single dispatch OR chain them so that
+    //once urls are received, range is called! - or make these get called in the stores?
+    
+    WebAPIUtils.fetch_browsing_range({
+     	from: Math.floor(range[0]/1000),
+      	to: Math.floor(range[1]/1000),
+    });
+    
+    /*
 	WebAPIUtils.fetch_urls({
       from: Math.floor(range[0]/1000),
       to: Math.floor(range[1]/1000),
     });
   	
-  	//should only do this if range requires a change from current bin.
+  	//should only do this if range requires a change from current bin. 
     WebAPIUtils.fetch_browsing_range({
       from: Math.floor(range[0]/1000),
       to: Math.floor(range[1]/1000),
-    });
+    });*/
   }
 
 };

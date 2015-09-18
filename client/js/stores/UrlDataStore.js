@@ -16,6 +16,7 @@ var _urls = [];
 var _selected = "";
 
 var _update_raw_url_data = function(data){
+ 
   _urls = data.urls || [];
 };
 
@@ -55,12 +56,21 @@ UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
   
   switch(action.type) {
 
-  	case ActionTypes.RAW_URL_DATA:
-      _update_raw_url_data(action.rawUrls);
+	case ActionTypes.RAW_ZOOM_DATA:
+	  console.log("ok updateding raw url data...");
+	  console.log(action.rawData);
+      _update_raw_url_data(action.rawData); 
       UrlDataStore.emitChange();
       break;
+      
+  	/*case ActionTypes.RAW_URL_DATA:
+      _update_raw_url_data(action.rawUrls);
+      console.log("URL DATA STORE raw URL data emiting change...");
+      UrlDataStore.emitChange();
+      break;*/
     
     case ActionTypes.URL_CLICKED:
+     console.log("URL DATA STORE url clicked emiting change...");
       _selected = action.url;
       UrlDataStore.emitChange();
       break;

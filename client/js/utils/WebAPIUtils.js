@@ -11,9 +11,7 @@ var params = location.search.substring(1).split('&').reduce(function(acc, pair){
 
 module.exports ={
 
-  fetch_browsing: function() {
-  	console.log("fetching browsing with");
-  	console.log(params);
+  fetch_browsing: function() {    
     request
       .get('/viz/browsing')
       .set('Accept', 'application/json')
@@ -27,6 +25,69 @@ module.exports ={
      });
   },
 
+   fetch_browsing_range: function(range) {
+  	console.log("fetching browsing range!!!");
+    request
+      .get('/viz/browsing')
+      .set('Accept', 'application/json')
+      .query(extend(range,params))
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+    	  console.log("ok got some data");
+    	  console.log(res.body);
+    	  ServerActionCreators.receivedZoomedInData(res.body);
+        }
+     });
+  
+  },
+ 
+  fetch_activity: function() {
+    request
+      .get('/viz/activity')
+      .set('Accept', 'application/json')
+      .query(params)
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          ServerActionCreators.receivedActivityData(res.body);
+         }
+     });
+  },
+  
+  fetch_location: function() {
+    request
+      .get('/viz/location')
+      .set('Accept', 'application/json')
+      .query(params)
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          ServerActionCreators.receivedLocationData(res.body);
+         }
+     });
+  },
+  
+  /*fetch_update: function(timerange){
+  	request
+      .get('/viz/update')
+      .set('Accept', 'application/json')
+      .query(extend(timerange,params))
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          console.log("great - got some new update data!");
+          //update data is the new urls data and the newly binned browsing data!
+          ServerActionCreators.receivedUpdateData(res.body);
+         }
+     });
+  },*/
+  
+   /*
   fetch_browsing_range: function(range) {
   	console.log("fetching browsing range!!!");
     request
@@ -45,20 +106,6 @@ module.exports ={
   
   },
   
-  fetch_activity: function() {
-    request
-      .get('/viz/activity')
-      .set('Accept', 'application/json')
-      .query(params)
-      .end(function(err, res){
-        if (err){
-          console.log(err);
-        }else{
-          ServerActionCreators.receivedActivityData(res.body);
-         }
-     });
-  },
-  
   fetch_urls: function(timerange) {
 
     request
@@ -73,7 +120,7 @@ module.exports ={
           ServerActionCreators.receivedURLData(res.body);
          }
      });
-  },
+  },*/
 
   fetch_url_history: function(url) {
 
