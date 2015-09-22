@@ -1,6 +1,10 @@
 var ActionCreators = require('../actions/ActionCreators');
 var d3 = require('../lib/d3.min');
 
+/*
+ * This is the overview chart that is used to select areas to zoom in on!
+ */
+ 
 Zoom = function(){
 
 };
@@ -36,14 +40,23 @@ Zoom.prototype.initialise = function(data, node, opts){
   this.stack = d3.layout.stack()
                  .offset("zero")
                  .values(function(d) {return d.values;})
-                 .x(function(d){return self.x(d.date);})
+                 .x(function(d){return this.x(d.date);}.bind(this))
                  .y(function(d){return d.y;});
 
   this.area = d3.svg.area()
                 .interpolate("basis")
-                .x(function(d) {return self.x(d.date);})
-                .y0(function(d) {return self.y(d.y0);})
-                .y1(function(d) {return self.y(d.y0 + d.y);}),
+                .x(function(d) {
+                	//console.log("x: for " + d.date + ":" + this.x(d.date));
+                	return this.x(d.date);
+                }.bind(this))
+                .y0(function(d) {
+                	//console.log("y0 for " + d.y0 + ": " + this.y(d.y0));
+                	return this.y(d.y0);
+                }.bind(this))
+                .y1(function(d) {
+                	//console.log("y1 for " + (d.y0 + d.y) + ": " + this.y(d.y0 + d.y));
+                	return this.y(d.y0 + d.y);
+                }.bind(this)),
 
   this.svg = d3.select(node).append('svg')
               .attr('width', opts.width + opts.margin.left + opts.margin.right)
@@ -73,6 +86,10 @@ Zoom.prototype.initialise = function(data, node, opts){
   this.svg.append("g")
           .attr("class","historyoverlay");
 
+ this.svg.append("g")
+          .attr("class","locationoverlay");
+
+
   this.update(data);
 };
 
@@ -86,7 +103,7 @@ Zoom.prototype.update = function(data){
 
   var browsers = this.stack(data.browsing);
 
-  this.x.domain(d3.extent(data.keys, function(d){return d*1000;}));
+  this.x.domain(data.range);
 
   this.y.domain([0, d3.max(browsers, function(c){
       return d3.max(c.values, function(d) {return d.y0 +d.y;});
@@ -94,7 +111,7 @@ Zoom.prototype.update = function(data){
   //update the scales
   this.xAxis.scale(this.x);
   this.yAxis.scale(this.y);
-
+	
   var chart = this.svg.selectAll("g.zoom");
 
   var zoom = chart.selectAll("g.browser")
@@ -114,7 +131,9 @@ Zoom.prototype.update = function(data){
 
   //update
   zoom.selectAll("path.zoomarea")
-      .attr("d", function(d) {return self.area(d.values);});
+      .attr("d", function(d) {
+      return self.area(d.values);
+  });
 
   //update axes
 
@@ -127,10 +146,38 @@ Zoom.prototype.update = function(data){
   if (data.urlhistory){
     this.urlhistory(data.urlhistory);
   }
+ 
+  if (data.locations){
+    this.locations(data.locations);
+  }
   //exit!
   zoom.exit()
       .remove();
 };
+
+Zoom.prototype.locations = function(locations){
+ 	
+ 	var overlay = this.svg.select("g.locationoverlay");
+	var height = this.opts.height;
+	console.log("locations are");
+	console.log(locations);
+	
+	var zones = overlay.selectAll("rect")
+					   .data(locations);
+					   					   						    
+	zones.enter()
+		 .append("rect")
+		 .attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
+		 .attr("y", 0)
+		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
+		 .attr("height", height)		
+		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
+		 .style("fill-opacity", function(d){return 0.2})	
+		 .style("stroke", "none")
+	
+	zones.exit().remove();		
+};
+
 
 Zoom.prototype.urlhistory = function(data){
 

@@ -48,6 +48,12 @@ module.exports = {
       from: Math.floor(range[0]/1000),
       to: Math.floor(range[1]/1000),
     });*/
-  }
+  },
+  
+  togglelocations: function(){
+  	AppDispatcher.handleViewAction({
+      type: ActionTypes.TOGGLE_LOCATIONS,
+   	});
+  },
 
 };

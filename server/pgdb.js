@@ -94,8 +94,8 @@ module.exports = {
 			return results.map(function(result){
 				return {
 					name: result.name.trim() === "" ? result.lat+","+result.lng : result.name,
-					enter: result.enter,
-					exit: result.exit
+					enter: parseInt(result.enter),
+					exit:  parseInt(result.exit),
 				}
 			});
 		});

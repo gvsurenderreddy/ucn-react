@@ -57,7 +57,7 @@ module.exports ={
      });
   },
   
-  fetch_location: function() {
+  fetch_locations: function() {
     request
       .get('/viz/location')
       .set('Accept', 'application/json')

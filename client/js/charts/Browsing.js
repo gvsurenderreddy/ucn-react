@@ -13,7 +13,7 @@ Browsing.prototype.initialise = function(data, node, opts){
   var start = Date.now();
   var self = this;
   this.opts = opts;
-
+ 
   this.x  = d3.time.scale().range([0,opts.width]);
   this.y  = d3.scale.linear().range([opts.height,0]);
 
@@ -117,7 +117,7 @@ Browsing.prototype.update = function(data){
     var browsers = this.stack(data.browsing);
 
     this.x.domain(data.range);
-
+		
     this.y.domain([0, d3.max(browsers, function(c){
         return d3.max(c.values.filter(function(item){return item.date >= data.range[0] && item.date <= data.range[1];}), function(d) {return d.y0 +d.y;});
     })]);
@@ -170,14 +170,36 @@ Browsing.prototype.update = function(data){
 	if (data.urlhistory){
       this.urlhistory(data.urlhistory);
 	}
-	//if (data.locations){
-	//  this.locations(data.locations);
-	//}    
+	if (data.locations){
+	  console.log("RENDERING LOACTIONS!!");
+	  this.locations(data.locations);
+	}    
 };
 
-Browsing.prototype.locations = function(data){
+Browsing.prototype.locations = function(locations){
+ 	
  	var overlay = this.svg.select("g.locationoverlay");
-
+	var height = this.opts.height;
+	
+	var zones = overlay.selectAll("rect")
+					   .data(locations, function(d){return d.enter + ""+ d.exit});
+	//enter
+					   					   						    
+	zones.enter()
+		 .append("rect")	
+		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
+		 .style("fill-opacity", function(d){return 0.2})	
+		 .style("stroke", "none")
+	
+	//update
+	zones
+		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
+		 .attr("y", 0)
+		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
+		 .attr("height", height)	
+	
+	//exit
+	zones.exit().remove();		
 };
 
 Browsing.prototype.urlhistory = function(data){

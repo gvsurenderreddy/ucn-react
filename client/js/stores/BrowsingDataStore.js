@@ -11,18 +11,45 @@ var Constants = require('../constants/Constants');
 var Utils = require('../utils/Utils');
 var assign = require('object-assign');
 var d3 = require('../lib/d3.min');
+var WebAPIUtils = require('../utils/WebAPIUtils');
+var extend = require('extend');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
 var _data, _zoomdata, _urlhistory;
 
+var overlaylocations = false;
+
+var _toggle_locations = function(){
+	if (!overlaylocations){
+		WebAPIUtils.fetch_locations();
+	}else{
+		_data.locations = [];
+		_zoomdata.locations = [];
+		_data.range =  d3.extent(_data.keys, function(d){return d*1000});
+		_zoomdata.range =  d3.extent(_zoomdata.keys, function(d){return d*1000});
+	}
+	overlaylocations = !overlaylocations;
+};
+
 var _update_filtered_data = function(range){
-  _data.range = range;
+ 	_zoomdata.range = range;
 };
 
 var _update_location_data = function(data){
-  //_data.locations = data.locations;	
-  //_zoomdata.locations  = data.locations;
+  _data.locations = data.locations;	
+  _zoomdata.locations  = data.locations;
+  
+  _data.range = data.locations.reduce(function(acc, obj){
+  	if (acc[0] > obj.exit*1000){
+  		acc[0] = obj.exit*1000;
+  	}
+  	if (acc[1] < obj.enter*1000){
+  		acc[1] = obj.enter*1000;
+  	}
+  	
+  	return acc;
+  },_data.range);
 };
 
 var _update_raw_url_history_data = function(data){
@@ -32,11 +59,16 @@ var _update_raw_url_history_data = function(data){
 };
 
 var _update_zoom_data = function(data){
+	console.log("---- updating zoom data ----");
 	_zoomdata = _format_data(data);
+	//set the locations data to whatever it currently is...
+	_zoomdata.locations = _data.locations;
+	console.log(_zoomdata);
 };
 
 var _update_data = function(data){
   _data = _format_data(data);
+  _zoomdata = extend({}, _data);
 };
 
 _format_data = function(data){
@@ -140,10 +172,14 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
 	
 	case ActionTypes.RAW_LOCATION_DATA:
       _update_location_data(action.rawData);
-       console.log("Browsing: location data, emitting change");
       BrowsingDataStore.emitChange();
       break;
-      
+     
+    case ActionTypes.TOGGLE_LOCATIONS:
+      _toggle_locations();
+      BrowsingDataStore.emitChange();
+      break;
+    	 
     default:
       // no op
   }
