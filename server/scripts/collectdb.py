@@ -39,8 +39,7 @@ def reconnect(fn):
 class CollectDB( object ):
 	
 	''' classdocs '''
-	def __init__(self, name):
-		self.name = name
+	def __init__(self):
 		self.connected = False
 		self.dbname = 'hostview'
 		self.dbuser = 'hostview'
@@ -103,8 +102,8 @@ class CollectDB( object ):
 	
 	@reconnect
 	def update_filepos(self, ts, fpos, type):
-		sql = "SELECT name FROM logaccess WHERE name = %s"
-		data = (type)
+		sql = "SELECT * FROM logaccess WHERE type=%s"
+		data = (type,)
 		self.cur.execute(sql,data)
 		result = self.cur.fetchone()
 		
@@ -112,7 +111,7 @@ class CollectDB( object ):
 			sql = "UPDATE logaccess SET ts=%s, filepos=%s WHERE type=%s"
 			data = (ts, fpos, type)
 		else:
-			sql = "INSERT INTO logaccess(name, ts, filepos) VALUES (%s,%s,%s)"
+			sql = "INSERT INTO logaccess(type, ts, filepos) VALUES (%s,%s,%s)"
 			data = (type, ts, fpos)
 			
 		self.cur.execute(sql,data)
@@ -120,7 +119,7 @@ class CollectDB( object ):
 	
 	@reconnect
 	def fetch_filepos_for(self, type):
-		sql = "SELECT filepos FROM logaccess WHERE name=%s"
+		sql = "SELECT filepos FROM logaccess WHERE type=%s"
 		data = (type,)
 		self.cur.execute(sql,data)
 		fpos = self.cur.fetchone()

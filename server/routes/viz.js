@@ -154,19 +154,24 @@ router.get('/categories', function(req,res, next){
     });
 });
 
-//router.get('/viz/categories/match', function(req, res){
-//   var partial = req.query.partial;
-//   db.fetch_matching_categories(partial).then(function(categories){
-//      res.send(categories);
-//   });
-//}),
+router.get('/categories/match', function(req, res){
+	var partial = req.query.partial;
+	pgdb.fetch_matching_categories(partial).then(function(categories){
+      res.send(categories);
+   	});
+});
 
 //need to get hosts here...
-//router.get('/viz/urls/match', function(req,res){
-//   var partial = req.query.partial;
-//   db.fetch_matching_categories_for_url(partial, hosts).then(function(categories){
-//      res.send(categories);
-//   });
-//}),
+router.get('/urls/match', function(req,res){
+   var partial = req.query.partial;
+   var device = req.query.device;
+   pgdb.fetch_device_id_for_device(device).then(function(deviceid){
+  		return deviceid;
+  	}).then(function(deviceid){
+   		return pgdb.fetch_matching_categories_for_device(partial, deviceid)
+   	}).then(function(categories){
+      	res.send(categories);
+   	});
+});
 
 module.exports = router;

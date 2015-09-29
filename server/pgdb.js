@@ -46,7 +46,7 @@ module.exports = {
 	},
 	
 	fetch_binned_browsing_for_device: function(device, bin, from, to){
-		var sql = "SELECT (timestamp/1000/" + bin + ") * " + bin + " as bin, id as host,  COUNT(httphost) as total from http3 WHERE id = " + device + " AND (timestamp/1000 >= "+from+" AND timestamp/1000 <= "+to+") GROUP BY id, bin ORDER BY id, bin";
+		var sql = "SELECT (timestamp/1000/" + bin + ") * " + bin + " as bin, id as host,  COUNT(DISTINCT httphost) as total from http3 WHERE id = " + device + " AND (timestamp/1000 >= "+from+" AND timestamp/1000 <= "+to+") GROUP BY id, bin ORDER BY id, bin";
       
       	return _execute_sql(sql).then(function(results){
 			return results;
@@ -125,6 +125,21 @@ module.exports = {
 				return {classification:classification, tld:result.tld, size:parseInt(result.size)};
 			});
 		});
+	},
+	
+	fetch_matching_categories: function(partial){
+		var sql = "SELECT DISTINCT(classification) FROM CLASSIFICATION WHERE classification LIKE '/%" + partial + "%'";
+       	return _execute_sql(sql).then(function(results){
+       		return results;
+       	});
+	},
+	
+	fetch_matching_categories_for_device: function(partial, deviceid){
+		var sql = "SELECT DISTINCT(h.httphost) as tld, c.classification FROM http3 h LEFT JOIN CLASSIFICATION c ON c.tld = h.httphost WHERE h.httphost LIKE '%" + partial + "%' AND h.id=" + deviceid + " AND c.success = 1";
+       	console.log(sql);
+       	return _execute_sql(sql).then(function(results){
+       		return results;
+       	});
 	},
 	
 	insert_token_for_device: function(deviceid, api, token){

@@ -60,12 +60,6 @@ UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
       _update_raw_url_data(action.rawData); 
       UrlDataStore.emitChange();
       break;
-      
-  	/*case ActionTypes.RAW_URL_DATA:
-      _update_raw_url_data(action.rawUrls);
-      console.log("URL DATA STORE raw URL data emiting change...");
-      UrlDataStore.emitChange();
-      break;*/
     
     case ActionTypes.URL_CLICKED:
       _selected = action.url;

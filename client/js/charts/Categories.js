@@ -194,7 +194,7 @@ Categories.prototype.generate = function(data){
             this.toggle(d);
             this.selectnode(d); 
             this.generate(d);  
-            CategoryActionCreators.categoryselected({ts: d.ts, urls: d.urls, name: d.name, path:d.path});
+            CategoryActionCreators.nodeselected({ts: d.ts, urls: d.urls, name: d.name, path:d.path});
           }.bind(this));
 
   nodeEnter.append("svg:circle")

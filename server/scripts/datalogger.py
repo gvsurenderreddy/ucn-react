@@ -5,6 +5,7 @@ from os.path import isfile, isdir, join
 import psycopg2
 logger = logging.getLogger( "collect_logger" )
 
+
 def reconnect(fn):
 	""" decorator to reconnect to the database if needed """
 	def wrapped(self, *args, **kwargs):
@@ -18,8 +19,7 @@ class DataLogger( object ):
 	
 	''' classdocs '''
 
-	def __init__(self, name):
-		self.name = name
+	def __init__(self):
 		self.connected = False
 		self.dbname = 'hostview'
 		self.dbuser = 'hostview'
@@ -68,8 +68,7 @@ class DataLogger( object ):
 			
  	@reconnect
  	def bulk_insert_urls(self, content):
-		logger.debug("in bulk insert urls")
-
+		
 		for line in content:
 
 			items = line.split()
@@ -92,13 +91,12 @@ class DataLogger( object ):
 					else:
 						tld = parts[0]
 						
-					print "%s,%s" % (domain,tld)
+					
 					path = ""
 					if len(parts) > 0:
 						path = "".join(parts[1:])
 					
-					print items[2].split(".")[0]
-					print items[4]
+					
 					#url = {'ts':items[2].split(".")[0], 'host':items[4], 'tld':tld, 'domain':domain, 'path': path}
 					url = {'ts':items[2].replace(".",""), 
 							'host':items[4], 
@@ -111,7 +109,7 @@ class DataLogger( object ):
 							'dest':items[11].split("/")[1],
 							'contenttype':items[12],
 						}
-					print url
+					
 					try:
 						#print "inserting %s %s %s %s %s %s" % (url['ts'], url['host'],url['tld'], url['domain'], url['path'], 'squid')
 						sql = "SELECT deviceid from vpnips WHERE ip=%s"

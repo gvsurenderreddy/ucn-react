@@ -1,11 +1,12 @@
 var d3 = require('../lib/d3.min');
+var d3tip = require('../lib/d3.tip')(d3);
 var fn = require('../utils/fn');
 var ActionCreators = require('../actions/ActionCreators');
+var Colours = require('../utils/Colours');
 
 var ANIMATION_DURATION = 2000;
 
 Browsing = function(){
-
 };
 
 Browsing.prototype.initialise = function(data, node, opts){
@@ -36,15 +37,10 @@ Browsing.prototype.initialise = function(data, node, opts){
                       console.log("brush end");
                   });
 
-  var  colours = ["#7bb6a4","#e5cf58","#cd804a","#445662","#d35a51", "#3f3b3c"];
-
-  var colourcount = 0;
-
-  this.colourchart = {};
 
   this.colour = function(host){
-      this.colourchart[host] = this.colourchart[host] || colours[(colourcount++) % colours.length];
-      return this.colourchart[host];
+  	
+     return Colours.colourFor(host);
   };
 
   this.stack = d3.layout.stack()
@@ -73,6 +69,8 @@ Browsing.prototype.initialise = function(data, node, opts){
                 .attr("width", opts.width)
                 .attr("height", opts.height);
 
+  
+         
   this.svg.append("g")
           .attr("class", "chart");
 
@@ -96,13 +94,8 @@ Browsing.prototype.initialise = function(data, node, opts){
   this.svg.append("g")
          .attr("class","historyoverlay");
 
- this.svg.append("g")
+   this.svg.append("g")
          .attr("class","locationoverlay");
- 
-  //this.update(data);
-  //this._addListeners();
-  var end = Date.now();
-  console.log("inited in " + (end-start) + "ms");
 };
 
 Browsing.prototype.update = function(data){
@@ -138,7 +131,7 @@ Browsing.prototype.update = function(data){
            .append("path")
            .attr("class", "area")
            .style("fill", function(d){return self.colour(d.name);})
-           .style("fill-opacity", 0.6)
+           .style("fill-opacity", 0.8)
            .style("stroke", function(d){return self.colour(d.name);})
            .style("stroke-opacity", 1.0)
 
@@ -183,24 +176,40 @@ Browsing.prototype.locations = function(locations){
 	
 	var zones = overlay.selectAll("rect")
 					   .data(locations, function(d){return d.enter + ""+ d.exit});
-	//enter
-					   					   						    
+	//enter			   					   						    
 	zones.enter()
 		 .append("rect")	
 		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
-		 .style("fill-opacity", function(d){return 0.2})	
+		 .style("fill-opacity", function(d){return 0.5})	
 		 .style("stroke", "none")
+		 
+		 .on('mouseover', function(d){
+		 		console.log("ok am showing the location tip now!!!");
+		 		console.log(d);
+		 		this.locationtip.show(d)}.bind(this)
+		 )
+		 .on('mouseout', this.locationtip.hide);
 	
 	//update
 	zones
 		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
 		 .attr("y", 0)
 		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
-		 .attr("height", height)	
-	
+		 .attr("height", height)
+		 .call(this.locationtip)	
+						    
 	//exit
 	zones.exit().remove();		
 };
+
+Browsing.prototype.locationtip = d3tip().attr('class', 'd3-tip')
+										.offset([-10,0])
+										.html(function(d){
+											console.log(d);
+											console.log("setting d name " + d['name']);
+											return "<strong>" + d['name'] + "</strong>";
+										});
+
 
 Browsing.prototype.urlhistory = function(data){
 

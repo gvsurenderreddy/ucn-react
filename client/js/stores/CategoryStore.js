@@ -20,6 +20,8 @@ var _selectednode = null;
 var _urls = [];
 var _categorymatches = [];
 var _urlmatches = [];
+var _selectedurls = [];
+var _selectedcategory = "";
 
 var _updatecategorymatches = function(matches){
     _categorymatches = matches;
@@ -33,10 +35,25 @@ var _node_selected = function(node){
   _urls = node.urls || [];
 };
 
+var _category_selected = function(category){
+	if (_selectedcategory === category){
+		_selectedcategory = "";
+	}else{
+  		_selectedcategory = category;
+  	}
+};
+
+var _url_selected = function(url){
+	var idx = _selectedurls.indexOf(url);
+	if (idx == -1){
+		_selectedurls.push(url);
+	}else{
+		_selectedurls.splice(idx,1);
+	}
+};
+
 var _updatetree = function(data){
     var _tree = _buildtree(data);
-    console.log("toatl size is");
-    console.log(_totalsize);
     _data = {name:"browsing", size:_totalsize, children:_tree};
 };
 
@@ -46,30 +63,22 @@ var _buildtree = function(data){
     var _tree = {};
 
     data.forEach(function(node){
-    	console.log("looking at node ");
-    	console.log(node);
     	
-        //var size = node.ts.split(",").length;
-        //var ts = node.ts.split(",");
         var size = node.size;
-        var tld = node.tld;//.split(",");
+        var tld = node.tld;
 
         _totalsize += size;
 
-        //var parent = node;
+       
         var lastkey;
         //can either be a sub of
         node.classification.forEach(function(key){
 
-            //var parent = parentfor[key] //if this node already has a parent
-
-            //if node has been seen before
             var n = _nodefor[key];
 
             if (n) { //if this node has been seen before.
                 n.size += size;
                 n.urls.concat(tld);
-                //n.ts.concat(ts);
             }
             else if (lastkey){ //add as child to previous node if one exists
                 _createnewparent(lastkey, key, node.size,/*node.ts,*/ node.tld);
@@ -91,22 +100,14 @@ var _buildtree = function(data){
 };
 
 var _createnewparent = function(parentkey, key, size,/*ts,*/ tld){
-  //will have already added tlds,size to this node
-  //ts = ts.split(",");
-  //tld = tld.split(",");
-
   var parent = _nodefor[parentkey];
   parent.children = parent.children || {};
-  //parent.children[key] = {name:key, path:parent.path + "/" + key, size: ts.length, ts:ts, urls:tld};
   parent.children[key] = {name:key, path:parent.path + "/" + key, size: size, urls:tld};
   _parentfor[key] = parent;
   _nodefor[key] = parent.children[key];
 };
 
 var _createroot = function(_tree, key, size, /*ts,*/ tld){
-
-  //ts = ts.split(",");
-  //_tree[key] = {name:key, path:key, size: ts.length, ts:ts, urls:tld.split(",")};
   _tree[key] = {name:key, path:key, size: size, urls:tld};
   _nodefor[key] = _tree[key];
 };
@@ -121,7 +122,6 @@ var _convertchildrentoarrays = function(_tree){
             return{
               name:node.name,
               path: node.path,
-              //ts: node.ts,
               urls: node.urls,
               size: node.size,
           };
@@ -130,7 +130,6 @@ var _convertchildrentoarrays = function(_tree){
         return {
           name:node.name,
           path:node.path,
-          //ts: node.ts,
           urls: node.urls,
           size: node.size,
           children:  _convertchildrentoarrays(node.children)
@@ -145,11 +144,9 @@ var _getparentfor = function(key){
 };
 
 var _getextrafor = function(node){
-  //var details = extra[node.name]
-  var details = {/*ts: node.ts,*/ urls: node.urls, name: node.name};
+  
+  var details = {urls: node.urls, name: node.name};
   details.percentage = ((node.size/_totalsize)*100).toFixed(2);
-  //nodechanged(details);
-  //dispatcher.dispatch("node_changed", details);
 };
 
 var CategoryStore = assign({}, EventEmitter.prototype, {
@@ -168,6 +165,14 @@ var CategoryStore = assign({}, EventEmitter.prototype, {
 
   urlmatches: function(){
     return _urlmatches;
+  },
+  
+  selectedurls: function(){
+  	return _selectedurls;
+  },
+  
+  selectedcategory: function(){
+  	return _selectedcategory;
   },
 
   emitChange: function() {
@@ -215,6 +220,16 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
       CategoryStore.emitChange();
       break;
     
+    case ActionTypes.CATEGORY_SELECTED:
+      _category_selected(action.action.category);
+      CategoryStore.emitChange();
+      break;
+      
+    case ActionTypes.CATEGORY_URL_SELECTED:
+      _url_selected(action.action.url);
+      CategoryStore.emitChange();
+      break;
+      
     default:
       // no op
   }

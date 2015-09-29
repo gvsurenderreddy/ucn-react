@@ -1,20 +1,24 @@
 var React = require('react');
-var ActionCreators = require('../actions/ActionCreators');
+var CategoryActionCreators = require('../actions/CategoryActionCreators');
 var CategoryStore = require('../stores/CategoryStore');
 var WebAPIUtils = require('../utils/WebAPIUtils');
 var ENTER_KEY_CODE = 13;
+var cx = require('classnames');
+var extend = require('extend');
 
 function getStateFromStores() {
     return {
       urls: CategoryStore.urls(),
       matches: CategoryStore.categorymatches(),
+      selectedurls: CategoryStore.selectedurls(),
+      selectedcategory: CategoryStore.selectedcategory(),
     };
 }
 
 var Classifier = React.createClass({
 
   getInitialState: function() {
-    return getStateFromStores();
+    return extend({categorise:false}, getStateFromStores());
   },
 
   componentDidMount: function(){
@@ -32,27 +36,81 @@ var Classifier = React.createClass({
     };
 
     var matches = this.state.matches.map(function(match){
-      return <li><a style={simple} href='#'>{match}</a></li>;
-    });
+      var selected = this.state.selectedcategory === match;
+      return <li className={cx({active:selected})}><a style={simple} onTouchTap={this._toggleCategory.bind(null, match)}>{match}</a></li>;
+    }.bind(this));
+    
     //dedup urls
     var urls = Object.keys(this.state.urls.reduce(function(acc, url){
       acc[url] = url;
       return acc;
     },{})).map(function(url){
-      return <li> {url} </li>;
-    });
+      var selected = this.state.selectedurls.indexOf(url) != -1;
+      return <li className={cx({active:selected})} onTouchTap={this._selectURL.bind(null, url)}>{url}</li>;
+    }.bind(this));
 
-    return  <div>
-              <Typeahead />
-              <ul className="no-bullet">{matches}</ul>
-              <ul className="no-bullet">{urls}</ul>
-            </div>;
+	var categorisebtn;
+	if (this.state.selectedurls.length > 0){
+		
+		var className = cx({
+			button: true,
+			primary: this.state.categorise && this.state.selectedcategory == "",
+			alert: this.state.categorise && this.state.selectedcategory !== "",
+			small: true,
+		}); 
+		
+		var handler = this.state.selectedcategory != "" ? this._categorise : this._toggleCategorise;
+		
+		categorisebtn = <div onTouchTap={handler} className={className}>(re)categorise</div>
+	}
+	
+	var selectcategories;
+	
+	if (this.state.categorise && this.state.selectedurls.length > 0){
+		selectcategories =  <div>
+								<Typeahead />
+								<ul className="no-bullet">{matches}</ul>
+							</div>
+	}
+	//
+    return  (<div>
+    			<div className="row">
+				  <div className="large-12 columns">
+					  <ul className="no-bullet">{urls}</ul>
+					</div>
+				</div>
+				
+    			<div className="row">
+				  <div className="large-12 columns">
+				  	{selectcategories}
+				  </div>
+				</div>
+				
+				<div className="row">
+					<div className="large-12 columns">
+						{categorisebtn}
+					</div>
+				</div>
+			</div>);
   },
   
-  _fetchActivity: function(){
-  	console.log("fetching activity!");
+  _categorise: function(){
+  	CategoryActionCreators.categorise({urls:this.state.selectedurls,  category:this.state.selectedcategory});
   },
-
+  
+  _toggleCategory: function(category){
+  	CategoryActionCreators.categoryselected(category);
+  },
+  
+  _toggleCategorise: function(){
+  	console.log("great - seen a categorise click");
+  	this.setState({categorise: !this.state.categorise});
+  },
+  
+  _selectURL: function(url){
+  	CategoryActionCreators.urlselected(url);
+  },
+  
   _onChange: function() {
      this.setState(getStateFromStores());
   }

@@ -1,4 +1,5 @@
 from datalogger import DataLogger
+from collectdb import CollectDB
 from os import path
 import logging
 from datetime import datetime
@@ -14,14 +15,16 @@ def insert_urls(datafile):
 		print "hmmm %s is not path!" % datafile
 		logger.debug("no access.log, trying date suffix %s-%s" % (datafile, time.strftime("%Y%m%d")))
 		datafile =  "%s-%s" % (datafile, time.strftime("%Y%m%d"))
+		print "trying %s" % datafile
 		if path.isfile(datafile) is False:
 			return
 
 	
 	logger.debug("adding data from squid logs")
 	print "adding data from squid logs!"
-	#fpos = collectdb.fetch_filepos_for('squid')
-	fpos = 0
+	fpos = collectdb.fetch_filepos_for('squid')
+	print "fpos is %s" % fpos
+	print "data file size is %s" % path.getsize(datafile)
 	
 	if fpos > path.getsize(datafile):
 		logger.debug("resetting fpos to 0 (%d > %d)" % ((fpos+1), path.getsize(datafile)))
@@ -37,7 +40,7 @@ def insert_urls(datafile):
 			print "adding %d new entries " % len(content)
 			#logger.debug("%s" % content)
 			datalogger.bulk_insert_urls(content)
-			#collectdb.update_filepos(int(time.mktime(datetime.now().timetuple())), f.tell(),'squid')
+			collectdb.update_filepos(int(time.mktime(datetime.now().timetuple())), f.tell(),'squid')
 			logger.debug("written %d bytes of squid log to db" % (f.tell() - fpos))
 
 
@@ -49,5 +52,6 @@ if __name__ == "__main__":
     logger.addHandler(hdlr)
     logger.setLevel(logging.DEBUG)
     logger.debug("using dbase %s" % cfg.DATADB)
-    datalogger = DataLogger(name=cfg.DATADB)
+    datalogger = DataLogger()
+    collectdb  = CollectDB()
     insert_urls(cfg.SQUIDLOG)

@@ -14,6 +14,8 @@ module.exports = {
 		TOGGLE_LOCATIONS: null,
 		URL_CLICKED:null,
 		CATEGORY_NODE_SELECTED: null,
+		CATEGORY_SELECTED: null,
+		CATEGORY_URL_SELECTED: null,
   }),
 
   PayloadSources: keyMirror({

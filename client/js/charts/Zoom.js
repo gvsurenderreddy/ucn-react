@@ -1,6 +1,6 @@
 var ActionCreators = require('../actions/ActionCreators');
 var d3 = require('../lib/d3.min');
-
+var Colours = require('../utils/Colours');
 /*
  * This is the overview chart that is used to select areas to zoom in on!
  */
@@ -28,13 +28,8 @@ Zoom.prototype.initialise = function(data, node, opts){
                       console.log("brush end");
                   });
 
-  var  colours = ["#7bb6a4","#e5cf58","#cd804a","#445662","#d35a51", "#3f3b3c"];
-  var colourcount = 0;
-  this.colourchart = {};
-
   this.colour = function(host){
-      this.colourchart[host] = this.colourchart[host] || colours[(colourcount++) % colours.length];
-      return this.colourchart[host];
+     return Colours.colourFor(host);
   };
 
   this.stack = d3.layout.stack()

@@ -5,13 +5,30 @@ var ActionTypes = Constants.ActionTypes;
 module.exports = {
 
 
-  categoryselected: function(node){
-    console.log("ok category selected");
-    console.log(node);
+  nodeselected: function(node){
     AppDispatcher.handleViewAction({
       type: ActionTypes.CATEGORY_NODE_SELECTED,
       node: node,
     });
+  },
+  
+  urlselected: function(url){
+  	 AppDispatcher.handleViewAction({
+      type: ActionTypes.CATEGORY_URL_SELECTED,
+      url: url,
+    });
+  },
+  
+   categoryselected: function(category){
+    AppDispatcher.handleViewAction({
+      type: ActionTypes.CATEGORY_SELECTED,
+      category: category,
+    });
+  },
+  
+  categorise: function(obj){
+  	console.log("ok would categorise");
+  	console.log(obj);
   },
 
 };

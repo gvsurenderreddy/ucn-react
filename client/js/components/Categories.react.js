@@ -6,6 +6,7 @@ var Chart = require('./Chart.react');
 var Classifier = require('./Classifier.react');
 injectTapEventPlugin = require("react-tap-event-plugin");
 injectTapEventPlugin();
+
 var ENTER_KEY_CODE = 13;
 var chart;
 

@@ -109,7 +109,6 @@ if __name__ == "__main__":
 	logger.addHandler(hdlr)
 	logger.setLevel(logging.DEBUG)
 
-	collectdb = CollectDB(name=cfg.COLLECTDB)
-	datalogger = DataLogger(name=cfg.DATADB)
-	#datadb = NetDB(name=cfg.DATADB)
+	collectdb = CollectDB()
+	datalogger = DataLogger()
 	fetchlocations()

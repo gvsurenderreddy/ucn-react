@@ -25,15 +25,17 @@ var _toggle_locations = function(){
 		WebAPIUtils.fetch_locations();
 	}else{
 		_data.locations = [];
-		_zoomdata.locations = [];
 		_data.range =  d3.extent(_data.keys, function(d){return d*1000});
-		_zoomdata.range =  d3.extent(_zoomdata.keys, function(d){return d*1000});
+		//set zoomdata back to data
+		_zoomdata = extend({}, _data);
 	}
 	overlaylocations = !overlaylocations;
 };
 
 var _update_filtered_data = function(range){
  	_zoomdata.range = range;
+ 	console.log("set zoom data range to " );
+ 	console.log(_zoomdata.range);
 };
 
 var _update_location_data = function(data){
@@ -50,6 +52,10 @@ var _update_location_data = function(data){
   	
   	return acc;
   },_data.range);
+  
+  _zoomdata.range = _data.range;
+  console.log("SET MAIN/ZOOM DATA RANGE TO ");
+  console.log(_data.range);
 };
 
 var _update_raw_url_history_data = function(data){
