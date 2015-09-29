@@ -161,6 +161,19 @@ router.get('/categories/match', function(req, res){
    	});
 });
 
+router.post('/categories/categorise', function(req, res){
+	var urls = req.body.urls;
+	var category = req.body.category;
+	var device = req.body.device;
+	console.log("got data");
+	console.log(urls);
+	console.log(category);
+	console.log(device);
+	res.send({success:true});
+});
+
+
+
 //need to get hosts here...
 router.get('/urls/match', function(req,res){
    var partial = req.query.partial;

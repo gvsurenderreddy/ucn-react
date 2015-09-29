@@ -1,6 +1,7 @@
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var Constants = require('../constants/Constants');
 var ActionTypes = Constants.ActionTypes;
+var WebAPIUtils = require('../utils/WebAPIUtils');
 
 module.exports = {
 
@@ -29,6 +30,7 @@ module.exports = {
   categorise: function(obj){
   	console.log("ok would categorise");
   	console.log(obj);
+  	WebAPIUtils.categorise(obj);
   },
 
 };

@@ -127,6 +127,9 @@ module.exports = {
 		});
 	},
 	
+	/*
+	 * This needs to pull from a full categorisation dataset!
+	 */
 	fetch_matching_categories: function(partial){
 		var sql = "SELECT DISTINCT(classification) FROM CLASSIFICATION WHERE classification LIKE '/%" + partial + "%'";
        	return _execute_sql(sql).then(function(results){

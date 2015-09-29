@@ -179,6 +179,21 @@ module.exports ={
           ServerActionCreators.receivedURLMatches(res.body);
         }
      });
-
+  },
+  
+  categorise: function(obj){
+    request
+      .post('/viz/categories/categorise')
+      .send(extend(obj,params))
+      .set('Accept', 'application/json')
+      .type('json')
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          console.log(res.body);
+          //ServerActionCreators.receivedCategoryData(res.body);
+        }
+     });
   },
 };

@@ -36,7 +36,7 @@ var Classifier = React.createClass({
     };
 
     var matches = this.state.matches.map(function(match){
-      var selected = this.state.selectedcategory === match;
+      var selected = this.state.selectedcategory === match.classification;
       return <li className={cx({active:selected})}><a style={simple} onTouchTap={this._toggleCategory.bind(null, match)}>{match}</a></li>;
     }.bind(this));
     
@@ -99,7 +99,9 @@ var Classifier = React.createClass({
   },
   
   _toggleCategory: function(category){
-  	CategoryActionCreators.categoryselected(category);
+  	console.log("toggling");
+  	console.log(category.classification);
+  	CategoryActionCreators.categoryselected(category.classification);
   },
   
   _toggleCategorise: function(){
