@@ -7,10 +7,12 @@ var db = Promise.promisifyAll(pg);
 
 //var _client = new pg.Client(config.database.url);
 
-var _execute_sql = function(sql){
-	
+var _execute_sql = function(sql,params){
+	if (!params){
+		params = []
+	}
 	return db.connectAsync(config.database.url).spread(function(connection, release){
-		return connection.queryAsync(sql)
+		return connection.queryAsync(sql,params)
 			.then(function(result){
 				return result.rows;
 			}).finally(function(){
@@ -31,40 +33,42 @@ module.exports = {
 		});
 	},
 	
-	fetch_max_ts_for_device: function(device){
-		var sql = "SELECT max(h.timestamp/1000) as ts FROM http3 h WHERE id=" + device;
-		return _execute_sql(sql).then(function(results){
+	fetch_max_ts_for_device: function(deviceid){
+		var sql = "SELECT max(h.timestamp/1000) as ts FROM http3 h WHERE id=$1";
+		var params = [deviceid];
+		return _execute_sql(sql,params).then(function(results){
 			return results[0] || {};
 		});
 	},
 	
-	fetch_min_ts_for_device: function(device, smallest){
-		var sql = "SELECT min(h.timestamp/1000) as ts FROM http3 h WHERE id=" + device + " AND h.timestamp/1000 >= " + smallest;
-		return _execute_sql(sql).then(function(results){
+	fetch_min_ts_for_device: function(deviceid, smallest){
+		var sql = "SELECT min(h.timestamp/1000) as ts FROM http3 h WHERE id=$1 AND h.timestamp/1000 >= $2";
+		var params = [deviceid,smallest];
+		return _execute_sql(sql,params).then(function(results){
 			return results[0] || {};
 		});
 	},
 	
-	fetch_binned_browsing_for_device: function(device, bin, from, to){
-		var sql = "SELECT (timestamp/1000/" + bin + ") * " + bin + " as bin, id as host,  COUNT(DISTINCT httphost) as total from http3 WHERE id = " + device + " AND (timestamp/1000 >= "+from+" AND timestamp/1000 <= "+to+") GROUP BY id, bin ORDER BY id, bin";
-      
-      	return _execute_sql(sql).then(function(results){
+	fetch_binned_browsing_for_device: function(deviceid, bin, from, to){
+		var sql = "SELECT (timestamp/1000/$1) * $2 as bin, id as host,  COUNT(DISTINCT httphost) as total from http3 WHERE id = $3 AND (timestamp/1000 >= $4 AND timestamp/1000 <= $5) GROUP BY id, bin ORDER BY id, bin";
+      	var params = [bin,bin,deviceid,from,to]
+      	return _execute_sql(sql,params).then(function(results){
 			return results;
 		});
 	},
 	
-	fetch_urls_for_device: function(device, from, to){
-		var sql = "SELECT httphost as url, count(DISTINCT(timestamp/1000)) as total from http3 WHERE id=" + device + " AND (timestamp/1000 >= "+from+" AND timestamp/1000 <= "+to+") GROUP BY httphost ORDER BY total DESC ";
-     	
-     	return _execute_sql(sql).then(function(results){
+	fetch_urls_for_device: function(deviceid, from, to){
+		var sql = "SELECT httphost as url, count(DISTINCT(timestamp/1000)) as total from http3 WHERE id=$1 AND (timestamp/1000 >= $2 AND timestamp/1000 <= $3) GROUP BY httphost ORDER BY total DESC ";
+     	var params = [deviceid,from,to];
+     	return _execute_sql(sql,params).then(function(results){
 			return results;
 		});
 	},
 	
-	fetch_ts_for_url: function(device, url){
-	 	var sql = "SELECT timestamp/1000 as ts from http3 WHERE id=" + device + " AND httphost='" + url + "' ORDER BY timestamp ASC ";
-     	
-     	return _execute_sql(sql).then(function(results){
+	fetch_ts_for_url: function(deviceid, url){
+	 	var sql = "SELECT timestamp/1000 as ts from http3 WHERE id=$1 AND httphost=$2 ORDER BY timestamp ASC ";
+     	var params = [deviceid, url];
+     	return _execute_sql(sql,params).then(function(results){
      		
 			return results.map(function(result){
 				return result.ts;
@@ -72,25 +76,28 @@ module.exports = {
 		});
 	},
 	
-	fetch_activity_for_device: function(device, from, to){
+	fetch_activity_for_device: function(deviceid, from, to){
 		var bin = 5*60 // 5 minute bins
-		var sql = "SELECT name, fullscreen, (timestamp/1000/" + bin + ") * " + bin + " as ts FROM activity WHERE id=" + device + " AND (timestamp/1000 >= "+from+" AND timestamp/1000 <= "+to+") GROUP BY name,ts, fullscreen ORDER BY name, ts" 
+		var sql = "SELECT name, fullscreen, (timestamp/1000/$1) * $2 as ts FROM activity WHERE id=$3 AND (timestamp/1000 >= $4 AND timestamp/1000 <= $5) GROUP BY name,ts, fullscreen ORDER BY name, ts" 
+		var params = [bin, bin, deviceid, from, to]
 		console.log(sql)
-		return _execute_sql(sql).then(function(results){
+		return _execute_sql(sql,params).then(function(results){
 			return results;
 		});
 	},  
 	
 	fetch_locations_for_device: function(deviceid, from, to){
 		
-		var sql = "SELECT name, enter, exit, lat, lng FROM ZONES where deviceid=" + deviceid; 
+		var sql = "SELECT name, enter, exit, lat, lng FROM ZONES where deviceid=$1";
+		var params = [deviceid];
 		
 		if (from && to){
-			sql += " AND (enter >= " + from + " AND exit <= " + to + ")";
+			sql += " AND (enter >= $2 AND exit <= $3)";
+			params = [deviceid,from,to]
 		}
 		console.log(sql);
 		
-		return _execute_sql(sql).then(function(results){
+		return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
 				return {
 					name: result.name.trim() === "" ? result.lat+","+result.lng : result.name,
@@ -103,9 +110,10 @@ module.exports = {
 	
 	fetch_device_id_for_device: function(device){
 	
-		var sql = "SELECT id FROM devices WHERE devicename='" + device + "'";
-	
-		return _execute_sql(sql).then(function(results){
+		var sql = "SELECT id FROM devices WHERE devicename=$1";
+		var params = [device];
+		
+		return _execute_sql(sql,params).then(function(results){
 			return results.reduce(function(acc, obj){
 				return obj.id || null;
 			},null);
@@ -114,11 +122,10 @@ module.exports = {
 	
 	fetch_categories_for_device: function(deviceid){
 		
-      	//var sql="SELECT classification, array_agg(distinct httphost) AS urls, count(httphost) as total FROM CLASSIFICATION c, http3 h WHERE c.success = 1 AND c.tld=h.httphost AND h.id=" + deviceid + " GROUP BY classification"
+      	var sql="SELECT classification, array_agg(distinct httphost) AS tld, count(httphost) as size FROM CLASSIFICATION c, http3 h WHERE c.success = 1 AND c.tld=h.httphost AND h.id=$1  AND h.id=c.deviceid GROUP BY classification";
+      	var params = [deviceid];
       	
-      	var sql="SELECT classification, array_agg(distinct httphost) AS tld, count(httphost) as size FROM CLASSIFICATION c, http3 h WHERE c.success = 1 AND c.tld=h.httphost AND h.id=" + deviceid + " GROUP BY classification"
-      	
-      	return _execute_sql(sql).then(function(results){
+      	return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
 				var classification = result.classification.split("/");
             	classification.shift();
@@ -131,36 +138,76 @@ module.exports = {
 	 * This needs to pull from a full categorisation dataset!
 	 */
 	fetch_matching_categories: function(partial){
-		var sql = "SELECT DISTINCT(classification) FROM CLASSIFICATION WHERE classification LIKE '/%" + partial + "%'";
-       	return _execute_sql(sql).then(function(results){
+		var sql = "SELECT DISTINCT(classification) FROM CLASSIFICATION WHERE classification LIKE $1";
+		var params = ['%'+partial+'%'];
+       	return _execute_sql(sql,params).then(function(results){
        		return results;
        	});
 	},
 	
 	fetch_matching_categories_for_device: function(partial, deviceid){
-		var sql = "SELECT DISTINCT(h.httphost) as tld, c.classification FROM http3 h LEFT JOIN CLASSIFICATION c ON c.tld = h.httphost WHERE h.httphost LIKE '%" + partial + "%' AND h.id=" + deviceid + " AND c.success = 1";
-       	console.log(sql);
-       	return _execute_sql(sql).then(function(results){
+		var sql = "SELECT DISTINCT(h.httphost) as tld, c.classification FROM http3 h LEFT JOIN CLASSIFICATION c ON c.tld = h.httphost WHERE h.httphost LIKE $1 AND h.id=$2 AND c.success = 1";
+       	var params = ['%'+partial+'%',deviceid];
+    
+       	return _execute_sql(sql,params).then(function(results){
        		return results;
        	});
 	},
 	
 	insert_token_for_device: function(deviceid, api, token){
-		var values = [deviceid,api,token,Date.now()].join("','");
 		
-		var sql = "SELECT * FROM tokens WHERE deviceid = '" + deviceid + "' AND api = '" + api + "'";
+		var sql = "SELECT * FROM tokens WHERE deviceid =$1 AND api =$2";
+		var params = [deviceid, api];
 		
-		return _execute_sql(sql).then(function(result){
+		return _execute_sql(sql,params).then(function(result){
 			if (result.length > 0){
-			   sql = "UPDATE tokens SET token = '" + token + "', lastupdate='" + Date.now() + "' WHERE deviceid ='" + deviceid  + "' AND api = '" + api + "'"; 
+			   sql = "UPDATE tokens SET token = $1, lastupdate=$2 WHERE deviceid =$3 AND api =$4"; 
+			   params = [token,Date.now(),deviceid,api]	
 			}else{
-			   sql = "INSERT INTO tokens (deviceid, api, token,lastupdate) VALUES ('"+ values +"')";
+			   sql = "INSERT INTO tokens (deviceid, api, token,lastupdate) VALUES ($1,$2,$3,$4)";
+			   params = [deviceid,api,token, Date.now()];
 			}
-			return _execute_sql(sql);
+			return _execute_sql(sql,params);
 		}).then(function(result){
 			console.log("got result");
 			console.log(result);
 			return true;
+		});
+		
+	},
+	
+	insert_classification_for_device: function(deviceid, classifier, urls, classification){
+		
+		var results = urls.map(function(url){
+		  	sql = "INSERT INTO CLASSIFICATION (deviceid, tld, success, classifier, score, classification) VALUES ($1,$2,$3,$4,$5,$6)"
+			params = [deviceid,url, 1, classifier, 1.0, classification]
+			return _execute_sql(sql,params);
+		});
+
+		Promise.all(results).then(function(results){
+		 	return results;	
+		}, function(err){
+		   console.log(err);
+		   throw(err);
+		});
+		
+	},
+	
+	update_classification_for_device: function(deviceid, classifier, urls, classification){
+		console.log("updating classification for device " + deviceid);
+		
+		var results = urls.map(function(url){
+		  	sql = "UPDATE CLASSIFICATION SET classification=$1, classifier=$2, score=$3 WHERE deviceid=$4 AND tld=$5"
+			console.log(sql);
+			params = [classification, classifier, 1, deviceid,url]
+			return _execute_sql(sql,params);
+		});
+
+		Promise.all(results).then(function(results){
+		 	return results;	
+		}, function(err){
+		   console.log(err);
+		   throw(err);
 		});
 		
 	},

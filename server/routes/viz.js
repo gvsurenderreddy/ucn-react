@@ -165,11 +165,19 @@ router.post('/categories/categorise', function(req, res){
 	var urls = req.body.urls;
 	var category = req.body.category;
 	var device = req.body.device;
-	console.log("got data");
-	console.log(urls);
-	console.log(category);
-	console.log(device);
-	res.send({success:true});
+	
+	pgdb.fetch_device_id_for_device(device).then(function(deviceid){
+  		return deviceid;
+   	}).then(function(deviceid){
+   		return [deviceid, pgdb.update_classification_for_device(deviceid, 'user', urls, category)]
+   	}).spread(function(deviceid, results){
+   		return pgdb.fetch_categories_for_device(deviceid)
+    }).then(function(categories){
+        res.send(categories);
+    }, function(err){
+   		res.send({success:false, error:err});
+   		return;
+   	});
 });
 
 
@@ -180,7 +188,7 @@ router.get('/urls/match', function(req,res){
    var device = req.query.device;
    pgdb.fetch_device_id_for_device(device).then(function(deviceid){
   		return deviceid;
-  	}).then(function(deviceid){
+   }).then(function(deviceid){
    		return pgdb.fetch_matching_categories_for_device(partial, deviceid)
    	}).then(function(categories){
       	res.send(categories);

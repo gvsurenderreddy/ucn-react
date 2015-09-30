@@ -45,7 +45,7 @@ class Classifier( object ):
 		print "in create tables!!"
 		#try:
 			#self.cur.execute('''CREATE TABLE CLASSIFICATION (
-			#						id serial PRIMARY KEY,
+			#						deviceid integer,
 			#						tld varchar(255) NOT NULL,
 			#						classifier varchar(128),
 			#						version varchar(128),
@@ -57,28 +57,29 @@ class Classifier( object ):
 			#self.conn.commit()
 		#except Exception,e:
 		#	print e
-					
+				
+			
 	@reconnect
 	def fetch_distinct_tlds(self, filters):
 		whereclause = "WHERE httphost NOT IN (%s) AND httphost NOT LIKE '%%openvpn%%'" % ",".join("'{0}'".format(w) for w in filters)
-		sql = "SELECT DISTINCT(httphost) FROM http3 %s" % whereclause 
+		sql = "SELECT id, httphost FROM http3 %s GROUP BY id, httphost" % whereclause 
 		
 		try:
 			self.cur.execute(sql)
-			return [row[0] for row in self.cur.fetchall()]
+			return [{'id':row[0], 'tld':row[1]} for row in self.cur.fetchall()]
 		except Exception, e:
 			print e
 			return []
 	
 
 	@reconnect
-	def fetch_classified_tlds(self, classifier):
-		sql = "SELECT DISTINCT(tld) FROM CLASSIFICATION WHERE classifier='%s' " % classifier
+	def fetch_classified_tlds(self):
+		sql = "SELECT deviceid,tld FROM CLASSIFICATION"
 		self.cur.execute(sql)
 		classified = {}
 
 		for row in self.cur.fetchall():
-			classified[row[0]] = True
+			classified["%s:%s" % (row[0],row[1])] = True
 
 		return classified
 
@@ -206,7 +207,7 @@ class Classifier( object ):
 						
 	def classify_urls_with_alchemy(self, tlds, apikey):
 
-		alreadyclassified = self.fetch_classified_tlds("alchemy")
+		alreadyclassified = self.fetch_classified_tlds()
 		limitexceeded = False
 
 		for tld in tlds:
@@ -214,10 +215,10 @@ class Classifier( object ):
 			if limitexceeded:
 				return
 
-			if tld not in alreadyclassified:
+			if "%s:%s"%(tld['id'],tld['tld']) not in alreadyclassified:
 
 				payload = {
-							'url':tld,
+							'url':tld['tld'],
 							'outputMode': 'json',
 							'apikey':apikey,
 						  }
@@ -225,7 +226,7 @@ class Classifier( object ):
 				r =  requests.get(url, params=payload)
 				try:
 					result = r.json()
-					print "url %s status %s" % (tld,result['status'])
+					print "url %s status %s" % (tld['tld'],result['status'])
 
 					if result['status'] == "OK":
 						maxscore = 0
@@ -239,9 +240,9 @@ class Classifier( object ):
 								label = classification["label"]
 
 						if label is not None:
-							self.classify(tld=tld, success=True, classifier="alchemy", classification=label, error=None, score=maxscore)
+							self.classify(deviceid=tld['id'], tld=tld['tld'], success=True, classifier="alchemy", classification=label, error=None, score=maxscore)
 						else:
-							self.classify(tld=tld, success=False, classifier="alchemy", classification=None, error="no classification")
+							self.classify(deviceid=tld['id'], tld=tld['tld'], success=False, classifier="alchemy", classification=None, error="no classification")
 
 					elif result['status'] == "ERROR":
 
@@ -249,16 +250,16 @@ class Classifier( object ):
 							print "limit exceeded"
 							limitexceeded = True
 						else:
-							self.classify(tld=tld, success=False, classifier="alchemy", classification=None, error=result['statusInfo'])
+							self.classify(deviceid=tld['id'], tld=tld['tld'], success=False, classifier="alchemy", classification=None, error=result['statusInfo'])
 
 					#print result
 				except:
 					print "oh well - error!"
 	
 	@reconnect
-	def updateclassification(self, tld, success, classifier, classification, score):
+	def updateclassification(self, deviceid, tld, success, classifier, classification, score):
 		try:
-			sql = 'UPDATE CLASSIFICATION SET success=%d,score=%f,classification="%s" WHERE tld="%s" AND classifier="%s" ' % (1, float(score),classification,tld, classifier)
+			sql = 'UPDATE CLASSIFICATION SET success=%d,score=%f,classification="%s" WHERE tld="%s" AND classifier="%s" AND deviceid="%s" ' % (1, float(score),classification,tld, classifier,deviceid)
 			print sql
 			self.cur.execute(sql)
 			self.conn.commit()
@@ -267,12 +268,12 @@ class Classifier( object ):
 			print e
 				
 	@reconnect
-	def classify(self, tld, success, classifier, classification, error=None, score=None):
-
+	def classify(self, deviceid, tld, success, classifier, classification, error=None, score=None):
+		tld = tld[:254]
 		if success is True:
 			try:
-				sql = "INSERT INTO CLASSIFICATION (tld,success,classifier,score,classification) VALUES (%s,%s,%s,%s,%s)"
-				data = (tld, 1, classifier, float(score), classification)
+				sql = "INSERT INTO CLASSIFICATION (deviceid, tld,success,classifier,score,classification) VALUES (%s,%s,%s,%s,%s,%s)"
+				data = (deviceid, tld, 1, classifier, float(score), classification)
 				self.cur.execute(sql,data)
 				self.conn.commit()
 			except Exception, e:
@@ -281,8 +282,8 @@ class Classifier( object ):
 
 		else:
 			try:
-				sql = "INSERT INTO CLASSIFICATION(tld,success,classifier,error) VALUES (%s,%s,%s,%s)"
-				data = (tld, 0, classifier, error)
+				sql = "INSERT INTO CLASSIFICATION(deviceid, tld,success,classifier,error) VALUES (%s,%s,%s,%s,%s)"
+				data = (deviceid, tld, 0, classifier, error)
 				self.cur.execute(sql,data)
 				self.conn.commit()
 			except Exception, e:

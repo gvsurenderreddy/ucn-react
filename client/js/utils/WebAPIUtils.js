@@ -191,8 +191,8 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-          console.log(res.body);
-          //ServerActionCreators.receivedCategoryData(res.body);
+          //console.log(res.body);
+          ServerActionCreators.receivedCategoryData(res.body);
         }
      });
   },
