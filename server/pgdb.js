@@ -80,7 +80,7 @@ module.exports = {
 		var bin = 5*60 // 5 minute bins
 		var sql = "SELECT name, fullscreen, (timestamp/1000/$1) * $2 as ts FROM activity WHERE id=$3 AND (timestamp/1000 >= $4 AND timestamp/1000 <= $5) GROUP BY name,ts, fullscreen ORDER BY name, ts" 
 		var params = [bin, bin, deviceid, from, to]
-		console.log(sql)
+		
 		return _execute_sql(sql,params).then(function(results){
 			return results;
 		});
@@ -95,7 +95,7 @@ module.exports = {
 			sql += " AND (enter >= $2 AND exit <= $3)";
 			params = [deviceid,from,to]
 		}
-		console.log(sql);
+		
 		
 		return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
@@ -169,8 +169,6 @@ module.exports = {
 			}
 			return _execute_sql(sql,params);
 		}).then(function(result){
-			console.log("got result");
-			console.log(result);
 			return true;
 		});
 		
@@ -194,16 +192,14 @@ module.exports = {
 	},
 	
 	update_classification_for_device: function(deviceid, classifier, urls, classification){
-		console.log("updating classification for device " + deviceid);
 		
 		var results = urls.map(function(url){
 		  	sql = "UPDATE CLASSIFICATION SET classification=$1, classifier=$2, score=$3 WHERE deviceid=$4 AND tld=$5"
-			console.log(sql);
 			params = [classification, classifier, 1, deviceid,url]
 			return _execute_sql(sql,params);
 		});
 
-		Promise.all(results).then(function(results){
+		return Promise.all(results).then(function(results){
 		 	return results;	
 		}, function(err){
 		   console.log(err);

@@ -23,6 +23,15 @@ var _urlmatches = [];
 var _selectedurls = [];
 var _selectedcategory = "";
 
+var _resetglobal = function(){
+	_parentfor = {};
+	_nodefor = {};
+	_categorymatches = [];
+	_urlmatches = [];
+ 	_selectedurls = [];
+ 	_selectedcategory = "";
+};
+
 var _updatecategorymatches = function(matches){
     _categorymatches = matches;
 };
@@ -32,7 +41,9 @@ var _updateurlmatches = function(matches){
 };
 
 var _node_selected = function(node){
-  _urls = node.urls || [];
+	console.log("node selected ");
+	console.log(node);
+	_urls = node.urls || [];
 };
 
 var _category_selected = function(category){
@@ -53,6 +64,7 @@ var _url_selected = function(url){
 };
 
 var _updatetree = function(data){
+	_resetglobal();
     var _tree = _buildtree(data);
     _data = {name:"browsing", size:_totalsize, children:_tree};
 };
@@ -200,6 +212,7 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
   switch(action.action.type) {
 
   	case ActionTypes.RAW_CATEGORY_DATA:
+  	  console.log("seen raw category data, so rebuilding tree...");
       _updatetree(action.action.rawData);
       CategoryStore.emitChange();
       break;

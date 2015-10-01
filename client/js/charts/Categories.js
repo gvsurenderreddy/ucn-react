@@ -92,7 +92,7 @@ Categories.prototype.initialise = function(data, node, opts){
   var self = this;
   this.root = data.categories;
   
- this.classifications = Object.keys(data.expanded.map(function(item){
+  this.classifications = Object.keys(data.expanded.map(function(item){
       return item.classification;
   }).reduce(function(acc, key){
       acc[key] = key;
@@ -135,8 +135,11 @@ Categories.prototype.nodeselected = function(node){
 
 Categories.prototype.update = function(data){
 
+  console.log("TREE-----> in update!!");
   
-  if (data.expanded && data.expanded.length > 0){
+  /*if (data.expanded && data.expanded.length > 0){
+    
+    console.log("-------->>>>>>>>rebuilding!!");
     
     this.classifications = Object.keys(data.expanded.map(function(item){
       return item.classification;
@@ -168,9 +171,12 @@ Categories.prototype.update = function(data){
     this.root._children = null;
 
     this.generate(this.root);
-  }
+  }else{
+  	console.log("hmmm - rebuild didn't happen!");
+  }*/
 };
 
+//need to check enter/exit, or could lookup urls when node is clicked rather than have them attached to node.
 
 Categories.prototype.generate = function(data){
   
@@ -183,8 +189,14 @@ Categories.prototype.generate = function(data){
   nodes.forEach(function(d) { d.y = d.depth * 180; });
 
   // Update the nodes…
+  //need to d3 to know this node is new if the number of associated urls changes?
+  //perhaps better to llokup urls in Category store...when category actuon creators fires.
   var node = this.svg.selectAll("g.node")
-      .data(nodes, function(d) { return d.id || (d.id = ++i); });
+      .data(nodes, function(d) {  
+      		var suffix = d.urls ? d.urls.length : "";
+      		d.id = d.id || ++i;
+      		return d.id + "_" + suffix;
+       });
 
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("svg:g")
