@@ -139,6 +139,18 @@ router.get('/urls/history', function(req,res, next){
     });
 });
 
+router.get('/urls/unclassified', function(req,res, next){
+    var device = req.query.device;
+    
+    pgdb.fetch_device_id_for_device(device).then(function(deviceid){
+  		return deviceid;
+  	}).then(function(deviceid){
+  		return pgdb.fetch_unclassified_for_device(deviceid);
+  	}).then(function(urls){
+        res.send(urls);
+    });
+});
+
 router.get('/categories', function(req,res, next){
 	
 	var device = req.query.device;

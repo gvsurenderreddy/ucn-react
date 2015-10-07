@@ -122,6 +122,20 @@ module.exports ={
      });
   },*/
 
+  fetch_unclassified: function(){
+  	 request
+      .get('/viz/urls/unclassified')
+      .set('Accept', 'application/json')
+      .query(params)
+      .end(function(err, res){
+        if (err){
+          console.log(err);
+        }else{
+          ServerActionCreators.receivedUnclassified(res.body);
+        }
+     });
+  },
+  
   fetch_url_history: function(url) {
 
     request
@@ -137,11 +151,14 @@ module.exports ={
      });
   },
 
-  fetch_category_data: function(){
+  fetch_category_data: function(classifier){
+  	
+  	var query = classifier ? extend({classifier:classifier},params): params;
+  	
     request
       .get('/viz/categories')
       .set('Accept', 'application/json')
-      .query(params)
+      .query(query)
       .end(function(err, res){
         if (err){
           console.log("hmm errror");

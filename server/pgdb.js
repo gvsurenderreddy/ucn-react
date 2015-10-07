@@ -65,6 +65,16 @@ module.exports = {
 		});
 	},
 	
+    fetch_unclassified_for_device: function(deviceid){
+    	var sql="SELECT h.httphost as url, count(h.httphost) as count FROM http3 h LEFT JOIN CLASSIFICATION c ON (c.deviceid = h.id AND h.httphost = c.tld) WHERE id=$1 AND c.success = 0 or c.success IS NULL GROUP BY h.httphost ORDER BY count DESC";
+      	var params = [deviceid];
+      	return _execute_sql(sql,params).then(function(results){
+			return results.map(function(result){
+				return result.url;
+			});
+		});
+    },
+	
 	fetch_ts_for_url: function(deviceid, url){
 	 	var sql = "SELECT timestamp/1000 as ts from http3 WHERE id=$1 AND httphost=$2 ORDER BY timestamp ASC ";
      	var params = [deviceid, url];

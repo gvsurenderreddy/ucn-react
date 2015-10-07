@@ -32,6 +32,18 @@ var Categories = React.createClass({
     CategoryStore.removeChangeListener(this._onChange);
   },
 
+  /*shouldComponentUpdate: function(nextprops, nextstate){
+  console.log("checking if component should update...");
+  console.log(nextstate.categories);
+  console.log(nextstate);
+  	if ('x0' in nextstate.categories){
+  		console.log("nope!");
+  		return false;
+  	} 
+  	console.log("yes");
+  	return true;	
+  },*/
+  
   render: function(){
     var options =    {
                         height: 500,
@@ -53,27 +65,41 @@ var Categories = React.createClass({
     
     return  <div>
               <div className="row fullWidth">
-                  <div className="large-12 columns">
+                  <div className="small-8 columns">
                       <LocateURL />
                   </div>
-              </div>
-               <div className="row fullWidth">
-                  <div className="large-4 columns">
-                      <h4> Most visited unclassified </h4>
+                  <div className="small-4 columns">
+                  	 <ul className="button-group">
+                  	 	<li><a onTouchTap={this._fetchUnclassified} className="button tiny">unclassified</a></li>
+                  	 	<li><a onTouchTap={this._fetchUserclassified} className="button tiny">user classified</a></li>
+                  	 	<li><a onTouchTap={this._fetchClassified} className="button tiny">full classification</a></li>
+                  	 </ul>
                   </div>
               </div>
               <div className="row fullWidth">
-                <div className="small-9 columns" style={{overflowY:'auto'}}>
+                <div className="small-8 columns" style={{overflowY:'auto'}}>
                   {chart}
                 </div>
-                 <div className="small-3 columns" style={{overflowY:'auto'}}>
+                 <div className="small-4 columns" style={{overflowY:'auto'}}>
                   <Classifier />
                 </div>
              </div>
            </div>;
 
   },
+  
+  _fetchUnclassified: function(){
+  		WebAPIUtils.fetch_unclassified();
+  },
 
+  _fetchUserclassified: function(){
+  		WebAPIUtils.fetch_category_data("user");
+  },
+  
+  _fetchClassified: function(){
+  		WebAPIUtils.fetch_category_data();
+  },
+  
   _onChange: function() {
      var state = getStateFromStores();
      this.setState(state);
@@ -90,7 +116,7 @@ var LocateURL = React.createClass({
   render: function(){
     return (<div>
               <div className="row">
-                <div className="large-4 columns">
+                <div className="small-6 columns">
                     <div className="row collapse">
                       <div className="small-9 columns">
                           <input type="text"  value={this.state.text} onChange={this._onChange} onKeyDown={this._onKeyDown} placeholder="find url" />

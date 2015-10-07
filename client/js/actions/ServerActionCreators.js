@@ -52,6 +52,13 @@ module.exports = {
       rawData: data,
     });
   },
+  
+  receivedUnclassified: function(data){
+  	AppDispatcher.handleServerAction({
+      type: ActionTypes.RAW_UNCLASSIFIED,
+      rawData: data,
+    });
+  },
 
   receivedCategoryData: function(data){
     console.log("dispatching received CATEGORY DATA");

@@ -11,6 +11,7 @@ module.exports = {
 		RAW_URL_MATCHES: null,
 		RAW_ACTIVITY_DATA:null,
 		RAW_LOCATION_DATA:null,
+		RAW_UNCLASSIFIED: null,
 		TOGGLE_LOCATIONS: null,
 		URL_CLICKED:null,
 		CATEGORY_NODE_SELECTED: null,

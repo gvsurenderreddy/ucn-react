@@ -40,6 +40,10 @@ var _updateurlmatches = function(matches){
     _urlmatches = matches;
 };
 
+var _set_urls = function(urls){
+	_urls = urls || [];
+};
+
 var _node_selected = function(node){
 	console.log("node selected ");
 	console.log(node);
@@ -233,6 +237,11 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
       CategoryStore.emitChange();
       break;
     
+    case ActionTypes.RAW_UNCLASSIFIED:
+      _set_urls(action.action.rawData);
+      CategoryStore.emitChange();
+      break;
+      
     case ActionTypes.CATEGORY_SELECTED:
       _category_selected(action.action.category);
       CategoryStore.emitChange();

@@ -133,47 +133,56 @@ Categories.prototype.nodeselected = function(node){
   return this._selected.name ? this._selected.name == node.name : false;
 };
 
+
 Categories.prototype.update = function(data){
 
-  console.log("TREE-----> in update!!");
+	if (!('x0' in data.categories)){
+	  this.root = data.categories;
+	  this._selected = {},
+	  this._found = [],
   
-  /*if (data.expanded && data.expanded.length > 0){
+ 
+	  this.classifications = Object.keys(data.expanded.map(function(item){
+		  return item.classification;
+	  }).reduce(function(acc, key){
+		  acc[key] = key;
+		  return acc;
+	  },{}));
+  
+	  this.root.x0 = this.opts.height / 2;
+	  this.root.y0 = 0;
+	  this.reset();
+	  this.generate(this.root);
+	}
+	else if (data.expanded && data.expanded.length > 0){
     
-    console.log("-------->>>>>>>>rebuilding!!");
-    
-    this.classifications = Object.keys(data.expanded.map(function(item){
-      return item.classification;
-    }).reduce(function(acc, key){
-      acc[key] = key;
-      return acc;
-    },{}));
-    
-    
-    this.collapseAll();
-    
-    var find = function(tree){
-      if (tree._children){
-        tree._children.forEach(function(child){
-          if (this.classifications.indexOf("/"+child.path) !== -1){
-            this.expandpath(child.path.split("/"), this.root._children);
-          }
-          if (child._children){
-            find(child);
-          }
-        }.bind(this));
-      }
-    }.bind(this);
+		this.classifications = Object.keys(data.expanded.map(function(item){
+		  return item.classification;
+		}).reduce(function(acc, key){
+		  acc[key] = key;
+		  return acc;
+		},{}));
+	
+		this.collapseAll();
 
-
-    find(this.root);
-
-    this.root.children = this.root._children;
-    this.root._children = null;
-
-    this.generate(this.root);
-  }else{
-  	console.log("hmmm - rebuild didn't happen!");
-  }*/
+		var find = function(tree){
+		  if (tree._children){
+			tree._children.forEach(function(child){
+			  if (this.classifications.indexOf("/"+child.path) !== -1){
+				this.expandpath(child.path.split("/"), this.root._children);
+			  }
+			  if (child._children){
+				find(child);
+			  }
+			}.bind(this));
+		  }
+		}.bind(this);
+	
+		find(this.root);
+		this.root.children = this.root._children;
+		this.root._children = null;
+		this.generate(this.root);
+	}
 };
 
 //need to check enter/exit, or could lookup urls when node is clicked rather than have them attached to node.
