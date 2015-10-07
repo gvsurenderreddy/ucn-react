@@ -134,6 +134,9 @@ module.exports = {
 		
       	var sql="SELECT classification, array_agg(distinct httphost) AS tld, count(httphost) as size FROM CLASSIFICATION c, http3 h WHERE c.success = 1 AND c.tld=h.httphost AND h.id=$1  AND h.id=c.deviceid GROUP BY classification";
       	var params = [deviceid];
+      	console.log("getting classifications");
+      	console.log(sql);
+      	console.log(params);
       	
       	return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
@@ -187,8 +190,8 @@ module.exports = {
 	insert_classification_for_device: function(deviceid, classifier, urls, classification){
 		
 		var results = urls.map(function(url){
-		  	sql = "INSERT INTO CLASSIFICATION (deviceid, tld, success, classifier, score, classification) VALUES ($1,$2,$3,$4,$5,$6)"
-			params = [deviceid,url, 1, classifier, 1.0, classification]
+		  	var sql = "INSERT INTO CLASSIFICATION (deviceid, tld, success, classifier, score, classification) VALUES ($1,$2,$3,$4,$5,$6)"
+			var params = [deviceid,url, 1, classifier, 1.0, classification]
 			return _execute_sql(sql,params);
 		});
 
@@ -202,11 +205,29 @@ module.exports = {
 	},
 	
 	update_classification_for_device: function(deviceid, classifier, urls, classification){
-		
+			  	
+		//ok - need to check if exists first and if not, create!
 		var results = urls.map(function(url){
-		  	sql = "UPDATE CLASSIFICATION SET classification=$1, classifier=$2, score=$3 WHERE deviceid=$4 AND tld=$5"
-			params = [classification, classifier, 1, deviceid,url]
-			return _execute_sql(sql,params);
+			var sql = "SELECT * FROM classification WHERE deviceid =$1 AND tld =$2";
+		  	var params = [deviceid, url];
+		  	return _execute_sql(sql, params).then(function(result){
+		  		console.log("goyt result");
+		  		console.log(result);
+		  		if (result.length > 0){
+		  			console.log("OK UPDATNG CLASSIFIACTION!");
+		  			sql = "UPDATE CLASSIFICATION SET classification=$1, classifier=$2, success=1, score=$3, error='' WHERE deviceid=$4 AND tld=$5"
+					params = [classification, classifier, 1, deviceid,url]
+					console.log(sql);
+					console.log(params);
+				}else{
+					console.log("OK INSERTING NEW CLASSIFIACTION!");
+					sql = "INSERT INTO CLASSIFICATION (deviceid, tld, success, classifier, score, classification) VALUES ($1,$2,$3,$4,$5,$6)"
+					params = [deviceid,url, 1, classifier, 1.0, classification]
+					console.log(sql);
+					console.log(params);
+				}
+				return _execute_sql(sql,params);
+			});
 		});
 
 		return Promise.all(results).then(function(results){
