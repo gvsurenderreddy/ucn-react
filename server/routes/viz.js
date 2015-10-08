@@ -154,11 +154,12 @@ router.get('/urls/unclassified', function(req,res, next){
 router.get('/categories', function(req,res, next){
 	
 	var device = req.query.device;
+	var classifier = req.query.classifier || null;
 	
 	pgdb.fetch_device_id_for_device(device).then(function(deviceid){
   		return deviceid;
   	}).then(function(deviceid){
-    	return pgdb.fetch_categories_for_device(deviceid)
+    	return pgdb.fetch_categories_for_device(deviceid, classifier)
     }).then(function(categories){
         res.send(categories);
     });

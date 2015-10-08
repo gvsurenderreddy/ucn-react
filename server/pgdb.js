@@ -24,6 +24,15 @@ var _execute_sql = function(sql,params){
 	});
 }
 
+var _print_query = function(sql, params){
+	var query = params.reduce(function(acc, param, index){
+		return acc.replace("$"+(index+1), "'"+param+"'");
+	},sql);
+	console.log("******");
+	console.log(query);
+	console.log("*******");
+};
+
 module.exports = {
 
 	fetch_hosts: function(){
@@ -66,8 +75,9 @@ module.exports = {
 	},
 	
     fetch_unclassified_for_device: function(deviceid){
-    	var sql="SELECT h.httphost as url, count(h.httphost) as count FROM http3 h LEFT JOIN CLASSIFICATION c ON (c.deviceid = h.id AND h.httphost = c.tld) WHERE id=$1 AND c.success = 0 or c.success IS NULL GROUP BY h.httphost ORDER BY count DESC";
+    	var sql="SELECT h.httphost as url, count(h.httphost) as count FROM http3 h LEFT JOIN CLASSIFICATION c ON (c.deviceid = h.id AND h.httphost = c.tld) WHERE id=$1 AND (c.success = 0 OR c.success IS NULL) GROUP BY h.httphost ORDER BY count DESC";
       	var params = [deviceid];
+      	_print_query(sql,params);
       	return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
 				return result.url;
@@ -130,13 +140,19 @@ module.exports = {
 		});
 	},
 	
-	fetch_categories_for_device: function(deviceid){
+	fetch_categories_for_device: function(deviceid, classifier){
 		
-      	var sql="SELECT classification, array_agg(distinct httphost) AS tld, count(httphost) as size FROM CLASSIFICATION c, http3 h WHERE c.success = 1 AND c.tld=h.httphost AND h.id=$1  AND h.id=c.deviceid GROUP BY classification";
-      	var params = [deviceid];
-      	console.log("getting classifications");
-      	console.log(sql);
-      	console.log(params);
+		var sql,params;
+		
+		if (!classifier){
+      		sql="SELECT c.classification, array_agg(distinct c.tld) AS tld, count(h.httphost) AS size FROM CLASSIFICATION c, http3 h WHERE  h.httphost=c.tld  AND  c.deviceid = $1 AND c.success=1 GROUP BY c.classification";
+      		params = [deviceid];
+      	}else{
+      		sql="SELECT c.classification, array_agg(distinct c.tld) AS tld, count(h.httphost) AS size FROM CLASSIFICATION c, http3 h WHERE  h.httphost=c.tld  AND  c.classifier=$1 AND c.deviceid = $2 AND c.success=1 GROUP BY c.classification";
+      		params = [classifier,deviceid];
+      	}
+      	
+      	_print_query(sql,params);
       	
       	return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
@@ -151,7 +167,7 @@ module.exports = {
 	 * This needs to pull from a full categorisation dataset!
 	 */
 	fetch_matching_categories: function(partial){
-		var sql = "SELECT DISTINCT(classification) FROM CLASSIFICATION WHERE classification LIKE $1";
+		var sql = "SELECT DISTINCT(classification) FROM CLASSIFICATION WHERE classification LIKE $1 ORDER BY classification ASC";
 		var params = ['%'+partial+'%'];
        	return _execute_sql(sql,params).then(function(results){
        		return results;
@@ -210,22 +226,18 @@ module.exports = {
 		var results = urls.map(function(url){
 			var sql = "SELECT * FROM classification WHERE deviceid =$1 AND tld =$2";
 		  	var params = [deviceid, url];
+		  	_print_query(sql,params);
+		  	
 		  	return _execute_sql(sql, params).then(function(result){
-		  		console.log("goyt result");
 		  		console.log(result);
 		  		if (result.length > 0){
-		  			console.log("OK UPDATNG CLASSIFIACTION!");
 		  			sql = "UPDATE CLASSIFICATION SET classification=$1, classifier=$2, success=1, score=$3, error='' WHERE deviceid=$4 AND tld=$5"
 					params = [classification, classifier, 1, deviceid,url]
-					console.log(sql);
-					console.log(params);
 				}else{
-					console.log("OK INSERTING NEW CLASSIFIACTION!");
 					sql = "INSERT INTO CLASSIFICATION (deviceid, tld, success, classifier, score, classification) VALUES ($1,$2,$3,$4,$5,$6)"
 					params = [deviceid,url, 1, classifier, 1.0, classification]
-					console.log(sql);
-					console.log(params);
 				}
+				_print_query(sql,params);
 				return _execute_sql(sql,params);
 			});
 		});

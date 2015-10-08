@@ -154,11 +154,9 @@ Zoom.prototype.locations = function(locations){
  	
  	var overlay = this.svg.select("g.locationoverlay");
 	var height = this.opts.height;
-	console.log("locations are");
-	console.log(locations);
 	
 	var zones = overlay.selectAll("rect")
-					   .data(locations);
+					   .data(locations, function(d){return d.enter + ""+ d.exit});
 					   					   						    
 	zones.enter()
 		 .append("rect")

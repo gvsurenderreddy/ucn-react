@@ -20,7 +20,7 @@ module.exports = {
     });
   },
   
-   categoryselected: function(category){
+  categoryselected: function(category){
     AppDispatcher.handleViewAction({
       type: ActionTypes.CATEGORY_SELECTED,
       category: category,
@@ -28,9 +28,10 @@ module.exports = {
   },
   
   categorise: function(obj){
-  	console.log("ok would categorise");
-  	console.log(obj);
-  	WebAPIUtils.categorise(obj);
+  	 AppDispatcher.handleViewAction({
+      type: ActionTypes.CATEGORISE,
+      data: obj,
+    });
   },
 
 };

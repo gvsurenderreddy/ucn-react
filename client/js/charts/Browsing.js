@@ -172,6 +172,8 @@ Browsing.prototype.update = function(data){
 Browsing.prototype.locations = function(locations){
  	
  	var overlay = this.svg.select("g.locationoverlay");
+ 	overlay.call(this.locationtip)
+	
 	var height = this.opts.height;
 	
 	var zones = overlay.selectAll("rect")
@@ -196,17 +198,15 @@ Browsing.prototype.locations = function(locations){
 		 .attr("y", 0)
 		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
 		 .attr("height", height)
-		 .call(this.locationtip)	
+			
 						    
 	//exit
-	zones.exit().remove();		
+	zones.exit().remove();	
 };
 
 Browsing.prototype.locationtip = d3tip().attr('class', 'd3-tip')
 										.offset([-10,0])
 										.html(function(d){
-											console.log(d);
-											console.log("setting d name " + d['name']);
 											return "<strong>" + d['name'] + "</strong>";
 										});
 

@@ -9,6 +9,7 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var Constants = require('../constants/Constants');
 var assign = require('object-assign');
+var WebAPIUtils = require('../utils/WebAPIUtils');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
@@ -42,6 +43,15 @@ var _updateurlmatches = function(matches){
 
 var _set_urls = function(urls){
 	_urls = urls || [];
+};
+
+var _remove_urls = function(urls){
+	urls.forEach(function(url){
+		var index = _urls.indexOf(url);
+		if (index != -1){
+			_urls.splice(index,1);
+		}
+	});
 };
 
 var _node_selected = function(node){
@@ -251,7 +261,14 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
       _url_selected(action.action.url);
       CategoryStore.emitChange();
       break;
-      
+    
+    case ActionTypes.CATEGORISE:
+      console.log(action.action.data);
+      _remove_urls(action.action.data.urls);
+      CategoryStore.emitChange();
+      WebAPIUtils.categorise(action.action.data);
+      break;	
+    
     default:
       // no op
   }

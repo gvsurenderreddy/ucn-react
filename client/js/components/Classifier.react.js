@@ -65,17 +65,23 @@ var Classifier = React.createClass({
 	}
 	
 	var selectcategories;
+	var maxheight = {
+		maxHeight: 250,
+		overflowY: 'auto',
+		overflowX: 'hidden',
+		marginBottom: 20,
+	}
 	
 	if (this.state.categorise && this.state.selectedurls.length > 0){
 		selectcategories =  <div>
 								<Typeahead />
-								<ul className="no-bullet">{matches}</ul>
+								<ul className="no-bullet" style={maxheight}>{matches}</ul>
 							</div>
 	}
-	//
+	
     return  (<div>
     			<div className="row">
-				  <div className="large-12 columns">
+				  <div className="large-12 columns" style={maxheight}>
 					  <ul className="no-bullet">{urls}</ul>
 					</div>
 				</div>

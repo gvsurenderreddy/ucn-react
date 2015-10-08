@@ -31,18 +31,6 @@ var Categories = React.createClass({
   componentWillUnmount: function(){
     CategoryStore.removeChangeListener(this._onChange);
   },
-
-  /*shouldComponentUpdate: function(nextprops, nextstate){
-  console.log("checking if component should update...");
-  console.log(nextstate.categories);
-  console.log(nextstate);
-  	if ('x0' in nextstate.categories){
-  		console.log("nope!");
-  		return false;
-  	} 
-  	console.log("yes");
-  	return true;	
-  },*/
   
   render: function(){
     var options =    {
@@ -93,10 +81,12 @@ var Categories = React.createClass({
   },
 
   _fetchUserclassified: function(){
+  		console.log("fetching user classified data");
   		WebAPIUtils.fetch_category_data("user");
   },
   
   _fetchClassified: function(){
+  		console.log("fetching user classified data");
   		WebAPIUtils.fetch_category_data();
   },
   
