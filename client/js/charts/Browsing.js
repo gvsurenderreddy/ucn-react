@@ -184,7 +184,6 @@ Browsing.prototype.locations = function(locations){
 		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
 		 .style("fill-opacity", function(d){return 0.5})	
 		 .style("stroke", "none")
-		 
 		 .on('mouseover', function(d){
 		 		console.log("ok am showing the location tip now!!!");
 		 		console.log(d);
