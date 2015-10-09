@@ -212,10 +212,12 @@ Categories.prototype.generate = function(data){
       .attr("class", "node")
       .attr("transform", function(d) { return "translate(" + data.y0 + "," + data.x0 + ")"; })
       .on("click", function(d) { 
-            this.toggle(d);
-            this.selectnode(d); 
-            this.generate(d);  
-            CategoryActionCreators.nodeselected({ts: d.ts, urls: d.urls, name: d.name, path:d.path});
+      		if (this.root.name !== d.name){
+            	this.toggle(d);
+            	this.selectnode(d); 
+            	this.generate(d);  
+            	CategoryActionCreators.nodeselected({ts: d.ts, urls: d.urls, name: d.name, path:d.path});
+            }
           }.bind(this));
 
   nodeEnter.append("svg:circle")

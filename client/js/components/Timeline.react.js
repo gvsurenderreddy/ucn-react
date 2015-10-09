@@ -4,6 +4,7 @@ var Chart = require('./Chart.react');
 var Urls = require('./Urls.react');
 var BrowsingDataStore = require('../stores/BrowsingDataStore');
 var WebAPIUtils = require('../utils/WebAPIUtils');
+var moment = require('moment');
 
 function getStateFromStores() {
     return {
@@ -28,6 +29,19 @@ var Timeline = React.createClass({
   },
 
   render: function(){
+  
+  	var rangestr = ""
+  	
+  	var rangestyle = {
+  		paddingLeft: 40,
+  	}
+  	
+  	if ('range' in this.state.zoomdata){
+  		var from = moment(this.state.zoomdata.range[0]).format("MMMM Do YYYY, h:mm:ss");
+  		var to   = moment(this.state.zoomdata.range[1]).format("MMMM Do YYYY, h:mm:ss");
+  	 	rangestr = from + " to " + to;
+  	}
+  	
    var browsingoptions = {
                     height: 300,
                     width: 800,
@@ -52,6 +66,7 @@ var Timeline = React.createClass({
               </div>
               <div className="row fullWidth">
                 <div className="small-9 columns" style={{overflowY:'auto'}}>
+                  <h5 style={rangestyle}> {rangestr} </h5>
                   <Chart type="Browsing" data={this.state.zoomdata} options={browsingoptions}/>
                 </div>
                 <div className="small-3 columns">
@@ -59,10 +74,13 @@ var Timeline = React.createClass({
                 </div>
               </div>
               <div className="row fullWidth">
-              	<ul className="inline-list">
-              		<li><a href="#" onClick={this._fetchActivity}>overlay activity</a></li>
-              		<li><a href="#" onClick={this._toggleLocation}>overlay locations</a></li>
-              	</ul> 
+              	<div className="small-9 columns">
+					<dl className="sub-nav">
+						<dt>Overlays:</dt>
+						<dd><a href="#" onClick={this._fetchActivity}>overlay activity</a></dd>
+						<dd><a href="#" onClick={this._toggleLocation}>overlay locations</a></dd>
+					</dl> 
+				</div>
               </div>
           </div>
   },

@@ -25,20 +25,31 @@ Browsing.prototype.initialise = function(data, node, opts){
                   .x(this.x)
                   .on("brushend", function(){
                       var xrange = this.brush.empty() ? this.x.domain() : this.brush.extent();
-                      ActionCreators.rangechange(xrange);
-                      this.brush.extent([0,0]);
-                      this.svg.select(".brush")
+                      
+                      //check the range is sane - can't gop back more than 2 years, and range
+                      //must be greater than a minute.
+                      
+                      var from = xrange[0].getTime();
+                      var to = xrange[1].getTime();
+                      var earliest = Date.now() - (2 * 365 * 24 * 60 * 60 * 1000);
+          
+                      if ( (from > earliest && to <= Date.now()) && (to-from) > 60000){
+                      	ActionCreators.rangechange(xrange);
+                      	this.brush.extent([0,0]);
+                      	this.svg.select(".brush")
                               .select("rect.extent")
                               .attr("width",0);
-
-
+                      
+                      }else{
+                      	this.svg.selectAll(".brush").call(this.brush.clear());
+                      }
                   }.bind(this))
                   .on("brush", function(){
                       console.log("brush end");
                   });
 
 
-  this.colour = function(host){
+  	  this.colour = function(host){
   	
      return Colours.colourFor(host);
   };
