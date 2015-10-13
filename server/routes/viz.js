@@ -17,8 +17,13 @@ router.use(function(req, res, next) {
 
 router.get('/', function(req,res,next){
 	var user = req.user;
+	console.log("seen user");
+	console.log(req.user);
 	
 	return Device.findDevicesForUser(user.username).then(function(results){
+		console.log("got devices") 
+		console.log(device);
+		
 		var devices = results.map(function(device){
 			return device.devname;
 		});
@@ -43,9 +48,10 @@ router.get('/browsing', function(req,res, next){
   if (from && to){
   	console.log(req.query.from + "->" + req.query.to);
   }
- 
+  console.log("getting browsing data for " + device);
+
   pgdb.fetch_device_id_for_device(device).then(function(deviceid){
-  	
+  	console.log("deviceid is " + deviceid);
   	return deviceid;
   })
   .then(function(deviceid){

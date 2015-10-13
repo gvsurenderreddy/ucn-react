@@ -3,6 +3,8 @@ var extend = require('extend');
 
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
+var REDIRECT = "/ucn/auth/login";
+
 var params = location.search.substring(1).split('&').reduce(function(acc, pair){
     var nv = pair.split("=");
     acc[nv[0]]=nv[1];
@@ -20,7 +22,9 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-    		ServerActionCreators.receivedBrowsingData(res.body);
+    	   console.log(res.body);
+    	   ServerActionCreators.receivedBrowsingData(res.body);
+    	   
         }
      });
   },
@@ -35,9 +39,11 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-    	  console.log("ok got some data");
-    	  console.log(res.body);
-    	  ServerActionCreators.receivedZoomedInData(res.body);
+			if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+    	  		ServerActionCreators.receivedZoomedInData(res.body);
+    	  	}
         }
      });
   
@@ -52,7 +58,11 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-          ServerActionCreators.receivedActivityData(res.body);
+        	if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+          		ServerActionCreators.receivedActivityData(res.body);
+          	}
          }
      });
   },
@@ -66,7 +76,11 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-          ServerActionCreators.receivedLocationData(res.body);
+        	if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+          		ServerActionCreators.receivedLocationData(res.body);
+         	}
          }
      });
   },
@@ -131,7 +145,11 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-          ServerActionCreators.receivedUnclassified(res.body);
+        	if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+         	 	ServerActionCreators.receivedUnclassified(res.body);
+         	 }
         }
      });
   },
@@ -146,8 +164,12 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-          ServerActionCreators.receivedURLHistoryData(res.body);
-         }
+        	if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+          		ServerActionCreators.receivedURLHistoryData(res.body);
+          	}
+        }
      });
   },
 
@@ -164,9 +186,13 @@ module.exports ={
           console.log("hmm errror");
           console.log(err);
         }else{
-          console.log("ok - firing receieved category data");
-          ServerActionCreators.receivedCategoryData(res.body);
-         }
+          	console.log("ok - firing receieved category data");
+          	if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+          		ServerActionCreators.receivedCategoryData(res.body);
+          	}
+        }
      });
   },
 
@@ -179,7 +205,11 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-          ServerActionCreators.receivedCategoryMatches(res.body);
+        	if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+         	 	ServerActionCreators.receivedCategoryMatches(res.body);
+         	}
         }
      });
   },
@@ -193,7 +223,11 @@ module.exports ={
         if (err){
           console.log(err);
         }else{
-          ServerActionCreators.receivedURLMatches(res.body);
+        	if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+          		ServerActionCreators.receivedURLMatches(res.body);
+          	}
         }
      });
   },
@@ -209,7 +243,11 @@ module.exports ={
           console.log(err);
         }else{
           console.log(res.body);
-          ServerActionCreators.receivedCategoryData(res.body);
+          if (res.body == null){
+				window.location.replace(REDIRECT);
+		  }else{
+          	ServerActionCreators.receivedCategoryData(res.body);
+          }
         }
      });
   },

@@ -36,14 +36,14 @@ var _print_query = function(sql, params){
 module.exports = {
 
 	fetch_hosts: function(){
-		var sql = "SELECT * FROM http3 LIMIT 10";
+		var sql = "SELECT * FROM browsing LIMIT 10";
 		return _execute_sql(sql).then(function(results){
 			return results;
 		});
 	},
 	
 	fetch_max_ts_for_device: function(deviceid){
-		var sql = "SELECT max(h.timestamp/1000) as ts FROM http3 h WHERE id=$1";
+		var sql = "SELECT max(h.timestamp/1000) as ts FROM browsing h WHERE id=$1";
 		var params = [deviceid];
 		return _execute_sql(sql,params).then(function(results){
 			return results[0] || {};
@@ -51,7 +51,7 @@ module.exports = {
 	},
 	
 	fetch_min_ts_for_device: function(deviceid, smallest){
-		var sql = "SELECT min(h.timestamp/1000) as ts FROM http3 h WHERE id=$1 AND h.timestamp/1000 >= $2";
+		var sql = "SELECT min(h.timestamp/1000) as ts FROM browsing h WHERE id=$1 AND h.timestamp/1000 >= $2";
 		var params = [deviceid,smallest];
 		return _execute_sql(sql,params).then(function(results){
 			return results[0] || {};
@@ -59,7 +59,7 @@ module.exports = {
 	},
 	
 	fetch_binned_browsing_for_device: function(deviceid, bin, from, to){
-		var sql = "SELECT (timestamp/1000/$1) * $2 as bin, id as host,  COUNT(DISTINCT httphost) as total from http3 WHERE id = $3 AND (timestamp/1000 >= $4 AND timestamp/1000 <= $5) GROUP BY id, bin ORDER BY id, bin";
+		var sql = "SELECT (timestamp/1000/$1) * $2 as bin, id as host,  COUNT(DISTINCT httphost) as total from browsing WHERE id = $3 AND (timestamp/1000 >= $4 AND timestamp/1000 <= $5) GROUP BY id, bin ORDER BY id, bin";
       	var params = [bin,bin,deviceid,from,to]
       	return _execute_sql(sql,params).then(function(results){
 			return results;
@@ -67,7 +67,7 @@ module.exports = {
 	},
 	
 	fetch_urls_for_device: function(deviceid, from, to){
-		var sql = "SELECT httphost as url, count(DISTINCT(timestamp/1000)) as total from http3 WHERE id=$1 AND (timestamp/1000 >= $2 AND timestamp/1000 <= $3) GROUP BY httphost ORDER BY total DESC ";
+		var sql = "SELECT httphost as url, count(DISTINCT(timestamp/1000)) as total from browsing WHERE id=$1 AND (timestamp/1000 >= $2 AND timestamp/1000 <= $3) GROUP BY httphost ORDER BY total DESC ";
      	var params = [deviceid,from,to];
      	return _execute_sql(sql,params).then(function(results){
 			return results;
@@ -75,7 +75,7 @@ module.exports = {
 	},
 	
     fetch_unclassified_for_device: function(deviceid){
-    	var sql="SELECT h.httphost as url, count(h.httphost) as count FROM http3 h LEFT JOIN CLASSIFICATION c ON (c.deviceid = h.id AND h.httphost = c.tld) WHERE id=$1 AND (c.success = 0 OR c.success IS NULL) GROUP BY h.httphost ORDER BY count DESC";
+    	var sql="SELECT h.httphost as url, count(h.httphost) as count FROM browsing h LEFT JOIN CLASSIFICATION c ON (c.deviceid = h.id AND h.httphost = c.tld) WHERE id=$1 AND (c.success = 0 OR c.success IS NULL) GROUP BY h.httphost ORDER BY count DESC";
       	var params = [deviceid];
       	_print_query(sql,params);
       	return _execute_sql(sql,params).then(function(results){
@@ -86,7 +86,7 @@ module.exports = {
     },
 	
 	fetch_ts_for_url: function(deviceid, url){
-	 	var sql = "SELECT timestamp/1000 as ts from http3 WHERE id=$1 AND httphost=$2 ORDER BY timestamp ASC ";
+	 	var sql = "SELECT timestamp/1000 as ts from browsing WHERE id=$1 AND httphost=$2 ORDER BY timestamp ASC ";
      	var params = [deviceid, url];
      	return _execute_sql(sql,params).then(function(results){
      		
@@ -145,10 +145,10 @@ module.exports = {
 		var sql,params;
 		
 		if (!classifier){
-      		sql="SELECT c.classification, array_agg(distinct c.tld) AS tld, count(h.httphost) AS size FROM CLASSIFICATION c, http3 h WHERE  h.httphost=c.tld  AND  c.deviceid = $1 AND c.success=1 GROUP BY c.classification";
+      		sql="SELECT c.classification, array_agg(distinct c.tld) AS tld, count(h.httphost) AS size FROM CLASSIFICATION c, browsing h WHERE  h.httphost=c.tld  AND  c.deviceid = $1 AND c.success=1 GROUP BY c.classification";
       		params = [deviceid];
       	}else{
-      		sql="SELECT c.classification, array_agg(distinct c.tld) AS tld, count(h.httphost) AS size FROM CLASSIFICATION c, http3 h WHERE  h.httphost=c.tld  AND  c.classifier=$1 AND c.deviceid = $2 AND c.success=1 GROUP BY c.classification";
+      		sql="SELECT c.classification, array_agg(distinct c.tld) AS tld, count(h.httphost) AS size FROM CLASSIFICATION c, browsing h WHERE  h.httphost=c.tld  AND  c.classifier=$1 AND c.deviceid = $2 AND c.success=1 GROUP BY c.classification";
       		params = [classifier,deviceid];
       	}
       	
@@ -175,7 +175,7 @@ module.exports = {
 	},
 	
 	fetch_matching_categories_for_device: function(partial, deviceid){
-		var sql = "SELECT DISTINCT(h.httphost) as tld, c.classification FROM http3 h LEFT JOIN CLASSIFICATION c ON c.tld = h.httphost WHERE h.httphost LIKE $1 AND h.id=$2 AND c.success = 1";
+		var sql = "SELECT DISTINCT(h.httphost) as tld, c.classification FROM browsing h LEFT JOIN CLASSIFICATION c ON c.tld = h.httphost WHERE h.httphost LIKE $1 AND h.id=$2 AND c.success = 1";
        	var params = ['%'+partial+'%',deviceid];
     
        	return _execute_sql(sql,params).then(function(results){

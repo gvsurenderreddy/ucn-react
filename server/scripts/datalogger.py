@@ -65,6 +65,40 @@ class DataLogger( object ):
 			self.conn.commit()
 		except Exception, e:
 			logger.error("error inserting zones %s" % str(zones))
+	
+	@reconnect
+	def deviceid_for_host(self, host):
+		try:
+			sql = "SELECT deviceid from vpnips WHERE ip=%s"
+			data = (host,)
+			self.cur.execute(sql,data)
+			deviceid =  self.cur.fetchone()
+			if deviceid is not None:
+				return deviceid[0]
+			return None
+			
+		except Exception, e:
+			return None
+	
+	@reconnect
+	def bulk_insert_dns(self, deviceid, content):
+		
+		for line in content:
+			sql = "INSERT INTO dns (id, host, timestamp) VALUES (%s,%s,%s)"
+			data = (deviceid, line['domain'], line['ts'])			
+			
+			try:
+				self.cur.execute(sql,data)
+			except Exception, e:
+				print e
+				logger.error("error inserting url %s" % str(url))
+
+		#commit now..
+		try:
+			self.conn.commit()				
+		except Exception, e:
+			print e
+			logger.error("error bulk committing dns")				
 			
  	@reconnect
  	def bulk_insert_urls(self, content):

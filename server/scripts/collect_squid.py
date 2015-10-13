@@ -6,6 +6,7 @@ from datetime import datetime
 import time
 from config import TestingConfig
 
+
 logger = logging.getLogger( "collect_logger" )
 
 def insert_urls(datafile):
