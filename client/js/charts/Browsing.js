@@ -34,20 +34,17 @@ Browsing.prototype.initialise = function(data, node, opts){
                       var earliest = Date.now() - (2 * 365 * 24 * 60 * 60 * 1000);
           
                       if ( (from > earliest && to <= Date.now()) && (to-from) > 60000){
-                      	ActionCreators.rangechange(xrange);
+                      	ActionCreators.rangechange([from,to]);
                       	this.brush.extent([0,0]);
                       	this.svg.select(".brush")
                               .select("rect.extent")
                               .attr("width",0);
                       
                       }else{
+                      	console.log("CALLING CELEAR BRUSH!!");
                       	this.svg.selectAll(".brush").call(this.brush.clear());
                       }
                   }.bind(this))
-                  .on("brush", function(){
-                      console.log("brush end");
-                  });
-
 
   	  this.colour = function(host){
   	
@@ -79,8 +76,6 @@ Browsing.prototype.initialise = function(data, node, opts){
                 .append("rect")
                 .attr("width", opts.width)
                 .attr("height", opts.height);
-
-  
          
   this.svg.append("g")
           .attr("class", "chart");
@@ -110,17 +105,23 @@ Browsing.prototype.initialise = function(data, node, opts){
 };
 
 Browsing.prototype.update = function(data){
-		
+
+	console.log("<----- OK AM NOW IN UPDATE!!!! ---->");
+
     var self = this;
     //guard against empty data;
     if (!data || !data.browsing){
       console.log("no data yet..");
       return;
     }
-
+ 	
+ 	console.log("--> data range before is ");
+ 	console.log(data.range);
+ 	this.x.domain(data.range);
     var browsers = this.stack(data.browsing);
-
-    this.x.domain(data.range);
+    
+    console.log("data range AFTER  is ");
+ 	console.log(data.range);   
 		
     this.y.domain([0, d3.max(browsers, function(c){
         return d3.max(c.values.filter(function(item){return item.date >= data.range[0] && item.date <= data.range[1];}), function(d) {return d.y0 +d.y;});
@@ -132,7 +133,6 @@ Browsing.prototype.update = function(data){
 
     var chart = this.svg.selectAll("g.chart");
 
-    //need to add exit!
     var browser = chart.selectAll("g.browser")
                        .data(browsers, function(d){return d.name;});
     //enter

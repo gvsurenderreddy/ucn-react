@@ -18,6 +18,19 @@ var Chart = React.createClass({
     );
   },
 
+  shouldComponentUpdate: function(nextProps, nextState){
+  	/* can we make more efficient here?  */
+  	/* nextProps.locations && nextProps.urlhistory */
+  	/* tends to === oldProps.locations and nextProps.urlhistory */
+  	console.log("-------------");
+  	console.log("old props:");
+  	console.log(this.props);
+  	console.log("new props");
+  	console.log(nextProps);
+  	console.log("-------------");
+  	return true;
+  },
+  
   componentDidUpdate: function(){
       this._chart.update(this.props.data);
   },

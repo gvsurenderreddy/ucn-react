@@ -22,7 +22,10 @@ Zoom.prototype.initialise = function(data, node, opts){
                   .x(this.x)
                   .on("brushend", function(){
                       var xrange = this.brush.empty() ? this.x.domain() : this.brush.extent();
-                      ActionCreators.rangechange(xrange);
+                      console.log("-----CALLLING RANGE CHANEG -----");
+                      console.log([xrange[0].getTime(), xrange[1].getTime()]);
+                      console.log("-----");
+                      ActionCreators.rangechange([xrange[0].getTime(), xrange[1].getTime()]);
                   }.bind(this))
                   .on("brush", function(){
                       console.log("brush end");
@@ -95,14 +98,15 @@ Zoom.prototype.update = function(data){
     console.log("no data yet..");
     return;
   }
-
+  
   var browsers = this.stack(data.browsing);
 
   this.x.domain(data.range);
-
+  
   this.y.domain([0, d3.max(browsers, function(c){
       return d3.max(c.values, function(d) {return d.y0 +d.y;});
   })]);
+  
   //update the scales
   this.xAxis.scale(this.x);
   this.yAxis.scale(this.y);
