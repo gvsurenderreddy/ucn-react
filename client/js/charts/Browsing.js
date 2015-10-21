@@ -115,12 +115,11 @@ Browsing.prototype.update = function(data){
       return;
     }
  	
- 	console.log("--> data range before is ");
- 	console.log(data.range);
+ 	
  	this.x.domain(data.range);
     var browsers = this.stack(data.browsing);
     
-    console.log("data range AFTER  is ");
+    console.log("data range is ");
  	console.log(data.range);   
 		
     this.y.domain([0, d3.max(browsers, function(c){
@@ -172,10 +171,11 @@ Browsing.prototype.update = function(data){
     //handle overlays!
           
 	if (data.urlhistory){
-      this.urlhistory(data.urlhistory);
+		console.log("OK URL HISTORT IS");
+		console.log(data.urlhistory);
+        this.urlhistory(data.urlhistory);
 	}
 	if (data.locations){
-	  console.log("RENDERING LOACTIONS!!");
 	  this.locations(data.locations);
 	}    
 };

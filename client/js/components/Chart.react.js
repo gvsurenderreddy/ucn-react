@@ -22,12 +22,12 @@ var Chart = React.createClass({
   	/* can we make more efficient here?  */
   	/* nextProps.locations && nextProps.urlhistory */
   	/* tends to === oldProps.locations and nextProps.urlhistory */
-  	console.log("-------------");
+  	/*console.log("-------------");
   	console.log("old props:");
   	console.log(this.props);
   	console.log("new props");
   	console.log(nextProps);
-  	console.log("-------------");
+  	console.log("-------------");*/
   	return true;
   },
   

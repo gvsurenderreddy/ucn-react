@@ -16,9 +16,20 @@ var extend = require('extend');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _data, _zoomdata, _urlhistory;
+var _data, _zoomdata, _urlhistory, _currenturl;
+
 
 var overlaylocations = false;
+
+var _toggle_url = function(url){
+	if (url === _currenturl){
+		_currenturl = "";
+		_data.urlhistory = _zoomdata.urlhistory = _urlhistory = [];
+	}else{
+		_currenturl = url;
+	}
+	
+};
 
 var _toggle_locations = function(){
 	if (!overlaylocations){
@@ -59,6 +70,7 @@ var _update_location_data = function(data){
 };
 
 var _update_raw_url_history_data = function(data){
+  console.log("updating raw url history data!");
   _urlhistory  = data.timestamps;
   _data.urlhistory = _urlhistory;
   _zoomdata.urlhistory =_urlhistory;
@@ -73,6 +85,7 @@ var _update_zoom_data = function(data){
 };
 
 var _update_data = function(data){
+	console.log("---- updating browsing data ----");
   _data = _format_data(data);
   _zoomdata = extend({}, _data);
 };
@@ -150,29 +163,32 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
   var action = action.action;
   
+  
+  
   switch(action.type) {
 
   	case ActionTypes.RAW_BROWSING_DATA:
       _update_data(action.rawData.browsing);   
-      console.log("Browsing: update_data, emitting change");
       BrowsingDataStore.emitChange();
       break;
       
     case ActionTypes.RAW_ZOOM_DATA:
       _update_zoom_data(action.rawData.browsing);
-       console.log("Browsing: update_zoom_data, emitting change");
       BrowsingDataStore.emitChange();
 	  break;
     
     case ActionTypes.RANGE_CHANGE:
       _update_filtered_data(action.range);
-      console.log("Browsing: range change, emitting change");
       BrowsingDataStore.emitChange();
       break;
 
+	case ActionTypes.URL_CLICKED:
+      _toggle_url(action.url);
+      BrowsingDataStore.emitChange();
+      break;
+      
     case ActionTypes.RAW_URL_HISTORY_DATA:
       _update_raw_url_history_data(action.rawData);
-      console.log("Browsing: url hustory, emitting change");
       BrowsingDataStore.emitChange();
       break;	   	
 	

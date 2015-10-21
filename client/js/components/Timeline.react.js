@@ -3,6 +3,7 @@ var ActionCreators = require('../actions/ActionCreators');
 var Chart = require('./Chart.react');
 var Urls = require('./Urls.react');
 var BrowsingDataStore = require('../stores/BrowsingDataStore');
+var NetworkAccessStore = require('../stores/NetworkAccessStore');
 var WebAPIUtils = require('../utils/WebAPIUtils');
 var moment = require('moment');
 
@@ -10,6 +11,7 @@ function getStateFromStores() {
     return {
       data: BrowsingDataStore.data(),
       zoomdata: BrowsingDataStore.zoomdata(), 
+      fetching: NetworkAccessStore.accessingNetwork(),
     }
 }; 
 
@@ -58,6 +60,7 @@ var Timeline = React.createClass({
                    margin:{left: 40, right:10, top:10, bottom:60}
                };
 
+  
    return <div className="container">
               <div className="row fullWidth">
                 <div className="small-12 columns" style={{overflowY:'auto'}}>

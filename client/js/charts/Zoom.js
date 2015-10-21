@@ -22,9 +22,6 @@ Zoom.prototype.initialise = function(data, node, opts){
                   .x(this.x)
                   .on("brushend", function(){
                       var xrange = this.brush.empty() ? this.x.domain() : this.brush.extent();
-                      console.log("-----CALLLING RANGE CHANEG -----");
-                      console.log([xrange[0].getTime(), xrange[1].getTime()]);
-                      console.log("-----");
                       ActionCreators.rangechange([xrange[0].getTime(), xrange[1].getTime()]);
                   }.bind(this))
                   .on("brush", function(){

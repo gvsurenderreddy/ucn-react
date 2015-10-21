@@ -9,11 +9,24 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var Constants = require('../constants/Constants');
 var assign = require('object-assign');
+var WebAPIUtils = require('../utils/WebAPIUtils');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
 var _urls = [];
 var _selected = "";
+
+
+var _toggle_url = function(url){
+	if (_selected === url){
+		console.log("NOT FETCHING NEW DATA NOW");
+		_selected = "";
+	}else{
+		_selected = url;
+		console.log("FETCHING NEW DATA NOW");
+		WebAPIUtils.fetch_url_history(url);
+	}
+};
 
 var _update_raw_url_data = function(data){
  
@@ -53,7 +66,7 @@ var UrlDataStore = assign({}, EventEmitter.prototype, {
 UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
   var action = action.action;
-  
+ 
   switch(action.type) {
 
 	case ActionTypes.RAW_ZOOM_DATA:
@@ -62,7 +75,7 @@ UrlDataStore.dispatchToken = AppDispatcher.register(function(action) {
       break;
     
     case ActionTypes.URL_CLICKED:
-      _selected = action.url;
+      _toggle_url(action.url);
       UrlDataStore.emitChange();
       break;
 

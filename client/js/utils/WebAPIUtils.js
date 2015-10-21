@@ -4,6 +4,7 @@ var extend = require('extend');
 var ServerActionCreators = require('../actions/ServerActionCreators');
 
 var REDIRECT = "/ucn/auth/login";
+var _netaccess = false;
 
 var params = location.search.substring(1).split('&').reduce(function(acc, pair){
     var nv = pair.split("=");
@@ -13,12 +14,20 @@ var params = location.search.substring(1).split('&').reduce(function(acc, pair){
 
 module.exports ={
 
+  accessing_network: function(){
+  	return _netaccess;
+  },
+  
   fetch_browsing: function() {    
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;	
     request
       .get('/viz/browsing')
       .set('Accept', 'application/json')
       .query(params)
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log(err);
         }else{
@@ -30,12 +39,17 @@ module.exports ={
   },
 
    fetch_browsing_range: function(range) {
+   	if (_netaccess)
+  		return;
+  	_netaccess=true;
   	console.log("fetching browsing range!!!");
     request
       .get('/viz/browsing')
       .set('Accept', 'application/json')
       .query(extend(range,params))
       .end(function(err, res){
+      	_netaccess = false;
+      	
         if (err){
           console.log(err);
         }else{
@@ -50,11 +64,16 @@ module.exports ={
   },
  
   fetch_activity: function() {
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
+  	
     request
       .get('/viz/activity')
       .set('Accept', 'application/json')
       .query(params)
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log(err);
         }else{
@@ -68,11 +87,15 @@ module.exports ={
   },
   
   fetch_locations: function() {
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
     request
       .get('/viz/location')
       .set('Accept', 'application/json')
       .query(params)
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log(err);
         }else{
@@ -137,11 +160,16 @@ module.exports ={
   },*/
 
   fetch_unclassified: function(){
+  	 if (_netaccess)
+  		return;
+  	 _netaccess=true;
+  	
   	 request
       .get('/viz/urls/unclassified')
       .set('Accept', 'application/json')
       .query(params)
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log(err);
         }else{
@@ -155,12 +183,17 @@ module.exports ={
   },
   
   fetch_url_history: function(url) {
-
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
+  	
+	console.log("***** fetching url history ********");
     request
       .get('/viz/urls/history')
       .set('Accept', 'application/json')
       .query(extend({url:url},params))
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log(err);
         }else{
@@ -174,6 +207,9 @@ module.exports ={
   },
 
   fetch_category_data: function(classifier){
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
   	
   	var query = classifier ? extend({classifier:classifier},params): params;
   	
@@ -182,6 +218,7 @@ module.exports ={
       .set('Accept', 'application/json')
       .query(query)
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log("hmm errror");
           console.log(err);
@@ -197,11 +234,16 @@ module.exports ={
   },
 
   match_categories: function(partial){
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
+  	
     request
       .get('/viz/categories/match')
       .set('Accept', 'application/json')
       .query({partial:partial})
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log(err);
         }else{
@@ -215,11 +257,16 @@ module.exports ={
   },
 
   match_urls: function(partial){
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
+  	
     request
       .get('/viz/urls/match')
       .set('Accept', 'application/json')
       .query(extend({partial:partial},params))
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log(err);
         }else{
@@ -233,12 +280,17 @@ module.exports ={
   },
   
   categorise: function(obj){
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
+  	
     request
       .post('/viz/categories/categorise')
       .send(extend(obj,params))
       .set('Accept', 'application/json')
       .type('json')
       .end(function(err, res){
+      	_netaccess = false;
         if (err){
           console.log(err);
         }else{
