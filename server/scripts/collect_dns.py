@@ -16,7 +16,6 @@ def duplicate(ts,host, domain, lastline):
 
 def lookup(host):
 	device = datalogger.deviceid_for_host(host)
-	print "got device %s" % device
 	return datalogger.deviceid_for_host(host)
 		
 def insert_dns(datafile):
@@ -81,7 +80,7 @@ def insert_dns(datafile):
 
 if __name__ == "__main__":
 	cfg = TestingConfig()
-	hdlr = logging.FileHandler(cfg.COLLECT_LOGFILE or '/var/tmp/collect.log') 
+	hdlr = logging.FileHandler(cfg.DNS_LOGFILE or '/var/tmp/ucn_dns.log') 
 	formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 	hdlr.setFormatter(formatter)
 	logger.addHandler(hdlr)

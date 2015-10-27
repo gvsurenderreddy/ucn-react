@@ -1,6 +1,7 @@
 var fn = require("./fn");
 var Browsing = require('../charts/Browsing');
 var Zoom = require('../charts/Zoom');
+var BrowsingBar = require('../charts/BrowsingBar');
 var Categories = require('../charts/Categories');
 var d3 = require('../lib/d3.min');
 
@@ -49,6 +50,7 @@ ChartFactory.prototype.initialise = function(data, node, opts){
 
 //attach all chart types as static properties
 ChartFactory.Browsing = Browsing;
+ChartFactory.BrowsingBar = BrowsingBar;
 ChartFactory.Zoom = Zoom;
 ChartFactory.Categories = Categories;
 

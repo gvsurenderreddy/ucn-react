@@ -39,8 +39,8 @@ def fetchlocations():
 	tokens = collectdb.fetch_tokens('moves')
  	
  	for token in tokens:
- 		print "looking at token"
- 		print token
+ 		logger.debug("got token")
+ 		logger.debug(token)
  		result = None
  		payload = {'access_token':token['token']}
  		url = cfg.API_URL + "/user/places/daily"
@@ -59,7 +59,6 @@ def fetchlocations():
 			for row in result:	
  				if row['segments'] is not None:
  					for segment in row['segments']:
- 						print segment
  						
  						lastUpdate = dateutil.parser.parse(row['lastUpdate'])
  				
@@ -90,8 +89,7 @@ def fetchlocations():
  			zones=[]
 		
 		except Exception, e:
-			print "EXCEPTION!!!"
-			print e
+			logger.error("error adding moves data")
 			logger.error("failed to get update for %s %s" % (r.url, token['token']))
 						
 		if latestUpdate is not None:
@@ -103,7 +101,7 @@ def fetchlocations():
 	
 if __name__ == "__main__":
 	cfg = TestingConfig()
-	hdlr = logging.FileHandler(cfg.COLLECT_LOGFILE or '/var/tmp/collect.log') 
+	hdlr = logging.FileHandler(cfg.MOVES_LOGFILE or '/var/tmp/ucn_moves.log') 
 	formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 	hdlr.setFormatter(formatter)
 	logger.addHandler(hdlr)

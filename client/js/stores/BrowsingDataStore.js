@@ -16,15 +16,14 @@ var extend = require('extend');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _data, _zoomdata, _urlhistory, _currenturl;
-
+var _data, _zoomdata, _urlhistory, _currenturl, _browsingdata;
 
 var overlaylocations = false;
 
 var _toggle_url = function(url){
 	if (url === _currenturl){
 		_currenturl = "";
-		_data.urlhistory = _zoomdata.urlhistory = _urlhistory = [];
+		_data.urlhistory = _zoomdata.urlhistory = _browsingdata.urlhistory = _urlhistory = [];
 	}else{
 		_currenturl = url;
 	}
@@ -45,13 +44,13 @@ var _toggle_locations = function(){
 
 var _update_filtered_data = function(range){
  	_zoomdata.range = range;
- 	console.log("set zoom data range to " );
- 	console.log(_zoomdata.range);
+ 	_browsingdata.range = range;
 };
 
 var _update_location_data = function(data){
   _data.locations = data.locations;	
   _zoomdata.locations  = data.locations;
+  _browsingdata.locations = data.locations;
   
   _data.range = data.locations.reduce(function(acc, obj){
   	if (acc[0] > obj.exit*1000){
@@ -65,29 +64,33 @@ var _update_location_data = function(data){
   },_data.range);
   
   _zoomdata.range = _data.range;
-  console.log("SET MAIN/ZOOM DATA RANGE TO ");
-  console.log(_data.range);
 };
 
 var _update_raw_url_history_data = function(data){
-  console.log("updating raw url history data!");
   _urlhistory  = data.timestamps;
   _data.urlhistory = _urlhistory;
   _zoomdata.urlhistory =_urlhistory;
+  _browsingdata.urlhistory = _urlhistory;
 };
 
 var _update_zoom_data = function(data){
-	console.log("---- updating zoom data ----");
-	_zoomdata = _format_data(data);
+	
+	_browsingdata = data;
+	_browsingdata.locations = _data.locations;
+	_zoomdata = _format_data(data.browsing);
 	//set the locations data to whatever it currently is...
 	_zoomdata.locations = _data.locations;
-	console.log(_zoomdata);
 };
 
 var _update_data = function(data){
-	console.log("---- updating browsing data ----");
-  _data = _format_data(data);
+  _browsingdata = data;
+  _data = _format_data(data.browsing);
   _zoomdata = extend({}, _data);
+  	console.log("++++++++++++");
+	console.log("browsing data is ");
+	console.log(_browsingdata);
+	console.log("zoomdata is ");
+	console.log(_data);
 };
 
 _format_data = function(data){
@@ -136,7 +139,7 @@ var BrowsingDataStore = assign({}, EventEmitter.prototype, {
   },
 
   zoomdata: function(){
-  	return _zoomdata || _data || {};
+  	return _browsingdata || {};//_zoomdata || _data || {};
   },
   
   emitChange: function() {
@@ -163,17 +166,16 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
 
   var action = action.action;
   
-  
-  
   switch(action.type) {
 
   	case ActionTypes.RAW_BROWSING_DATA:
-      _update_data(action.rawData.browsing);   
+      _update_data(action.rawData);   
       BrowsingDataStore.emitChange();
       break;
       
     case ActionTypes.RAW_ZOOM_DATA:
-      _update_zoom_data(action.rawData.browsing);
+    
+      _update_zoom_data(action.rawData);
       BrowsingDataStore.emitChange();
 	  break;
     

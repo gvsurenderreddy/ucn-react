@@ -1,6 +1,5 @@
 module.exports = {
   dasherize: function( string ) {
-    console.log("in dasherise with string " + string);
     return string.replace ( /([^])([A-Z]+)([^$])/g, '$1-$2$3' ). toLowerCase();
   },
 

@@ -37,10 +37,10 @@ var Timeline = React.createClass({
   	var rangestyle = {
   		paddingLeft: 40,
   	}
-  	
-  	if ('range' in this.state.zoomdata){
-  		var from = moment(this.state.zoomdata.range[0]).format("MMMM Do YYYY, h:mm:ss");
-  		var to   = moment(this.state.zoomdata.range[1]).format("MMMM Do YYYY, h:mm:ss");
+  
+  	if ('browsing' in this.state.zoomdata){
+  		var from = moment(this.state.zoomdata.browsing.timerange.from*1000).format("MMMM Do YYYY, h:mm:ss");
+  		var to   = moment(this.state.zoomdata.browsing.timerange.to*1000).format("MMMM Do YYYY, h:mm:ss");
   	 	rangestr = from + " to " + to;
   	}
   	
@@ -70,7 +70,7 @@ var Timeline = React.createClass({
               <div className="row fullWidth">
                 <div className="small-9 columns" style={{overflowY:'auto'}}>
                   <h5 style={rangestyle}> {rangestr} </h5>
-                  <Chart type="Browsing" data={this.state.zoomdata} options={browsingoptions}/>
+                  <Chart type="BrowsingBar" data={this.state.zoomdata} options={browsingoptions}/>
                 </div>
                 <div className="small-3 columns">
                   <Urls/>
@@ -89,7 +89,6 @@ var Timeline = React.createClass({
   },
   
   _fetchActivity: function(){
-  	console.log("fetching activity!");
   	WebAPIUtils.fetch_activity();
   },
 

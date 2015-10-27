@@ -4,7 +4,7 @@ var pgdb = require('../pgdb');
 var User 	= require('../models/User');
 var Device = require('../models/Device');
 
-var SINCE = (365/2) * 24 * 60 * 60;
+var SINCE = (365/2) * 24 * 60 * 60  * 1000;
 
 //all requests to /viz will go here...
 router.use(function(req, res, next) {
@@ -65,11 +65,13 @@ router.get('/browsing', function(req,res, next){
   .spread(function(deviceid, maxts, min){
   	var difference = maxts-min.ts;
     var timerange = {from:min.ts, to:maxts};
+
     var bin = difference >= (6 * 60 * 60) ? 60*60 : difference > (2 * 60) ? 60 : 1;
-	console.log("Set bin to "  + bin);    
+	var binnedtimerange = {from: parseInt(min.ts/bin)*bin, to: parseInt(maxts/bin)*bin}
+	   
     return [
     			bin,
-    			timerange, 
+    			binnedtimerange, 
     			pgdb.fetch_binned_browsing_for_device(deviceid, bin, timerange.from, timerange.to), 
     			pgdb.fetch_urls_for_device(deviceid, timerange.from, timerange.to)
     		];

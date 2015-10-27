@@ -1,9 +1,11 @@
 from config import TestingConfig
 import psycopg2
 import requests
+import logging
+
+logger = logging.getLogger( "collect_logger" )
 
 def reconnect(fn):
-	print "in conncet decorator"
 	""" decorator to reconnect to the database if needed """
 	def wrapped(self, *args, **kwargs):
 		if self.connected is not True:
@@ -15,7 +17,6 @@ class Classifier( object ):
 	''' classdocs '''
 
 	def __init__( self, name):
-		print "IN INIT!"
 		self.name = name
 		self.connected = False
 		self.dbname = 'hostview'
@@ -26,23 +27,20 @@ class Classifier( object ):
 
 
 	def connect( self ):
-		print "connecting to postgres database %s " % self.dbname
 		
 		if self.connected is False:
 			try:
 				constr = "dbname=%s user=%s host=%s password=%s" % (self.dbname,self.dbuser,self.dbhost,self.dbpass)
-				print constr
 				self.conn = psycopg2.connect("dbname=hostview user=hostview host=localhost password=hostview")
 				self.cur = self.conn.cursor()
 				self.connected = True
 			except Exception, e:
-				print e
-				print "unable to connect to the database!"
+				logger.debug(e)
+				logger.debug("unable to connect to the database!")
 				
 	@reconnect
 	def createTables(self):
-	
-		print "in create tables!!"
+		pass
 		#try:
 			#self.cur.execute('''CREATE TABLE CLASSIFICATION (
 			#						deviceid integer,
@@ -68,7 +66,7 @@ class Classifier( object ):
 			self.cur.execute(sql)
 			return [{'id':row[0], 'tld':row[1]} for row in self.cur.fetchall()]
 		except Exception, e:
-			print e
+			logger.debug(e)
 			return []
 	
 
@@ -94,13 +92,11 @@ class Classifier( object ):
 	#then it will translate the text to english (using the yandex api)
 	#then it will post this text to the alchemy keyword api
 	def translate_urls(self, alchemykey, zandexkey):
-		print " in translate urls"
+		
 		totranslate = self.fetch_to_translate("alchemy")
 		limitexceeded = False
 		
 		for tld in totranslate:
-			
-			print "translating %s" % tld
 			
 			if limitexceeded:
 				return
@@ -116,13 +112,8 @@ class Classifier( object ):
 					self.classify_text_with_alchemy(tld, translated, alchemykey)
 					
 				elif result['status'] == "ERROR":
- 					print result['statusInfo']
 					if result['statusInfo'] == "daily-transaction-limit-exceeded":
-						print "limit exceeded"
 						limitexceeded = True
-			
-			else:
-			   print "result is none!"
 	
 	def extract_text(self, tld, apikey):
 			
@@ -138,11 +129,11 @@ class Classifier( object ):
 		try:
 			result = r.json()
 			return result
-			print "url %s status %s" % (tld,result['status'])
+			logger.debug("url %s status %s" % (tld,result['status']))
 					
 		except Exception, e:
-			print "error extracting text!"
-			print e
+			logger.debug("error extracting text!")
+			logger.debug(e)
 			return None
 	
 	def translate_text(self, apikey, text):
@@ -161,8 +152,8 @@ class Classifier( object ):
 			return ' '.join(result['text'])
 				
 		except Exception, e:
-			print "error extracting text!"
-			print e
+			logger.debug("error extracting text!")
+			logger.debug(e)
 			return None	
 
 	def classify_text_with_alchemy(self, tld, text, apikey):
@@ -175,20 +166,17 @@ class Classifier( object ):
 			'outputMode': 'json',
 			'apikey':apikey,
 		}
-		print "text len is "
-	        print len(text)
-		print text	
+		
 		url = "http://access.alchemyapi.com/calls/text/TextGetRankedTaxonomy"
 		r =  requests.post(url, params=payload)
 		
 		try:
-			print "converting alchemy result"
 			result = r.json()
-			print result			
+			logger.debug(result)			
 			if result['status'] == "OK":
 				maxscore = 0
 				label = None
-				print result['taxonomy']
+				logger.debug(result['taxonomy'])
 				for classification in result['taxonomy']:
 					score = classification["score"]
 
@@ -200,10 +188,10 @@ class Classifier( object ):
 					self.updateclassification(tld=tld, success=True, classifier="alchemy", classification=label, score=maxscore)
 				
 		except Exception, e:
-			print "Exception ----->"
-			print r
-			print r.content
-			print e
+			logger.debug("error extracting text!")
+			logger.debug(r)
+			logger.debug(r.content)
+			
 						
 	def classify_urls_with_alchemy(self, tlds, apikey):
 
@@ -226,12 +214,12 @@ class Classifier( object ):
 				r =  requests.get(url, params=payload)
 				try:
 					result = r.json()
-					print "url %s status %s" % (tld['tld'],result['status'])
+					logger.debug("url %s status %s" % (tld['tld'],result['status']))
 
 					if result['status'] == "OK":
 						maxscore = 0
 						label = None
-   						print result['taxonomy']
+   						logger.debug(result['taxonomy'])
 						for classification in result['taxonomy']:
 							score = classification["score"]
 
@@ -247,25 +235,25 @@ class Classifier( object ):
 					elif result['status'] == "ERROR":
 
 						if result['statusInfo'] == "daily-transaction-limit-exceeded":
-							print "limit exceeded"
+							logger.debug("limit exceeded")
 							limitexceeded = True
 						else:
 							self.classify(deviceid=tld['id'], tld=tld['tld'], success=False, classifier="alchemy", classification=None, error=result['statusInfo'])
 
 					#print result
-				except:
-					print "oh well - error!"
+				except Exception, e:
+					logger.debug("classify error")
+					logger.debug(e)
 	
 	@reconnect
 	def updateclassification(self, deviceid, tld, success, classifier, classification, score):
 		try:
 			sql = 'UPDATE CLASSIFICATION SET success=%d,score=%f,classification="%s" WHERE tld="%s" AND classifier="%s" AND deviceid="%s" ' % (1, float(score),classification,tld, classifier,deviceid)
-			print sql
 			self.cur.execute(sql)
 			self.conn.commit()
 		except Exception, e:
-			print "error storing in database"
-			print e
+			logger.debug("error storing in database")
+			logger.debug(e)
 				
 	@reconnect
 	def classify(self, deviceid, tld, success, classifier, classification, error=None, score=None):
@@ -277,8 +265,8 @@ class Classifier( object ):
 				self.cur.execute(sql,data)
 				self.conn.commit()
 			except Exception, e:
-				print "error storing in database"
-				print e
+				logger.debug("error storing in database")
+				logger.debug(e)
 
 		else:
 			try:
@@ -287,12 +275,17 @@ class Classifier( object ):
 				self.cur.execute(sql,data)
 				self.conn.commit()
 			except Exception, e:
-				print "error storing in database"
-				print e
+				logger.debug("error storing in database")
+				logger.debug(e)
 
 if __name__ == "__main__":
 	cfg = TestingConfig()
-	print "using dbase %s" % cfg.DATADB
+	hdlr = logging.FileHandler(cfg.CLASSIFY_LOGFILE or '/var/tmp/ucn_classify.log') 
+	formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+	hdlr.setFormatter(formatter)
+	logger.addHandler(hdlr)
+	logger.setLevel(logging.DEBUG)
+	
 	classifier = Classifier(name=cfg.DATADB)
 	classifier.createTables();
 	blocked = []
@@ -300,10 +293,5 @@ if __name__ == "__main__":
 		blocked = [x.strip() for x in f.readlines()]
 
 	toclassify = classifier.fetch_distinct_tlds(blocked)
-	
-	print "ok to classify is"
-	print toclassify
-	print "****"
-	
 	classifier.classify_urls_with_alchemy(toclassify,cfg.ALCHEMYAPI)
 	#classifier.translate_urls(cfg.ALCHEMYAPI, cfg.ZANDEXAPI)

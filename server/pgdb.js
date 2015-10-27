@@ -52,7 +52,9 @@ module.exports = {
 	
 	fetch_min_ts_for_device: function(deviceid, smallest){
 		var sql = "SELECT min(h.timestamp/1000) as ts FROM browsing h WHERE id=$1 AND h.timestamp/1000 >= $2";
+		
 		var params = [deviceid,smallest];
+		
 		return _execute_sql(sql,params).then(function(results){
 			return results[0] || {};
 		});

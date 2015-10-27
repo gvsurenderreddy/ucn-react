@@ -25,13 +25,14 @@ Zoom.prototype.initialise = function(data, node, opts){
                       ActionCreators.rangechange([xrange[0].getTime(), xrange[1].getTime()]);
                   }.bind(this))
                   .on("brush", function(){
-                      console.log("brush end");
+                     
                   });
 
   this.colour = function(host){
      return Colours.colourFor(host);
   };
-
+  
+ 
   this.stack = d3.layout.stack()
                  .offset("zero")
                  .values(function(d) {return d.values;})
@@ -39,17 +40,14 @@ Zoom.prototype.initialise = function(data, node, opts){
                  .y(function(d){return d.y;});
 
   this.area = d3.svg.area()
-                .interpolate("basis")
+                .interpolate("linear")
                 .x(function(d) {
-                	//console.log("x: for " + d.date + ":" + this.x(d.date));
                 	return this.x(d.date);
                 }.bind(this))
                 .y0(function(d) {
-                	//console.log("y0 for " + d.y0 + ": " + this.y(d.y0));
                 	return this.y(d.y0);
                 }.bind(this))
                 .y1(function(d) {
-                	//console.log("y1 for " + (d.y0 + d.y) + ": " + this.y(d.y0 + d.y));
                 	return this.y(d.y0 + d.y);
                 }.bind(this)),
 
@@ -97,7 +95,7 @@ Zoom.prototype.update = function(data){
   }
   
   var browsers = this.stack(data.browsing);
-
+  
   this.x.domain(data.range);
   
   this.y.domain([0, d3.max(browsers, function(c){

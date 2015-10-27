@@ -20,10 +20,8 @@ var _url = "";
 
 var _setnetworkaccess = function(value){
 	//if (_accessingNetwork != WebAPIUtils.accessing_network()){
-  		_accessingNetwork = value;//WebAPIUtils.accessing_network();
-  		console.log("caccesisng network is ");
-  		console.log(_accessingNetwork);
-  			
+  	_accessingNetwork = value;//WebAPIUtils.accessing_network();
+  				
   	//}
 };
 
