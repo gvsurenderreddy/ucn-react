@@ -128,7 +128,6 @@ BrowsingBar.prototype.update = function(data){
     		.transition()
     		.duration(ANIMATION_DURATION)
     		.attr("x", function(d){
-    			console.log("x position for " + d.bin + " is " + this.x(parseInt(d.bin)*1000))
     			return this.x(parseInt(d.bin)*1000);
     		}.bind(this))
     		.attr("y", function(d){

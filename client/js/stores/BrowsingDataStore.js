@@ -86,11 +86,6 @@ var _update_data = function(data){
   _browsingdata = data;
   _data = _format_data(data.browsing);
   _zoomdata = extend({}, _data);
-  	console.log("++++++++++++");
-	console.log("browsing data is ");
-	console.log(_browsingdata);
-	console.log("zoomdata is ");
-	console.log(_data);
 };
 
 _format_data = function(data){
