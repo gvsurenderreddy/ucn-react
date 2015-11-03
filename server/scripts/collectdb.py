@@ -47,21 +47,20 @@ class CollectDB( object ):
 		self.dbpass = 'hostview'
 	
 	def connect( self ):
-		print "connecting to postgres database %s " % self.dbname
+		logger.debug("connecting to postgres database %s " % self.dbname)
 	
 		if self.connected is False:
 	
 			try:
 				constr = "dbname=%s user=%s host=%s password=%s" % (self.dbname,self.dbuser,self.dbhost,self.dbpass)
-				print constr
 				self.conn = psycopg2.connect("dbname=hostview user=hostview host=localhost password=hostview")
 				self.cur = self.conn.cursor()
 				self.connected = True
-				print "successfully connected!"
+				logger.debug("successfully connected!")
 			
 			except Exception, e:
-				print e
-				print "unable to connect to the database!"
+				logger.debug(e)
+				logger.debug("unable to connect to the database!")
 			
 	@reconnect
 	def insert_token_for_device(self, api, deviceid, token):
@@ -71,8 +70,8 @@ class CollectDB( object ):
 			self.cur.execute(sql,data)
 			self.conn.commit()
 		except Exception, e:
-			log.error("error saving token!!")
-			log.error(e)
+			logger.error("error saving token!!")
+			logger.error(e)
 	
 	@reconnect
 	def fetch_tokens(self, api):

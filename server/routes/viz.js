@@ -21,9 +21,6 @@ router.get('/', function(req,res,next){
 	console.log(req.user);
 	
 	return Device.findDevicesForUser(user.username).then(function(results){
-		console.log("got devices") 
-		console.log(device);
-		
 		var devices = results.map(function(device){
 			return device.devname;
 		});
@@ -31,9 +28,10 @@ router.get('/', function(req,res,next){
 		res.render("admin", {families:families});
 	});
 });
-router.get('/', function(req,res,next){
+
+/*router.get('/', function(req,res,next){
 	console.log(req.user);
-});
+});*/
 
 router.get('/device', function(req, res, next){
 	//get and display all devices for this user

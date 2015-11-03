@@ -176,7 +176,6 @@ class Classifier( object ):
 			if result['status'] == "OK":
 				maxscore = 0
 				label = None
-				logger.debug(result['taxonomy'])
 				for classification in result['taxonomy']:
 					score = classification["score"]
 
@@ -186,25 +185,41 @@ class Classifier( object ):
 
 				if label is not None:
 					self.updateclassification(tld=tld, success=True, classifier="alchemy", classification=label, score=maxscore)
-				
+			
+					
 		except Exception, e:
 			logger.debug("error extracting text!")
 			logger.debug(r)
 			logger.debug(r.content)
-			
-						
+	
+	def resetcounters(self):
+		self.classifyerrors = 0
+		self.classifysuccesses = 0
+		self.preclassified = 0
+		
+	def incrementerrors(self):
+		self.classifyerrors = self.classifyerrors + 1
+		
+	def incrementsuccesses(self):
+		self.classifysuccesses = self.classifysuccesses + 1	
+	
+	def incrementpreclassified(self):
+		self.preclassified = self.preclassified + 1	
+	
 	def classify_urls_with_alchemy(self, tlds, apikey):
-
+		self.resetcounters()
 		alreadyclassified = self.fetch_classified_tlds()
+		
 		limitexceeded = False
 
 		for tld in tlds:
-
+			
 			if limitexceeded:
+				logger.debug("limit exceeded,stopping")
 				return
 
 			if "%s:%s"%(tld['id'],tld['tld']) not in alreadyclassified:
-
+				logger.debug("classifiying %s" % tld)
 				payload = {
 							'url':tld['tld'],
 							'outputMode': 'json',
@@ -219,7 +234,7 @@ class Classifier( object ):
 					if result['status'] == "OK":
 						maxscore = 0
 						label = None
-   						logger.debug(result['taxonomy'])
+   						
 						for classification in result['taxonomy']:
 							score = classification["score"]
 
@@ -228,12 +243,15 @@ class Classifier( object ):
 								label = classification["label"]
 
 						if label is not None:
+							self.incrementsuccesses()
 							self.classify(deviceid=tld['id'], tld=tld['tld'], success=True, classifier="alchemy", classification=label, error=None, score=maxscore)
+							
 						else:
+							self.incrementerrors()
 							self.classify(deviceid=tld['id'], tld=tld['tld'], success=False, classifier="alchemy", classification=None, error="no classification")
 
 					elif result['status'] == "ERROR":
-
+						self.incrementerrors()
 						if result['statusInfo'] == "daily-transaction-limit-exceeded":
 							logger.debug("limit exceeded")
 							limitexceeded = True
@@ -242,8 +260,11 @@ class Classifier( object ):
 
 					#print result
 				except Exception, e:
+					self.incrementerrors()
 					logger.debug("classify error")
 					logger.debug(e)
+			else:
+				self.incrementpreclassified()
 	
 	@reconnect
 	def updateclassification(self, deviceid, tld, success, classifier, classification, score):
@@ -293,5 +314,8 @@ if __name__ == "__main__":
 		blocked = [x.strip() for x in f.readlines()]
 
 	toclassify = classifier.fetch_distinct_tlds(blocked)
+	logger.debug("starting classification, classifying %d urls " % len(toclassify)) 
 	classifier.classify_urls_with_alchemy(toclassify,cfg.ALCHEMYAPI)
+	logger.debug("completed classification")
+	logger.debug("%d success %d errors %d preclassified" % (classifier.classifysuccesses, classifier.classifyerrors, classifier.preclassified))
 	#classifier.translate_urls(cfg.ALCHEMYAPI, cfg.ZANDEXAPI)

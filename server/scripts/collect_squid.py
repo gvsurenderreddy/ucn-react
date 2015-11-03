@@ -37,6 +37,11 @@ def insert_urls(datafile):
 				datalogger.bulk_insert_urls(content)
 				collectdb.update_filepos(int(time.mktime(datetime.now().timetuple())), f.tell(),'squid')
 				logger.debug("written %d bytes of squid log to db" % (f.tell() - fpos))
+		else: #reset fpos to 0
+			if fpos > 0:
+				logger.debug("reset fpos to 0")
+				collectdb.update_filepos(int(time.mktime(datetime.now().timetuple())), 0,'squid')	
+			
 	except Exception, e:
 		logger.error("error adding data from squid file")
 		logger.error(e)

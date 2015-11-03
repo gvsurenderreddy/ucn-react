@@ -31,8 +31,7 @@ Zoom.prototype.initialise = function(data, node, opts){
   this.colour = function(host){
      return Colours.colourFor(host);
   };
-  
- 
+
   this.stack = d3.layout.stack()
                  .offset("zero")
                  .values(function(d) {return d.values;})
@@ -40,7 +39,7 @@ Zoom.prototype.initialise = function(data, node, opts){
                  .y(function(d){return d.y;});
 
   this.area = d3.svg.area()
-                .interpolate("linear")
+                .interpolate("basis")
                 .x(function(d) {
                 	return this.x(d.date);
                 }.bind(this))
@@ -95,7 +94,7 @@ Zoom.prototype.update = function(data){
   }
   
   var browsers = this.stack(data.browsing);
-  
+
   this.x.domain(data.range);
   
   this.y.domain([0, d3.max(browsers, function(c){

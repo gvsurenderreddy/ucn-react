@@ -28,21 +28,21 @@ class DataLogger( object ):
 	
 	#///////////////////////////////////////
 	def connect( self ):
-		print "connecting to postgres database %s " % self.dbname
+		#print "connecting to postgres database %s " % self.dbname
 		
 		if self.connected is False:
 		
 			try:
 				constr = "dbname=%s user=%s host=%s password=%s" % (self.dbname,self.dbuser,self.dbhost,self.dbpass)
-				print constr
+				#print constr
 				self.conn = psycopg2.connect("dbname=hostview user=hostview host=localhost password=hostview")
 				self.cur = self.conn.cursor()
 				self.connected = True
-				print "successfully connected!"
+				#print "successfully connected!"
 				
 			except Exception, e:
-				print e
-				print "unable to connect to the database!"
+				logger.error(e)
+				logger.error("unable to connect to the database!")
 	
 	
 	@reconnect
@@ -90,14 +90,14 @@ class DataLogger( object ):
 			try:
 				self.cur.execute(sql,data)
 			except Exception, e:
-				print e
+				logger.error(e)
 				logger.error("error inserting url %s" % str(url))
 
 		#commit now..
 		try:
 			self.conn.commit()				
 		except Exception, e:
-			print e
+			logger.error(e)
 			logger.error("error bulk committing dns")				
 			
  	@reconnect
@@ -115,9 +115,7 @@ class DataLogger( object ):
 				if ("http" in items[8]  and "//" in items[8]):
 					parts  = items[8].split("//")[1].split("/")
 
-					domain = parts[0]
-					print domain
-					
+					domain = parts[0]	
 					res = get_tld(items[8], as_object=True, fail_silently=True)
 
 					if res is not None:
@@ -156,7 +154,7 @@ class DataLogger( object ):
 						data = (deviceid,url['verb'],url['path'], url['statuscode'],url['tld'], url['contenttype'], url['clength'], url['host'], url['dest'], url['ts'])			
 						self.cur.execute(sql,data)
 					except Exception, e:
-						print e
+						logger.error(e)
 						logger.error("error inserting url %s" % str(url))
 
 		#commit now..

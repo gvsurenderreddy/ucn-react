@@ -68,8 +68,7 @@ def fetchlocations():
  							if time.mktime(lastUpdate.timetuple()) > time.mktime(latestUpdate.timetuple()):
  								latestUpdate = lastUpdate
 						
-						print latestUpdate 
-						print int(time.mktime(latestUpdate.timetuple()))						
+											
  						place = segment['place']
  						enter = int(time.mktime(dateutil.parser.parse(segment['startTime']).timetuple()))
  						exit  = int(time.mktime(dateutil.parser.parse(segment['endTime']).timetuple()))
@@ -84,7 +83,7 @@ def fetchlocations():
  			
  						datalogger.remove_zones(token['deviceid'], row['date'])
  			logger.debug("adding zones ")
- 			logger.debug(zones)					
+ 			logger.debug(zones)
  			datalogger.insert_zones(zones)
  			zones=[]
 		
