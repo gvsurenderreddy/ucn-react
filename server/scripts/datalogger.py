@@ -128,6 +128,11 @@ class DataLogger( object ):
 					if len(parts) > 0:
 						path = "".join(parts[1:])
 					
+					#sometimes dest can just be a '-', need to set it to a valid host so postgres does not barf
+					if items[11].split("/")[1].strip() == "-":
+						dest = "0.0.0.0"
+					else:
+						dest = items[11].split("/")[1]
 					
 					#url = {'ts':items[2].split(".")[0], 'host':items[4], 'tld':tld, 'domain':domain, 'path': path}
 					url = {'ts':items[2].replace(".",""), 
@@ -138,7 +143,7 @@ class DataLogger( object ):
 							'verb':items[7],
 							'clength':items[6],
 							'statuscode':items[5].split("/")[1],
-							'dest':items[11].split("/")[1],
+							'dest':dest,
 							'contenttype':items[12],
 						}
 					
