@@ -3,14 +3,25 @@ from datetime import datetime
 import time
 from config import TestingConfig
 from tld import get_tld
+import psycopg2
 
 def bulk_insert_urls(content):
+	
+	dbname = 'hostview'
+	dbuser = 'hostview'
+	dbhost = 'localhost'
+	dbpass = 'hostview'
+	
+	constr = "dbname=%s user=%s host=%s password=%s" % (dbname,dbuser,dbhost,dbpass)
+				#print constr
+	conn = psycopg2.connect("dbname=hostview user=hostview host=localhost password=hostview")
+	cur = conn.cursor()	
 	
 	for line in content:
 
 			items = line.split()
-			deviceid=1
 			
+			deviceid = 1
 			if len(items) < 9:
 				print "error parsing line"
 				print line
@@ -50,8 +61,13 @@ def bulk_insert_urls(content):
 						}
 					
 					try:
+						sql = "SELECT deviceid from vpnips WHERE ip=%s"
+						data = (url['host'],)
+						cur.execute(sql,data)
+						deviceid =  cur.fetchone()
+						
 						data = (deviceid,url['verb'],url['path'], url['statuscode'],url['tld'], url['contenttype'], url['clength'], url['host'], url['dest'], url['ts'])			
-						print url['dest']
+						print "%s %s %s %s " % (url['host'], deviceid, url['ts'], url['verb'])
 					except Exception, e:
 						print e
 

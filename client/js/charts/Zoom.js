@@ -141,7 +141,11 @@ Zoom.prototype.update = function(data){
   }
  
   if (data.locations){
+  	console.log("zoom - re-rendering locations with");
+  	console.log(data.locations);
     this.locations(data.locations);
+  }else{
+  	console.log("not rendingi locatons");
   }
   //exit!
   zoom.exit()
@@ -150,22 +154,32 @@ Zoom.prototype.update = function(data){
 
 Zoom.prototype.locations = function(locations){
  	
+ 	console.log("ok locations are");
+ 	console.log(locations);
+ 	
  	var overlay = this.svg.select("g.locationoverlay");
 	var height = this.opts.height;
 	
 	var zones = overlay.selectAll("rect")
 					   .data(locations, function(d){return d.enter + ""+ d.exit});
-					   					   						    
+		
+	//enter			   					   						    
 	zones.enter()
 		 .append("rect")
-		 .attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
-		 .attr("y", 0)
-		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
-		 .attr("height", height)		
+		 .attr("height", height)
+		 .attr("y", 0)		
 		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
 		 .style("fill-opacity", function(d){return 0.2})	
 		 .style("stroke", "none")
 	
+	//update
+	zones.transition()
+		 .duration(1000)
+		 .attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
+		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
+		 
+	
+	//exit
 	zones.exit().remove();		
 };
 

@@ -16,14 +16,14 @@ var extend = require('extend');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _data, _zoomdata, _urlhistory, _currenturl, _browsingdata;
+var _data, _urlhistory, _currenturl, _browsingdata;
 
 var overlaylocations = false;
 
 var _toggle_url = function(url){
 	if (url === _currenturl){
 		_currenturl = "";
-		_data.urlhistory = _zoomdata.urlhistory = _browsingdata.urlhistory = _urlhistory = [];
+		_data.urlhistory = _browsingdata.urlhistory = _urlhistory = [];
 	}else{
 		_currenturl = url;
 	}
@@ -35,24 +35,21 @@ var _toggle_locations = function(){
 		WebAPIUtils.fetch_locations();
 	}else{
 		_data.locations = [];
-		_data.range =  d3.extent(_data.keys, function(d){return d*1000});
-		//set zoomdata back to data
-		_zoomdata = extend({}, _data);
+		_browsingdata.locations = [];
+		//_data.range =  d3.extent(_data.keys, function(d){return d*1000});
 	}
 	overlaylocations = !overlaylocations;
 };
 
 var _update_filtered_data = function(range){
- 	_zoomdata.range = range;
  	_browsingdata.range = range;
 };
 
 var _update_location_data = function(data){
   _data.locations = data.locations;	
-  _zoomdata.locations  = data.locations;
   _browsingdata.locations = data.locations;
   
-  _data.range = data.locations.reduce(function(acc, obj){
+  /*_data.range = data.locations.reduce(function(acc, obj){
   	if (acc[0] > obj.exit*1000){
   		acc[0] = obj.exit*1000;
   	}
@@ -61,31 +58,24 @@ var _update_location_data = function(data){
   	}
   	
   	return acc;
-  },_data.range);
-  
-  _zoomdata.range = _data.range;
+   },_data.range);*/
 };
 
 var _update_raw_url_history_data = function(data){
   _urlhistory  = data.timestamps;
   _data.urlhistory = _urlhistory;
-  _zoomdata.urlhistory =_urlhistory;
   _browsingdata.urlhistory = _urlhistory;
 };
 
 var _update_zoom_data = function(data){
-	
 	_browsingdata = data;
 	_browsingdata.locations = _data.locations;
-	_zoomdata = _format_data(data.browsing);
-	//set the locations data to whatever it currently is...
-	_zoomdata.locations = _data.locations;
+	_browsingdata.urlhistory = _data.urlhistory;
 };
 
 var _update_data = function(data){
   _browsingdata = data;
   _data = _format_data(data.browsing);
-  _zoomdata = extend({}, _data);
 };
 
 _format_data = function(data){
@@ -129,12 +119,13 @@ _format_data = function(data){
 
 var BrowsingDataStore = assign({}, EventEmitter.prototype, {
 
+   
   data: function(){
     return _data || {};
   },
 
   zoomdata: function(){
-  	return _browsingdata || {};//_zoomdata || _data || {};
+  	return _browsingdata || {};
   },
   
   emitChange: function() {
@@ -190,6 +181,8 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
       break;	   	
 	
 	case ActionTypes.RAW_LOCATION_DATA:
+	  console.log("GOT RAW LOCATION DATA!");
+	  console.log(action.rawData);
       _update_location_data(action.rawData);
       BrowsingDataStore.emitChange();
       break;

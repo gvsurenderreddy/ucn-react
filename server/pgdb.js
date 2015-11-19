@@ -79,7 +79,7 @@ module.exports = {
     fetch_unclassified_for_device: function(deviceid){
     	var sql="SELECT h.httphost as url, count(h.httphost) as count FROM browsing h LEFT JOIN CLASSIFICATION c ON (c.deviceid = h.id AND h.httphost = c.tld) WHERE id=$1 AND (c.success = 0 OR c.success IS NULL) GROUP BY h.httphost ORDER BY count DESC";
       	var params = [deviceid];
-      	_print_query(sql,params);
+      	//_print_query(sql,params);
       	return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
 				return result.url;
@@ -154,7 +154,7 @@ module.exports = {
       		params = [classifier,deviceid];
       	}
       	
-      	_print_query(sql,params);
+      	
       	
       	return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
@@ -177,9 +177,10 @@ module.exports = {
 	},
 	
 	fetch_matching_categories_for_device: function(partial, deviceid){
-		var sql = "SELECT DISTINCT(h.httphost) as tld, c.classification FROM browsing h LEFT JOIN CLASSIFICATION c ON c.tld = h.httphost WHERE h.httphost LIKE $1 AND h.id=$2 AND c.success = 1";
-       	var params = ['%'+partial+'%',deviceid];
-    
+		//var sql = "SELECT DISTINCT(h.httphost) as tld, c.classification FROM browsing h LEFT JOIN CLASSIFICATION c ON c.tld = h.httphost WHERE h.httphost LIKE $1 AND h.id=$2 AND c.success = 1";
+       	var sql = "SELECT c.tld, c.classification FROM classification c where c.deviceid=$1 AND c.tld LIKE $2 AND c.success= 1";
+       	var params = [deviceid,'%'+partial+'%'];
+    	//_print_query(sql,params);
        	return _execute_sql(sql,params).then(function(results){
        		return results;
        	});
@@ -228,10 +229,10 @@ module.exports = {
 		var results = urls.map(function(url){
 			var sql = "SELECT * FROM classification WHERE deviceid =$1 AND tld =$2";
 		  	var params = [deviceid, url];
-		  	_print_query(sql,params);
+		  	//_print_query(sql,params);
 		  	
 		  	return _execute_sql(sql, params).then(function(result){
-		  		console.log(result);
+		  		
 		  		if (result.length > 0){
 		  			sql = "UPDATE CLASSIFICATION SET classification=$1, classifier=$2, success=1, score=$3, error='' WHERE deviceid=$4 AND tld=$5"
 					params = [classification, classifier, 1, deviceid,url]
@@ -239,7 +240,7 @@ module.exports = {
 					sql = "INSERT INTO CLASSIFICATION (deviceid, tld, success, classifier, score, classification) VALUES ($1,$2,$3,$4,$5,$6)"
 					params = [deviceid,url, 1, classifier, 1.0, classification]
 				}
-				_print_query(sql,params);
+				//_print_query(sql,params);
 				return _execute_sql(sql,params);
 			});
 		});

@@ -46,9 +46,15 @@ var Categories = React.createClass({
       categories: this.state.categories,
       expanded: this.state.urls,
     };
+    
+    console.log("chart data is");
+    console.log(chartdata);
 
     if (this.state.categories.children){
+    	console.log("CRAETONG CHART>>");
       chart = <Chart type="Categories" data={chartdata} options={options}/>;
+    }else{
+    	console.log("hmm nthing chanegs");
     } 
     
     return  <div>
@@ -91,8 +97,7 @@ var Categories = React.createClass({
   },
   
   _onChange: function() {
-     var state = getStateFromStores();
-     this.setState(state);
+     this.setState(getStateFromStores());
   }
 });
 

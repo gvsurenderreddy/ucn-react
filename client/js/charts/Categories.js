@@ -47,6 +47,7 @@ Categories.prototype.collapse = function(d){
 };
 
 Categories.prototype.expandpath = function(path, tree){
+	
   var top = path.shift();
   
   var subtree = tree.filter(function(item){
@@ -72,19 +73,25 @@ Categories.prototype.collapseAll = function(){
       d.children.forEach(collapseChildren);
       this.collapse(d);
     }
+    if (d._children) {
+       d._children.forEach(collapseChildren);
+    }
   }.bind(this);
 
   if(this.root.children){
+    
     this.root.children.forEach(function(d){
       if (d.children) {
         d.children.forEach(collapseChildren);
         this.collapse(d);
       }
+      if (d._children) {
+        d._children.forEach(collapseChildren);
+      }
     }.bind(this));
-
+    
     this.collapse(this.root);
   }
-
 };
 
 Categories.prototype.initialise = function(data, node, opts){
@@ -136,6 +143,8 @@ Categories.prototype.nodeselected = function(node){
 
 Categories.prototype.update = function(data){
 
+	
+	
 	if (!('x0' in data.categories)){
 	  this.root = data.categories;
 	  this._selected = {},
@@ -155,7 +164,7 @@ Categories.prototype.update = function(data){
 	  this.generate(this.root);
 	}
 	else if (data.expanded && data.expanded.length > 0){
-    
+    	
 		this.classifications = Object.keys(data.expanded.map(function(item){
 		  return item.classification;
 		}).reduce(function(acc, key){
@@ -164,11 +173,14 @@ Categories.prototype.update = function(data){
 		},{}));
 	
 		this.collapseAll();
-
+		
+				
 		var find = function(tree){
 		  if (tree._children){
 			tree._children.forEach(function(child){
+			
 			  if (this.classifications.indexOf("/"+child.path) !== -1){
+				
 				this.expandpath(child.path.split("/"), this.root._children);
 			  }
 			  if (child._children){
@@ -177,7 +189,9 @@ Categories.prototype.update = function(data){
 			}.bind(this));
 		  }
 		}.bind(this);
+		
 	
+		
 		find(this.root);
 		this.root.children = this.root._children;
 		this.root._children = null;

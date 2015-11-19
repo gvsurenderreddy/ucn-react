@@ -106,8 +106,6 @@ Browsing.prototype.initialise = function(data, node, opts){
 
 Browsing.prototype.update = function(data){
 
-	console.log("<----- OK AM NOW IN UPDATE!!!! ---->");
-
     var self = this;
     //guard against empty data;
     if (!data || !data.browsing){
@@ -118,10 +116,7 @@ Browsing.prototype.update = function(data){
  	
  	this.x.domain(data.range);
     var browsers = this.stack(data.browsing);
-    
-    console.log("data range is ");
- 	console.log(data.range);   
-		
+    	
     this.y.domain([0, d3.max(browsers, function(c){
         return d3.max(c.values.filter(function(item){return item.date >= data.range[0] && item.date <= data.range[1];}), function(d) {return d.y0 +d.y;});
     })]);
@@ -174,10 +169,12 @@ Browsing.prototype.update = function(data){
 		console.log("OK URL HISTORT IS");
 		console.log(data.urlhistory);
         this.urlhistory(data.urlhistory);
+	}else{
+		console.log("no url history to update!");
 	}
 	if (data.locations){
-	  this.locations(data.locations);
-	}    
+	  	this.locations(data.locations);
+	}   
 };
 
 Browsing.prototype.locations = function(locations){
@@ -192,9 +189,11 @@ Browsing.prototype.locations = function(locations){
 	//enter			   					   						    
 	zones.enter()
 		 .append("rect")	
-		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
-		 .style("fill-opacity", function(d){return 0.5})	
+		 .style("fill", function(d){this.colour(d.name)}.bind(this))	
+		 .style("fill-opacity", 0.1)	
 		 .style("stroke", "none")
+		 .attr("y", 0)
+		 .attr("height", height)
 		 .on('mouseover', function(d){
 		 		console.log("ok am showing the location tip now!!!");
 		 		console.log(d);
@@ -203,13 +202,11 @@ Browsing.prototype.locations = function(locations){
 		 .on('mouseout', this.locationtip.hide);
 	
 	//update
-	zones
+	zones.transition()
+		.duration(1000)
 		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
-		 .attr("y", 0)
-		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
-		 .attr("height", height)
-			
-						    
+		.attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
+							    
 	//exit
 	zones.exit().remove();	
 };

@@ -39,6 +39,8 @@ var _updatecategorymatches = function(matches){
 
 var _updateurlmatches = function(matches){
     _urlmatches = matches;
+    console.log("url matches are");
+    console.log(_urlmatches);
 };
 
 var _set_urls = function(urls){
@@ -226,7 +228,6 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
   switch(action.action.type) {
 
   	case ActionTypes.RAW_CATEGORY_DATA:
-  	  console.log("seen raw category data, so rebuilding tree...");
       _updatetree(action.action.rawData);
       CategoryStore.emitChange();
       break;
@@ -237,6 +238,8 @@ CategoryStore.dispatchToken = AppDispatcher.register(function(action) {
       break;
 
     case ActionTypes.RAW_URL_MATCHES:
+       console.log("updating raw url matches..");
+       console.log(action.action.rawData);
       _updateurlmatches(action.action.rawData);
       CategoryStore.emitChange();
       break;

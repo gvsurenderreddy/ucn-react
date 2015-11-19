@@ -177,20 +177,22 @@ BrowsingBar.prototype.locations = function(locations){
 	//enter			   					   						    
 	zones.enter()
 		 .append("rect")	
-		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
-		 .style("fill-opacity", function(d){return 0.5})	
+		 .style("fill", function(d){return this.colour(d.name)}.bind(this))	
+		 .style("fill-opacity", 0.1)	
 		 .style("stroke", "none")
+		 .attr("y", 0)
+		 .attr("height", height)
 		 .on('mouseover', function(d){
-		 		this.locationtip.show(d)}.bind(this)
+		 	this.locationtip.show(d)}.bind(this)
 		 )
 		 .on('mouseout', this.locationtip.hide);
 	
 	//update
-	zones
+	zones.transition()
+		.duration(ANIMATION_DURATION)
 		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
-		 .attr("y", 0)
-		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
-		 .attr("height", height)
+		.attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
+		 
 			
 						    
 	//exit
