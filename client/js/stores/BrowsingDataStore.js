@@ -16,7 +16,8 @@ var extend = require('extend');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _data, _urlhistory, _currenturl, _browsingdata;
+var _data, _urlhistory, _devices, _currenturl, _browsingdata;
+var _selectedlocation = {};
 
 var overlaylocations = false;
 
@@ -49,16 +50,19 @@ var _update_location_data = function(data){
   _data.locations = data.locations;	
   _browsingdata.locations = data.locations;
   
-  /*_data.range = data.locations.reduce(function(acc, obj){
-  	if (acc[0] > obj.exit*1000){
+  _data.range = data.locations.reduce(function(acc, obj){
+  	if (acc[0] > obj.exit*1000 || acc[0]==0){
   		acc[0] = obj.exit*1000;
   	}
   	if (acc[1] < obj.enter*1000){
   		acc[1] = obj.enter*1000;
-  	}
-  	
+  	}	
   	return acc;
-   },_data.range);*/
+   },_data.range);
+};
+
+var _update_selected_location = function(lat, lng){
+	_selectedlocation = {lat:parseFloat(lat), lng:parseFloat(lng)};
 };
 
 var _update_raw_url_history_data = function(data){
@@ -113,19 +117,27 @@ _format_data = function(data){
       hosts: hosts,
       browsing: browsing,
       range:  d3.extent(keys, function(d){return d*1000}),
-      urlhistory: _urlhistory || []
+      urlhistory: _urlhistory || [],
+      devices: data.devices,
   }
 };
 
 var BrowsingDataStore = assign({}, EventEmitter.prototype, {
-
-   
+ 
   data: function(){
     return _data || {};
   },
 
   zoomdata: function(){
   	return _browsingdata || {};
+  },
+  
+  location: function(){
+  	return _selectedlocation;
+  },
+  
+  locationoverlay: function(){
+  	return overlaylocations;
   },
   
   emitChange: function() {
@@ -160,7 +172,6 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
       break;
       
     case ActionTypes.RAW_ZOOM_DATA:
-    
       _update_zoom_data(action.rawData);
       BrowsingDataStore.emitChange();
 	  break;
@@ -181,12 +192,15 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
       break;	   	
 	
 	case ActionTypes.RAW_LOCATION_DATA:
-	  console.log("GOT RAW LOCATION DATA!");
-	  console.log(action.rawData);
       _update_location_data(action.rawData);
       BrowsingDataStore.emitChange();
       break;
-     
+    
+    case ActionTypes.LOCATION_SELECTED:
+      _update_selected_location(action.lat, action.lng);
+      BrowsingDataStore.emitChange();	
+      break;
+    
     case ActionTypes.TOGGLE_LOCATIONS:
       _toggle_locations();
       BrowsingDataStore.emitChange();

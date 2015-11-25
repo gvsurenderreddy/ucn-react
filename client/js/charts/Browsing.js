@@ -1,7 +1,7 @@
+var ActionCreators = require('../actions/ActionCreators');
 var d3 = require('../lib/d3.min');
 var d3tip = require('../lib/d3.tip')(d3);
 var fn = require('../utils/fn');
-var ActionCreators = require('../actions/ActionCreators');
 var Colours = require('../utils/Colours');
 
 var ANIMATION_DURATION = 2000;
@@ -112,7 +112,7 @@ Browsing.prototype.update = function(data){
       console.log("no data yet..");
       return;
     }
- 	
+ 
  	
  	this.x.domain(data.range);
     var browsers = this.stack(data.browsing);
@@ -166,11 +166,7 @@ Browsing.prototype.update = function(data){
     //handle overlays!
           
 	if (data.urlhistory){
-		console.log("OK URL HISTORT IS");
-		console.log(data.urlhistory);
         this.urlhistory(data.urlhistory);
-	}else{
-		console.log("no url history to update!");
 	}
 	if (data.locations){
 	  	this.locations(data.locations);
@@ -195,11 +191,14 @@ Browsing.prototype.locations = function(locations){
 		 .attr("y", 0)
 		 .attr("height", height)
 		 .on('mouseover', function(d){
-		 		console.log("ok am showing the location tip now!!!");
-		 		console.log(d);
-		 		this.locationtip.show(d)}.bind(this)
-		 )
-		 .on('mouseout', this.locationtip.hide);
+		 		this.locationtip.show(d);
+		 		
+		 		ActionCreators.locationselected(d.name.split(","));
+		 }.bind(this))
+		 .on('mouseout', this.locationtip.hide)
+		 .on('click', function(d){
+		 	
+		 });
 	
 	//update
 	zones.transition()
@@ -242,22 +241,6 @@ Browsing.prototype.urlhistory = function(data){
 
     timestamps.exit()
            .remove();
-};
-
-Browsing.prototype._addListeners = function(){
-
-};
-
-Browsing.prototype._removeListeners = function(){
-
-};
-
-_onMouseOver = function(options){
-
-};
-
-_onMouseOut = function(){
-
 };
 
 module.exports = Browsing;

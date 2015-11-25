@@ -1,5 +1,6 @@
 var ActionCreators = require('../actions/ActionCreators');
 var d3 = require('../lib/d3.min');
+var d3tip = require('../lib/d3.tip')(d3);
 var Colours = require('../utils/Colours');
 /*
  * This is the overview chart that is used to select areas to zoom in on!
@@ -94,7 +95,6 @@ Zoom.prototype.update = function(data){
   }
   
   var browsers = this.stack(data.browsing);
-
   this.x.domain(data.range);
   
   this.y.domain([0, d3.max(browsers, function(c){
@@ -141,8 +141,6 @@ Zoom.prototype.update = function(data){
   }
  
   if (data.locations){
-  	console.log("zoom - re-rendering locations with");
-  	console.log(data.locations);
     this.locations(data.locations);
   }else{
   	console.log("not rendingi locatons");
@@ -154,10 +152,9 @@ Zoom.prototype.update = function(data){
 
 Zoom.prototype.locations = function(locations){
  	
- 	console.log("ok locations are");
- 	console.log(locations);
- 	
  	var overlay = this.svg.select("g.locationoverlay");
+ 	overlay.call(this.locationtip)
+ 	
 	var height = this.opts.height;
 	
 	var zones = overlay.selectAll("rect")
@@ -171,7 +168,15 @@ Zoom.prototype.locations = function(locations){
 		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
 		 .style("fill-opacity", function(d){return 0.2})	
 		 .style("stroke", "none")
-	
+		 .on('mouseover', function(d){
+		 	this.locationtip.show(d);
+		 	ActionCreators.locationselected(d.name.split(","));
+		 }.bind(this))
+		 .on('mouseout', this.locationtip.hide)
+		 .on('click', function(d){
+		 	
+		 });
+		 
 	//update
 	zones.transition()
 		 .duration(1000)
@@ -183,6 +188,11 @@ Zoom.prototype.locations = function(locations){
 	zones.exit().remove();		
 };
 
+Zoom.prototype.locationtip = d3tip().attr('class', 'd3-tip')
+										.offset([-10,0])
+										.html(function(d){
+											return "<strong>" + d['name'] + "</strong>";
+										});
 
 Zoom.prototype.urlhistory = function(data){
 

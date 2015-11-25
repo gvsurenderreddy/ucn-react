@@ -19,6 +19,14 @@ module.exports = {
     });
   },
 
+  locationselected: function(latlng){
+  	 AppDispatcher.handleViewAction({
+      type: ActionTypes.LOCATION_SELECTED,
+      lat: latlng[0],
+      lng: latlng[1],
+    });
+  },
+  
   rangechange: function(range){
     
     AppDispatcher.handleViewAction({

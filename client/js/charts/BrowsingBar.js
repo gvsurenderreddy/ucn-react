@@ -183,8 +183,9 @@ BrowsingBar.prototype.locations = function(locations){
 		 .attr("y", 0)
 		 .attr("height", height)
 		 .on('mouseover', function(d){
-		 	this.locationtip.show(d)}.bind(this)
-		 )
+		 	this.locationtip.show(d)
+		 	ActionCreators.locationselected(d.name.split(","));
+		 }.bind(this))
 		 .on('mouseout', this.locationtip.hide);
 	
 	//update

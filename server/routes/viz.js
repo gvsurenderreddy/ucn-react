@@ -17,8 +17,6 @@ router.use(function(req, res, next) {
 
 router.get('/', function(req,res,next){
 	var user = req.user;
-	console.log("seen user");
-	console.log(req.user);
 	
 	return Device.findDevicesForUser(user.username).then(function(results){
 		var devices = results.map(function(device){
@@ -38,29 +36,29 @@ router.get('/device', function(req, res, next){
 	res.render('device')
 });
 
-router.get('/browsing', function(req,res, next){
+router.get('/browsing', function(req, res, next){
+  var user = req.user;
   var device = req.query.device;
   var from = req.query.from ? parseInt(req.query.from) : null;
   var to   = req.query.to ? parseInt(req.query.to) : null;
+  console.log("finding all devices for " + user.username);
   
-  if (from && to){
-  	console.log(req.query.from + "->" + req.query.to);
-  }
-  console.log("getting browsing data for " + device);
-
-  pgdb.fetch_device_id_for_device(device).then(function(deviceid){
-  	console.log("deviceid is " + deviceid);
-  	return deviceid;
-  })
-  .then(function(deviceid){
-  	
-  	return [deviceid, req.query.to ? {ts:to} : pgdb.fetch_max_ts_for_device(deviceid)];
-  })
-  .spread(function(deviceid, max){
   
-    return [deviceid, max.ts, req.query.from ? {ts:from} : pgdb.fetch_min_ts_for_device(deviceid, max.ts-SINCE)];
+  Device.findDevicesForUser(req.query.device.split(".")[0]).then(function(results){
+	return results.map(function(device){
+		return device.devname;
+	});
   })
-  .spread(function(deviceid, maxts, min){
+  .then(function(devices){
+  	return [devices, pgdb.fetch_device_id_for_device(device)]
+  })
+  .spread(function(devices, deviceid){
+  	return [devices, deviceid, req.query.to ? {ts:to} : pgdb.fetch_max_ts_for_device(deviceid)];
+  })
+  .spread(function(devices, deviceid, max){
+    return [devices, deviceid, max.ts, req.query.from ? {ts:from} : pgdb.fetch_min_ts_for_device(deviceid, max.ts-SINCE)];
+  })
+  .spread(function(devices, deviceid, maxts, min){
   	var difference = maxts-min.ts;
     var timerange = {from:min.ts, to:maxts};
 
@@ -68,20 +66,23 @@ router.get('/browsing', function(req,res, next){
 	var binnedtimerange = {from: parseInt(min.ts/bin)*bin, to: parseInt(maxts/bin)*bin}
 	   
     return [
+    			devices,
     			bin,
     			binnedtimerange, 
     			pgdb.fetch_binned_browsing_for_device(deviceid, bin, timerange.from, timerange.to), 
     			pgdb.fetch_urls_for_device(deviceid, timerange.from, timerange.to)
     		];
   })
-  .spread(function(bin,timerange,binned,urls){
+  .spread(function(devices,bin,timerange,binned,urls){
     res.send({
     			browsing:{
       						timerange: timerange,
       						bin: bin,
       						binned  : binned,
+      						devices: devices,
       					},
-      			urls: urls
+      			urls: urls,
+      			
     });
   });
 });

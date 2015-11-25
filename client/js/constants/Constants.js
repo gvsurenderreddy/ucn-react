@@ -13,6 +13,7 @@ module.exports = {
 		RAW_LOCATION_DATA:null,
 		RAW_UNCLASSIFIED: null,
 		TOGGLE_LOCATIONS: null,
+		LOCATION_SELECTED: null,
 		URL_CLICKED:null,
 		CATEGORY_NODE_SELECTED: null,
 		CATEGORY_SELECTED: null,
