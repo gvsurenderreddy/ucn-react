@@ -33,6 +33,10 @@ var _print_query = function(sql, params){
 	console.log("*******");
 };
 
+var _convert_to_tuple = function(devices){
+	return "(" + devices.map(function(item){return "'" + item + "'"}).join(",") + ")";
+};
+
 module.exports = {
 
 	fetch_hosts: function(){
@@ -50,10 +54,28 @@ module.exports = {
 		});
 	},
 	
+	fetch_max_ts_for_devices: function(deviceids){
+		var sql = "SELECT max(h.timestamp/1000) as ts FROM browsing h WHERE id IN " + _convert_to_tuple(deviceids);
+		
+		return _execute_sql(sql).then(function(results){
+			return results[0] || {};
+		});
+	},
+	
 	fetch_min_ts_for_device: function(deviceid, smallest){
 		var sql = "SELECT min(h.timestamp/1000) as ts FROM browsing h WHERE id=$1 AND h.timestamp/1000 >= $2";
 		
 		var params = [deviceid,smallest];
+		
+		return _execute_sql(sql,params).then(function(results){
+			return results[0] || {};
+		});
+	},
+	
+	fetch_min_ts_for_deviceids: function(deviceids, smallest){
+		var sql = "SELECT min(h.timestamp/1000) as ts FROM browsing h WHERE id IN " + _convert_to_tuple(deviceids) + " AND h.timestamp/1000 >= $1";
+		
+		var params = [smallest];
 		
 		return _execute_sql(sql,params).then(function(results){
 			return results[0] || {};
@@ -68,9 +90,26 @@ module.exports = {
 		});
 	},
 	
+	fetch_binned_browsing_for_devices: function(deviceids, bin, from, to){
+		var sql = "SELECT (timestamp/1000/$1) * $2 as bin, id as host,  COUNT(DISTINCT httphost) as total from browsing WHERE id IN " + _convert_to_tuple(deviceids) + " AND (timestamp/1000 >= $3 AND timestamp/1000 <= $4) GROUP BY id, bin ORDER BY id, bin";
+      	var params = [bin,bin,from,to]
+      	return _execute_sql(sql,params).then(function(results){
+			return results;
+		});
+	},
+	
 	fetch_urls_for_device: function(deviceid, from, to){
 		var sql = "SELECT httphost as url, count(DISTINCT(timestamp/1000)) as total from browsing WHERE id=$1 AND (timestamp/1000 >= $2 AND timestamp/1000 <= $3) GROUP BY httphost ORDER BY total DESC ";
      	var params = [deviceid,from,to];
+     	return _execute_sql(sql,params).then(function(results){
+			return results;
+		});
+	},
+	
+	fetch_urls_for_devices: function(deviceids, from, to){
+		var sql = "SELECT httphost as url, count(DISTINCT(timestamp/1000)) as total from browsing WHERE id IN " + _convert_to_tuple(deviceids) + " AND (timestamp/1000 >= $1 AND timestamp/1000 <= $2) GROUP BY httphost ORDER BY total DESC ";
+     	var params = [from,to];
+     	//_print_query(sql,params);
      	return _execute_sql(sql,params).then(function(results){
 			return results;
 		});
@@ -87,9 +126,9 @@ module.exports = {
 		});
     },
 	
-	fetch_ts_for_url: function(deviceid, url){
-	 	var sql = "SELECT timestamp/1000 as ts from browsing WHERE id=$1 AND httphost=$2 ORDER BY timestamp ASC ";
-     	var params = [deviceid, url];
+	fetch_ts_for_url: function(deviceids, url){
+	 	var sql = "SELECT timestamp/1000 as ts from browsing WHERE id IN " + _convert_to_tuple(deviceids) + " AND httphost=$1 ORDER BY timestamp ASC ";
+     	var params = [url];
      	return _execute_sql(sql,params).then(function(results){
      		
 			return results.map(function(result){
@@ -126,6 +165,19 @@ module.exports = {
 					enter: parseInt(result.enter),
 					exit:  parseInt(result.exit),
 				}
+			});
+		});
+	},
+	
+	fetch_device_ids_for_selected: function(selected){
+		var sql = "SELECT id FROM devices WHERE devicename IN " + _convert_to_tuple(selected);
+		console.log(sql);
+		//var params = [_convert_to_tuple(selected)];
+		//_print_query(sql,params);
+		return _execute_sql(sql).then(function(results){
+			console.log(results);
+			return results.map(function(device){
+				return device.id;
 			});
 		});
 	},

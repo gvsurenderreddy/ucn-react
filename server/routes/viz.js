@@ -36,29 +36,40 @@ router.get('/device', function(req, res, next){
 	res.render('device')
 });
 
-router.get('/browsing', function(req, res, next){
+router.post('/browsing', function(req, res, next){
+  
   var user = req.user;
-  var device = req.query.device;
-  var from = req.query.from ? parseInt(req.query.from) : null;
-  var to   = req.query.to ? parseInt(req.query.to) : null;
-  console.log("finding all devices for " + user.username);
   
+  console.log(req.body);
   
-  Device.findDevicesForUser(req.query.device.split(".")[0]).then(function(results){
+  var selected 	= req.body.devices;
+  var family 	= req.body.family;
+  var from 	 	= req.body.from ? parseInt(req.body.from) : null;
+  var to   		= req.body.to ? parseInt(req.body.to) : null;
+  
+  Device.findDevicesForUser(family).then(function(results){
 	return results.map(function(device){
-		return device.devname;
+		return family + "." + device.devname;
 	});
   })
   .then(function(devices){
-  	return [devices, pgdb.fetch_device_id_for_device(device)]
+  	console.log("here, selected are ");
+  	console.log(selected);
+  	return [devices, pgdb.fetch_device_ids_for_selected(selected)]
   })
-  .spread(function(devices, deviceid){
-  	return [devices, deviceid, req.query.to ? {ts:to} : pgdb.fetch_max_ts_for_device(deviceid)];
+  .spread(function(devices, deviceids){
+  	console.log("here, deviceids are");
+  	console.log(deviceids);
+  	return [devices, deviceids, to ? {ts:to} : pgdb.fetch_max_ts_for_devices(deviceids)];
   })
-  .spread(function(devices, deviceid, max){
-    return [devices, deviceid, max.ts, req.query.from ? {ts:from} : pgdb.fetch_min_ts_for_device(deviceid, max.ts-SINCE)];
+  .spread(function(devices, deviceids, max){
+  console.log("here, max is ");
+  console.log(max);
+    return [devices, deviceids, max.ts, from ? {ts:from} : pgdb.fetch_min_ts_for_deviceids(deviceids, max.ts-SINCE)];
   })
-  .spread(function(devices, deviceid, maxts, min){
+  .spread(function(devices, deviceids, maxts, min){
+  	console.log("heer, min i s");
+  	console.log(min);
   	var difference = maxts-min.ts;
     var timerange = {from:min.ts, to:maxts};
 
@@ -69,8 +80,8 @@ router.get('/browsing', function(req, res, next){
     			devices,
     			bin,
     			binnedtimerange, 
-    			pgdb.fetch_binned_browsing_for_device(deviceid, bin, timerange.from, timerange.to), 
-    			pgdb.fetch_urls_for_device(deviceid, timerange.from, timerange.to)
+    			pgdb.fetch_binned_browsing_for_devices(deviceids, bin, timerange.from, timerange.to), 
+    			pgdb.fetch_urls_for_devices(deviceids, timerange.from, timerange.to)
     		];
   })
   .spread(function(devices,bin,timerange,binned,urls){
@@ -79,9 +90,10 @@ router.get('/browsing', function(req, res, next){
       						timerange: timerange,
       						bin: bin,
       						binned  : binned,
-      						devices: devices,
       					},
       			urls: urls,
+      			devices: devices,
+      			selected: selected,
       			
     });
   });
@@ -131,14 +143,14 @@ router.get('/urls', function(req,res, next){
 });
 
 
-router.get('/urls/history', function(req,res, next){
-    var url = req.query.url;
-    var device = req.query.device;
+router.post('/urls/history', function(req,res, next){
+    var url = req.body.url;
+    var devices = req.body.devices;
     
-    pgdb.fetch_device_id_for_device(device).then(function(deviceid){
-  		return deviceid;
-  	}).then(function(deviceid){
-  		return pgdb.fetch_ts_for_url(deviceid, url)
+    pgdb.fetch_device_ids_for_selected(devices).then(function(deviceids){
+  		return deviceids;
+  	}).then(function(deviceids){
+  		return pgdb.fetch_ts_for_url(deviceids, url)
   	}).then(function(ts){
         res.send({
           timestamps:ts
