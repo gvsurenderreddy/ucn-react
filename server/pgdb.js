@@ -162,12 +162,32 @@ module.exports = {
 			return results.map(function(result){
 				return {
 					name: result.name.trim() === "" ? result.lat+","+result.lng : result.name,
+					lat: result.lat,
+					lng: result.lng,
 					enter: parseInt(result.enter),
 					exit:  parseInt(result.exit),
 				}
 			});
 		});
 	},
+	
+	fetch_browsing_in_location_for_devices: function(deviceids, lat, lng){
+		var sql = "SELECT b.httphost as url, count(DISTINCT(b.timestamp/1000)) as total from browsing b, zones z WHERE"
+		sql += " b.id IN " + _convert_to_tuple(deviceids) + " AND"; 
+		sql += " b.id = z.deviceid AND z.lat::numeric=$1 AND z.lng::numeric=$2 AND (b.timestamp/1000  >= z.enter AND b.timestamp/1000 <= z.exit)"
+		sql += " GROUP BY httphost ORDER BY total DESC ";
+     	var params = [lat,lng];
+     	_print_query(sql,params);
+		return _execute_sql(sql,params).then(function(results){
+			return results;	
+		});
+	},
+	
+	
+	SELECT b.httphost as url, count(DISTINCT(b.timestamp/1000)) as total from browsing b,
+	zones z WHERE b.id IN ('38') AND b.id = z.deviceid AND z.lat::numeric='52.9736' AND 
+	z.lng::numeric='-1.20123' AND (b.timestamp/1000  >= z.enter AND b.timestamp/1000 <= z.exit) 
+	GROUP BY httphost ORDER BY total DESC;
 	
 	fetch_device_ids_for_selected: function(selected){
 		var sql = "SELECT id FROM devices WHERE devicename IN " + _convert_to_tuple(selected);

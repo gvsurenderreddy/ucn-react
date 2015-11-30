@@ -16,8 +16,11 @@ var extend = require('extend');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
-var _data, _urlhistory, _devices, _currenturl, _browsingdata;
+var _data, _urlhistory, _currenturl, _browsingdata;
 var _selectedlocation = {};
+
+
+// Browsing data is the data that has been selected, _data is the full unzoomed dataset
 
 var overlaylocations = false;
 
@@ -30,6 +33,7 @@ var _toggle_url = function(url){
 	}
 	
 };
+
 
 var _toggle_locations = function(){
 	if (!overlaylocations){
@@ -78,8 +82,8 @@ var _update_zoom_data = function(data){
 };
 
 var _update_data = function(data){
-  _browsingdata = data;
-  _data = _format_data(data.browsing);
+  	_browsingdata = data;
+  	_data = _format_data(data.browsing);
 };
 
 _format_data = function(data){
@@ -118,12 +122,11 @@ _format_data = function(data){
       browsing: browsing,
       range:  d3.extent(keys, function(d){return d*1000}),
       urlhistory: _urlhistory || [],
-      devices: data.devices,
   }
 };
 
 var BrowsingDataStore = assign({}, EventEmitter.prototype, {
- 
+  
   data: function(){
     return _data || {};
   },
@@ -196,11 +199,11 @@ BrowsingDataStore.dispatchToken = AppDispatcher.register(function(action) {
       BrowsingDataStore.emitChange();
       break;
     
-    case ActionTypes.LOCATION_SELECTED:
+    case ActionTypes.LOCATION_HIGHLIGHTED:
       _update_selected_location(action.lat, action.lng);
       BrowsingDataStore.emitChange();	
       break;
-    
+      
     case ActionTypes.TOGGLE_LOCATIONS:
       _toggle_locations();
       BrowsingDataStore.emitChange();

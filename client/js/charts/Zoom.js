@@ -45,10 +45,10 @@ Zoom.prototype.initialise = function(data, node, opts){
                 	return this.x(d.date);
                 }.bind(this))
                 .y0(function(d) {
-                	return this.y(d.y0);
+                	return this.y(0);//d.y0);
                 }.bind(this))
                 .y1(function(d) {
-                	return this.y(d.y0 + d.y);
+                	return this.y(/*d.y0 +*/ d.y);
                 }.bind(this)),
 
   this.svg = d3.select(node).append('svg')
@@ -56,6 +56,8 @@ Zoom.prototype.initialise = function(data, node, opts){
               .attr('height', opts.height + opts.margin.top + opts.margin.bottom)
               .append('g')
               .attr('transform', 'translate(' + opts.margin.left + ',' + opts.margin.top + ')');
+
+  
 
   var zoom = this.svg.append("g")
                      .attr("class", "zoom");
@@ -77,11 +79,10 @@ Zoom.prototype.initialise = function(data, node, opts){
              .call(this.yAxis);
 
   this.svg.append("g")
-          .attr("class","historyoverlay");
-
- this.svg.append("g")
           .attr("class","locationoverlay");
-
+  
+  this.svg.append("g")
+          .attr("class","historyoverlay");
 
   this.update(data);
 };
@@ -94,7 +95,9 @@ Zoom.prototype.update = function(data){
     return;
   }
   
+  //stack relies on y.domain, and y.domain relies on stack (d.y0!);
   var browsers = this.stack(data.browsing);
+  
   this.x.domain(data.range);
   
   this.y.domain([0, d3.max(browsers, function(c){
@@ -116,17 +119,21 @@ Zoom.prototype.update = function(data){
       .append("g")
       .attr("class", "browser")
       .append("path")
-      .attr("class", "zoomarea")
-      .style("fill", function(d){return self.colour(d.name);})
-      .style("fill-opacity", 0.6)
-      .style("stroke", function(d){return self.colour(d.name);})
-      .style("stroke-opacity", 1.0);
+      .attr("class", "zoomarea");
+      
 
   //update
   zoom.selectAll("path.zoomarea")
+  	  .style("fill", function(d){
+  	  	console.log("colour for " + d.name + " is " + self.colour(d.name));
+  	  	return self.colour(d.name);
+  	  })
+      .style("fill-opacity", 0.6)
+      .style("stroke", function(d){return self.colour(d.name);})
+      .style("stroke-opacity", 1.0)
       .attr("d", function(d) {
-      return self.area(d.values);
-  });
+      		return self.area(d.values);
+  	   });
 
   //update axes
 
@@ -151,39 +158,68 @@ Zoom.prototype.update = function(data){
 };
 
 Zoom.prototype.locations = function(locations){
- 	
+ 	var self = this;
  	var overlay = this.svg.select("g.locationoverlay");
  	overlay.call(this.locationtip)
  	
 	var height = this.opts.height;
 	
-	var zones = overlay.selectAll("rect")
+	var zones = overlay.selectAll("g.zone")
 					   .data(locations, function(d){return d.enter + ""+ d.exit});
-		
+	
 	//enter			   					   						    
-	zones.enter()
-		 .append("rect")
-		 .attr("height", height)
-		 .attr("y", 0)		
+	var zone = zones.enter()
+		 			.append("g").attr("class", "zone");
+		 			
+	zone.append("rect")
+		 .attr("class", "key")
+		 .attr("height", 10)
+		 .attr("y", 15)		
 		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
-		 .style("fill-opacity", function(d){return 0.2})	
+		 .style("fill-opacity", 1.0)	
 		 .style("stroke", "none")
 		 .on('mouseover', function(d){
 		 	this.locationtip.show(d);
-		 	ActionCreators.locationselected(d.name.split(","));
+		 	ActionCreators.locationhighlighted([d.lat, d.lng]);
 		 }.bind(this))
 		 .on('mouseout', this.locationtip.hide)
 		 .on('click', function(d){
-		 	
+		 	ActionCreators.locationselected([d.lat, d.lng]);
+		 });
+	
+	zone.append("rect")
+		 .attr("class", "zone")
+		 .attr("height", height-15)
+		 .attr("y", 15)		
+		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
+		 .style("fill-opacity", function(d){return 0.1})	
+		 .style("stroke", "none")
+		 .on('mouseover', function(d){
+		 	self.locationtip.show(d);
+		 	d3.select(this).style("fill-opacity", 0.5);
+		 	ActionCreators.locationhighlighted([d.lat, d.lng]);
+		 })
+		 .on('mouseout', function(){
+		 		self.locationtip.hide();
+		 		d3.select(this).style("fill-opacity", 0.1);
+		 })
+		 .on('click', function(d){
+		 	ActionCreators.locationselected([d.lat, d.lng]);
 		 });
 		 
 	//update
-	zones.transition()
-		 .duration(1000)
-		 .attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
-		 .attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
-		 
+	zones.selectAll("rect.key")
+		.transition()
+		.duration(1000)
+		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
+		.attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
 	
+	zones.selectAll("rect.zone")
+		.transition()
+		.duration(1000)
+		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
+		.attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))	 
+			 
 	//exit
 	zones.exit().remove();		
 };

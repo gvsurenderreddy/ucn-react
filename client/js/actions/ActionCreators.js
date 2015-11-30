@@ -19,7 +19,18 @@ module.exports = {
     });
   },
 
+  locationhighlighted: function(latlng){
+  	 AppDispatcher.handleViewAction({
+      type: ActionTypes.LOCATION_HIGHLIGHTED,
+      lat: latlng[0],
+      lng: latlng[1],
+    });
+  },
+  
+  
   locationselected: function(latlng){
+  	console.log("dispatching a location selected!!");
+  	
   	 AppDispatcher.handleViewAction({
       type: ActionTypes.LOCATION_SELECTED,
       lat: latlng[0],
@@ -33,17 +44,19 @@ module.exports = {
       type: ActionTypes.RANGE_CHANGE,
       range: range,
    	});
-   	
-   	WebAPIUtils.fetch_browsing_range({
-     	from: Math.floor(range[0]/1000),
-      	to: Math.floor(range[1]/1000),
-    });
   },
   
   togglelocations: function(){
   	AppDispatcher.handleViewAction({
       type: ActionTypes.TOGGLE_LOCATIONS,
    	});
+  },
+  
+  toggleselected: function(device){
+  	AppDispatcher.handleViewAction({
+  		type: ActionTypes.TOGGLE_DEVICE,
+  		device: device,
+  	});
   },
 
 };

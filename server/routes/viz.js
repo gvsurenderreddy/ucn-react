@@ -124,6 +124,20 @@ router.get('/location', function(req,res, next){
   });
 });
 
+router.post('/browsinginlocation', function(req,res,next){
+	var family 	= req.body.family;
+	var selected = req.body.devices;
+	var lat = req.body.lat;
+	var lng = req.body.lng;
+	console.log("am here");
+	console.log(req.body);
+	
+	pgdb.fetch_device_ids_for_selected(selected).then(function(selected){
+		return pgdb.fetch_browsing_in_location_for_devices(selected, lat, lng);	
+	}).then(function(results){
+		res.send(results);
+	});
+});
 
 router.get('/urls', function(req,res, next){
 

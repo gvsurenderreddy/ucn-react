@@ -18,14 +18,20 @@ module.exports ={
   	return _netaccess;
   },
   
-  fetch_browsing: function() {    
+  fetch_browsing: function(family, devices) {
+  	
+  	var data = {
+  		devices: devices,
+  		family:  family,
+  	}    
+	
   	if (_netaccess)
   		return;
   	_netaccess=true;	
     request
-      .get('/viz/browsing')
+      .post('/viz/browsing')
       .set('Accept', 'application/json')
-      .query(params)
+      .send(data)
       .end(function(err, res){
       	_netaccess = false;
         if (err){
@@ -38,15 +44,23 @@ module.exports ={
      });
   },
 
-   fetch_browsing_range: function(range) {
+  fetch_browsing_range: function(family, devices, range) {
+   	
+   	var data = {
+  		devices: devices,
+  		family: family,
+  		from: range.from,
+  		to: range.to,
+  	}    
+  	
    	if (_netaccess)
   		return;
   	_netaccess=true;
   	console.log("fetching browsing range!!!");
     request
-      .get('/viz/browsing')
+      .post('/viz/browsing')
       .set('Accept', 'application/json')
-      .query(extend(range,params))
+      .send(data)
       .end(function(err, res){
       	_netaccess = false;
       	
@@ -62,8 +76,43 @@ module.exports ={
      });
   
   },
+  
+  
+  fetch_browsing_in_location: function(family, devices, lat, lng){
+  	var data = {
+  		devices: devices,
+  		family: family,
+  		lat:lat,
+  		lng:lng,
+  	}    
+  	
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
+   	request
+      .post('/viz/browsinginlocation')
+      .set('Accept', 'application/json')
+      .send(data)
+      .end(function(err, res){
+      	_netaccess = false;
+      	
+        if (err){
+          console.log(err);
+        }else{
+			if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+    	  		console.log(res.body);
+    	  		//ServerActionCreators.receivedBrowsingData(res.body);
+    	  	}
+        }
+     });
+  },
+  
  
-  fetch_activity: function() {
+  fetch_activity: function(family, devices) {
+  
+  	
   	if (_netaccess)
   		return;
   	_netaccess=true;
@@ -182,16 +231,23 @@ module.exports ={
      });
   },
   
-  fetch_url_history: function(url) {
+  
+  //this needs to be called with device, family!
+  fetch_url_history: function(devices, url) {
   	if (_netaccess)
   		return;
   	_netaccess=true;
   	
-	console.log("***** fetching url history ********");
+  	var data = {
+  		url:url,
+  		devices: devices,
+  	}
+
     request
-      .get('/viz/urls/history')
+      .post('/viz/urls/history')
       .set('Accept', 'application/json')
-      .query(extend({url:url},params))
+      .send(data)
+      //.query(extend({url:url},params))
       .end(function(err, res){
       	_netaccess = false;
         if (err){

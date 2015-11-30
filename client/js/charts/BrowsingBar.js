@@ -112,7 +112,7 @@ BrowsingBar.prototype.update = function(data){
     var chart = this.svg.selectAll("g.chart");
                     
     var browsing = chart.selectAll("rect.url")
-                       .data(data.browsing.binned);
+                       .data(data.browsing.binned, function(d){return d.bin+d.host;});
    	
    	
     var delta = parseInt(data.browsing.timerange.from) + parseInt(data.browsing.bin);
@@ -121,7 +121,9 @@ BrowsingBar.prototype.update = function(data){
    	browsing.enter()
    			.append("rect")
     		.attr("class", "url")
-    		.style("fill", function(d){return this.colour(d.host)}.bind(this));
+    		.style("fill", function(d){
+  				return this.colour(d.host)
+  			}.bind(this));
     
     //update
     browsing
@@ -166,38 +168,71 @@ BrowsingBar.prototype.update = function(data){
 };
 
 BrowsingBar.prototype.locations = function(locations){
- 	
+ 	 	var self = this;
  	var overlay = this.svg.select("g.locationoverlay");
  	overlay.call(this.locationtip)
-	
+ 	
 	var height = this.opts.height;
 	
-	var zones = overlay.selectAll("rect")
+	var zones = overlay.selectAll("g.zone")
 					   .data(locations, function(d){return d.enter + ""+ d.exit});
-	//enter			   					   						    
-	zones.enter()
-		 .append("rect")	
-		 .style("fill", function(d){return this.colour(d.name)}.bind(this))	
-		 .style("fill-opacity", 0.1)	
-		 .style("stroke", "none")
-		 .attr("y", 0)
-		 .attr("height", height)
-		 .on('mouseover', function(d){
-		 	this.locationtip.show(d)
-		 	ActionCreators.locationselected(d.name.split(","));
-		 }.bind(this))
-		 .on('mouseout', this.locationtip.hide);
 	
+	//enter			   					   						    
+	var zone = zones.enter()
+		 			.append("g").attr("class", "zone");
+		 			
+	zone.append("rect")
+		 .attr("class", "key")
+		 .attr("height", 10)
+		 .attr("y", 15)		
+		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
+		 .style("fill-opacity", 1.0)	
+		 .style("stroke", "none")
+		 .on('mouseover', function(d){
+		 	this.locationtip.show(d);
+		 	ActionCreators.locationhighlighted([d.lat, d.lng]);
+		 	
+		 }.bind(this))
+		 .on('mouseout', this.locationtip.hide)
+		 .on('click', function(d){
+		 	ActionCreators.locationselected([d.lat, d.lng]);
+		 });
+	
+	zone.append("rect")
+		 .attr("class", "zone")
+		 .attr("height", height-15)
+		 .attr("y", 15)		
+		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
+		 .style("fill-opacity", function(d){return 0.1})	
+		 .style("stroke", "none")
+		 .on('mouseover', function(d){
+		 	self.locationtip.show(d);
+		 	d3.select(this).style("fill-opacity", 0.5);
+		 	ActionCreators.locationhighlighted([d.lat, d.lng]);
+		 })
+		 .on('mouseout', function(){
+		 	self.locationtip.hide();
+		 	d3.select(this).style("fill-opacity", 0.1);
+		 })
+		 .on('click', function(d){
+		 	ActionCreators.locationselected([d.lat, d.lng]);
+		 });
+		 
 	//update
-	zones.transition()
-		.duration(ANIMATION_DURATION)
+	zones.selectAll("rect.key")
+		.transition()
+		.duration(1000)
 		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
 		.attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
-		 
-			
-						    
+	
+	zones.selectAll("rect.zone")
+		.transition()
+		.duration(1000)
+		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))
+		.attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))	 
+			 
 	//exit
-	zones.exit().remove();	
+	zones.exit().remove();
 };
 
 BrowsingBar.prototype.locationtip = d3tip().attr('class', 'd3-tip')

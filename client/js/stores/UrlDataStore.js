@@ -10,6 +10,7 @@ var EventEmitter = require('events').EventEmitter;
 var Constants = require('../constants/Constants');
 var assign = require('object-assign');
 var WebAPIUtils = require('../utils/WebAPIUtils');
+var DevicesStore = require('./DevicesStore');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
@@ -19,12 +20,10 @@ var _selected = "";
 
 var _toggle_url = function(url){
 	if (_selected === url){
-		console.log("NOT FETCHING NEW DATA NOW");
 		_selected = "";
 	}else{
 		_selected = url;
-		console.log("FETCHING NEW DATA NOW");
-		WebAPIUtils.fetch_url_history(url);
+		WebAPIUtils.fetch_url_history(DevicesStore.selected(), url);
 	}
 };
 

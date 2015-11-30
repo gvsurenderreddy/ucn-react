@@ -3,13 +3,12 @@ var ActionCreators = require('../actions/ActionCreators');
 var Chart = require('./Chart.react');
 var Urls = require('./Urls.react');
 var BrowsingDataStore = require('../stores/BrowsingDataStore');
-var NetworkAccessStore = require('../stores/NetworkAccessStore');
+var DevicesStore = require('../stores/DevicesStore');
 var WebAPIUtils = require('../utils/WebAPIUtils');
 var moment = require('moment');
 var GoogleMapsLoader = require('google-maps');
 var map, googleapi, marker;
-
-//GoogleMapsLoader.KEY = 'AIzaSyAWvgQTvOD9N0XnQ2XaxgTn0l5C7W0-KsE';
+var cx = require('react/lib/cx');
 
 function getStateFromStores() {
     return {
@@ -17,20 +16,23 @@ function getStateFromStores() {
       zoomdata: BrowsingDataStore.zoomdata(), 
       location: BrowsingDataStore.location(),
       locationoverlay: BrowsingDataStore.locationoverlay(),
-      fetching: NetworkAccessStore.accessingNetwork(),
-      
+      devices: DevicesStore.devices(),
+      selected: DevicesStore.selected(),
     }
 }; 
-
+	
 var Timeline = React.createClass({
     
   getInitialState: function() {
+  	DevicesStore.init();
     return getStateFromStores();
   },
 
+
   componentDidMount: function(){
+  	
     BrowsingDataStore.addChangeListener(this._onChange);
-    WebAPIUtils.fetch_browsing();
+    DevicesStore.addChangeListener(this._onChange);
     
     GoogleMapsLoader.load(function(google){
     	
@@ -53,6 +55,7 @@ var Timeline = React.createClass({
 
   componentWillUnmount: function(){
     BrowsingDataStore.removeChangeListener(this._onChange);
+    DevicesStore.removeChangeListener(this._onChange);
   },
 
   render: function(){
@@ -83,7 +86,7 @@ var Timeline = React.createClass({
                 };
 
    var zoomoptions = {
-                   height: 100,
+                   height: 200,
                    width: 1000,
                    xaxis:{orientation:'bottom'},
                    yaxis:{orientation:'left'},
@@ -103,16 +106,18 @@ var Timeline = React.createClass({
    
    var devices;
    
-   console.log("ok data is");
-   console.log(this.state.data);
   
-   if (this.state.data.devices){
-  	  var buttons = this.state.data.devices.map(function(device){
-  	  	return <li><a className="button tiny">{device}</a></li>
-  	  });
-  	  devices = <ul className="button-group">
-  	  				{buttons}
-  	  			</ul>
+   if (this.state.devices){
+  	  var buttons = this.state.devices.map(function(device){
+  	  	var className= cx({ 	
+  	  		button: true,
+  	  		tiny: true,
+  	  		alert: this.state.selected.indexOf(device) != -1,
+  	  	});
+  	  	
+  	  	return <li><a onClick={this._selectDevice.bind(this,device)} className={className}>{device}</a></li>
+  	  }.bind(this));
+  	  devices = <ul className="button-group">{buttons}</ul>
    }
   
    
@@ -151,6 +156,10 @@ var Timeline = React.createClass({
 				</div>
               </div>
           </div>
+  },
+  
+  _selectDevice: function(device){
+  	ActionCreators.toggleselected(device);
   },
   
   _fetchActivity: function(){
