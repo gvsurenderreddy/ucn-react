@@ -14,6 +14,13 @@ var _translate = function(classification){
 	return classification;	
 }
 
+var _gettotal = function(counts, tlds){
+	
+	return tlds.reduce(function(acc, item){
+		return acc + (parseInt(counts[item]) || 0);
+	},0);
+}
+
 var _execute_sql = function(sql,params){
 	if (!params){
 		params = []
@@ -235,16 +242,46 @@ module.exports = {
 		
 		var sql,params;
 		
+		var tldcount = "SELECT httphost, count(httphost) as count FROM browsing WHERE id=$1 GROUP BY httphost";
+		var tldparams = [deviceid];
+		
 		if (!classifier){
+			sql = "SELECT c.classification, array_agg(distinct c.tld) AS tld FROM CLASSIFICATION c WHERE deviceid=$1 AND c.success=1 GROUP BY c.classification"
+			params = [deviceid]
+		}else{
+			sql = "SELECT c.classification, array_agg(distinct c.tld) AS tld FROM CLASSIFICATION c WHERE c.classifier=$1  AND deviceid=$2 AND c.success=1 GROUP BY c.classification"
+			params= [classifier, deviceid]
+		}
+		
+		//first get the counts of all tlds
+		
+		return _execute_sql(tldcount, tldparams).then(function (results){
+			return results.reduce(function(acc, item){
+				acc[item.httphost] = item.count; 
+				return acc;
+			},{});
+		}).then(function(counts){
+			return [counts, _execute_sql(sql,params)];
+		})
+		.spread(function(counts, results){
+			return results.map(function(result){
+				result.classification = _translate(result.classification);
+				var classification = result.classification.split("/");
+            	classification.shift();
+				return {classification:classification, tld:result.tld, size:_gettotal(counts, result.tld)};
+			});
+		});
+		
+		/*if (!classifier){
       		sql="SELECT c.classification, array_agg(distinct c.tld) AS tld, count(h.httphost) AS size FROM CLASSIFICATION c, browsing h WHERE  h.httphost=c.tld  AND  c.deviceid = $1 AND c.success=1 GROUP BY c.classification";
       		params = [deviceid];
       	}else{
       		sql="SELECT c.classification, array_agg(distinct c.tld) AS tld, count(h.httphost) AS size FROM CLASSIFICATION c, browsing h WHERE  h.httphost=c.tld  AND  c.classifier=$1 AND c.deviceid = $2 AND c.success=1 GROUP BY c.classification";
       		params = [classifier,deviceid];
-      	}
+      	}*/
       	
       	
-      	
+      	/*
       	return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
 				result.classification = _translate(result.classification);
@@ -252,7 +289,7 @@ module.exports = {
             	classification.shift();
 				return {classification:classification, tld:result.tld, size:parseInt(result.size)};
 			});
-		});
+		});*/
 	},
 	
 	/*
