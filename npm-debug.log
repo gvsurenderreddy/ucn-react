@@ -1,19 +1,18 @@
 0 info it worked if it ends with ok
-1 verbose cli [ 'node', '/usr/local/bin/npm', 'start' ]
-2 info using npm@2.1.9
-3 info using node@v0.10.33
-4 verbose node symlink /usr/local/bin/node
-5 verbose config Skipping project config: /Users/tlodge/.npmrc. (matches userconfig)
-6 verbose stack Error: ENOENT, open '/Users/tlodge/package.json'
-7 verbose cwd /Users/tlodge/ucn/ucn-react
-8 error Darwin 14.0.0
-9 error argv "node" "/usr/local/bin/npm" "start"
-10 error node v0.10.33
-11 error npm  v2.1.9
-12 error path /Users/tlodge/package.json
-13 error code ENOENT
-14 error errno 34
-15 error enoent ENOENT, open '/Users/tlodge/package.json'
-15 error enoent This is most likely not a problem with npm itself
-15 error enoent and is related to npm not being able to find a file.
-16 verbose exit [ 34, true ]
+1 verbose cli [ '/usr/local/bin/node', '/usr/local/bin/npm', 'run', 'build' ]
+2 info using npm@2.11.3
+3 info using node@v0.12.7
+4 verbose stack Error: ENOENT, open '/home/txl/ucn-react/package.json'
+4 verbose stack     at Error (native)
+5 verbose cwd /home/txl/ucn-react
+6 error Linux 2.6.32-5-amd64
+7 error argv "/usr/local/bin/node" "/usr/local/bin/npm" "run" "build"
+8 error node v0.12.7
+9 error npm  v2.11.3
+10 error path /home/txl/ucn-react/package.json
+11 error code ENOENT
+12 error errno -2
+13 error enoent ENOENT, open '/home/txl/ucn-react/package.json'
+13 error enoent This is most likely not a problem with npm itself
+13 error enoent and is related to npm not being able to find a file.
+14 verbose exit [ -2, true ]

@@ -17,22 +17,46 @@ var Chart = React.createClass({
       this.props.options
     );
   },
-
-  shouldComponentUpdate: function(nextProps, nextState){
-  	/* can we make more efficient here?  */
-  	/* nextProps.locations && nextProps.urlhistory */
-  	/* tends to === oldProps.locations and nextProps.urlhistory */
-  	/*console.log("-------------");
-  	console.log("old props:");
-  	console.log(this.props);
-  	console.log("new props");
-  	console.log(nextProps);
-  	console.log("-------------");*/
+  
+  
+  /*shouldComponentUpdate: function(nextProps, nextState){
+  
+  	if (this.props.type === "Zoom"){
+  	
+  		if (!this.props.data.keys){
+  			return true;
+  		}
+  		
+  		if (this.props.data.reset != nextProps.data.reset){
+  			return true;
+  		}
+  		
+  		if (this.props.data.locations && !nextProps.data.locations){
+  			return true;
+  		}
+  		
+  		if (nextProps.data.locations && !this.props.data.locations){
+  			return true;
+  		}
+  		
+  		if (this.props.data.urlhistory || nextProps.data.urlhistory){
+  			return true;
+  		}
+  		if (nextProps.data.urlhistory && !this.props.data.urlhistory){
+  			return true;
+  		}
+  		if (!nextProps.data.urlhistory && this.props.data.urlhistory){
+  			return true;
+  		}
+  		
+  		return this.props.data.keys.length != nextProps.data.keys.length;
+  	}
   	return true;
-  },
+  },*/
+
   
   componentDidUpdate: function(){
-      this._chart.update(this.props.data);
+  	this._chart.update(this.props.data);
   },
 
   componentWillUnmount: function(){
@@ -46,7 +70,7 @@ var Chart = React.createClass({
   },
 
   _handleClick: function(){
-    ActionCreators.clicked();
+    //ActionCreators.clicked();
   },
 
 });

@@ -21,6 +21,7 @@ module.exports = {
 		CATEGORY_SELECTED: null,
 		CATEGORY_URL_SELECTED: null,
 		CATEGORISE: null,
+		RESET: null,
   }),
 
   PayloadSources: keyMirror({

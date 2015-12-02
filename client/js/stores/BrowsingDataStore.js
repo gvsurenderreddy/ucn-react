@@ -12,7 +12,9 @@ var Utils = require('../utils/Utils');
 var assign = require('object-assign');
 var d3 = require('../lib/d3.min');
 var WebAPIUtils = require('../utils/WebAPIUtils');
-var extend = require('extend');
+var DevicesStore = require('./DevicesStore');
+
+//var extend = require('extend');
 
 var CHANGE_EVENT = 'change';
 var ActionTypes = Constants.ActionTypes;
@@ -27,17 +29,19 @@ var overlaylocations = false;
 var _toggle_url = function(url){
 	if (url === _currenturl){
 		_currenturl = "";
-		_data.urlhistory = _browsingdata.urlhistory = _urlhistory = [];
+		_data.urlhistory = undefined;
+		_browsingdata.urlhistory = undefined;
+		_urlhistory = undefined;
 	}else{
 		_currenturl = url;
-	}
-	
+	}	
 };
 
 
 var _toggle_locations = function(){
 	if (!overlaylocations){
-		WebAPIUtils.fetch_locations();
+		var devices = DevicesStore.selected();
+		WebAPIUtils.fetch_locations(devices);
 	}else{
 		_data.locations = [];
 		_browsingdata.locations = [];
@@ -51,6 +55,12 @@ var _update_filtered_data = function(range){
 };
 
 var _update_location_data = function(data){
+  
+  if (!data.locations || data.locations.length <= 0){
+  	overlaylocations = false;
+  	return;
+  }
+  
   _data.locations = data.locations;	
   _browsingdata.locations = data.locations;
   
@@ -79,11 +89,14 @@ var _update_zoom_data = function(data){
 	_browsingdata = data;
 	_browsingdata.locations = _data.locations;
 	_browsingdata.urlhistory = _data.urlhistory;
+	_data.reset = false;
 };
 
 var _update_data = function(data){
+	
   	_browsingdata = data;
   	_data = _format_data(data.browsing);
+  	_data.reset = true;
 };
 
 _format_data = function(data){
@@ -116,13 +129,16 @@ _format_data = function(data){
   });
 
 
-  return {
+  var obj = {
       keys: keys,
       hosts: hosts,
       browsing: browsing,
       range:  d3.extent(keys, function(d){return d*1000}),
-      urlhistory: _urlhistory || [],
   }
+  if (_urlhistory){
+  	obj.urlhistory = _urlhistory;
+  }
+  return obj;
 };
 
 var BrowsingDataStore = assign({}, EventEmitter.prototype, {

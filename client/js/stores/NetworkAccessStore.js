@@ -67,14 +67,12 @@ NetworkAccessStore.dispatchToken = AppDispatcher.register(function(action) {
   	switch(action.type) {
   		
   		case ActionTypes.RANGE_CHANGE:
-  			_setnetworkaccess(true);
-  			NetworkAccessStore.emitChange();
-  			break;
-  		
+  		case ActionTypes.RESET:
   		case ActionTypes.TOGGLE_DEVICE:
   			_setnetworkaccess(true);
   			NetworkAccessStore.emitChange();
   			break;
+  		
   			
   	    case ActionTypes.URL_CLICKED:
       		_toggle_url(action.url);

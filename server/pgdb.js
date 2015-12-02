@@ -6,6 +6,13 @@ var db = Promise.promisifyAll(pg);
 
 
 //var _client = new pg.Client(config.database.url);
+var _translate = function(classification){
+	
+	if (classification === "/technology and computing/internet technology/social network")
+		return "/social network";
+		
+	return classification;	
+}
 
 var _execute_sql = function(sql,params){
 	if (!params){
@@ -147,7 +154,22 @@ module.exports = {
 		});
 	},  
 	
-	fetch_locations_for_device: function(deviceid, from, to){
+	fetch_locations_for_devices: function(deviceids){
+		var sql = "SELECT name, enter, exit, lat, lng FROM ZONES where deviceid IN " +  _convert_to_tuple(deviceids);
+		return _execute_sql(sql).then(function(results){
+			return results.map(function(result){
+				return {
+					name: result.name.trim() === "" ? result.lat+","+result.lng : result.name,
+					lat: result.lat,
+					lng: result.lng,
+					enter: parseInt(result.enter),
+					exit:  parseInt(result.exit),
+				}
+			});
+		});
+	},
+	
+	/*fetch_locations_for_device: function(deviceid, from, to){
 		
 		var sql = "SELECT name, enter, exit, lat, lng FROM ZONES where deviceid=$1";
 		var params = [deviceid];
@@ -169,7 +191,7 @@ module.exports = {
 				}
 			});
 		});
-	},
+	},*/
 	
 	fetch_browsing_in_location_for_devices: function(deviceids, lat, lng){
 		var sql = "SELECT b.httphost as url, count(DISTINCT(b.timestamp/1000)) as total from browsing b, zones z WHERE"
@@ -182,12 +204,7 @@ module.exports = {
 			return results;	
 		});
 	},
-	
-	
-	SELECT b.httphost as url, count(DISTINCT(b.timestamp/1000)) as total from browsing b,
-	zones z WHERE b.id IN ('38') AND b.id = z.deviceid AND z.lat::numeric='52.9736' AND 
-	z.lng::numeric='-1.20123' AND (b.timestamp/1000  >= z.enter AND b.timestamp/1000 <= z.exit) 
-	GROUP BY httphost ORDER BY total DESC;
+
 	
 	fetch_device_ids_for_selected: function(selected){
 		var sql = "SELECT id FROM devices WHERE devicename IN " + _convert_to_tuple(selected);
@@ -230,6 +247,7 @@ module.exports = {
       	
       	return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
+				result.classification = _translate(result.classification);
 				var classification = result.classification.split("/");
             	classification.shift();
 				return {classification:classification, tld:result.tld, size:parseInt(result.size)};

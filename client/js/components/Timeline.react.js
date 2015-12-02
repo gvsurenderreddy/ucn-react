@@ -36,7 +36,6 @@ var Timeline = React.createClass({
     
     GoogleMapsLoader.load(function(google){
     	
-    	console.log(google.maps);
     	googleapi = google;
     	
     	map = new google.maps.Map(document.getElementById("map"),
@@ -123,8 +122,11 @@ var Timeline = React.createClass({
    
    return <div className="container">
    			  <div className="row fullWidth">
-   			  	<div className="small-12 columns">
+   			  	<div className="small-11 columns">
    			  		{devices}
+   			  	</div>
+   			  	<div className="small-1 columns">
+   			  		<a onClick={this._reset} className="button tiny">reset</a>
    			  	</div>
    			  </div>
    			  <div className="row fullWidth">
@@ -150,12 +152,15 @@ var Timeline = React.createClass({
               	<div className="small-9 columns">
 					<dl className="sub-nav">
 						<dt>Overlays:</dt>
-						<dd><a href="#" onClick={this._fetchActivity}>overlay activity</a></dd>
 						<dd><a href="#" onClick={this._toggleLocation}>overlay locations</a></dd>
 					</dl> 
 				</div>
               </div>
           </div>
+  },
+  
+  _reset: function(){
+  	ActionCreators.reset();
   },
   
   _selectDevice: function(device){
@@ -171,6 +176,7 @@ var Timeline = React.createClass({
   },
   
   _onChange: function() {
+  	
      this.setState(getStateFromStores());
   }
 });

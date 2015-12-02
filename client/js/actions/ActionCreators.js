@@ -30,7 +30,6 @@ module.exports = {
   
   locationselected: function(latlng){
   	console.log("dispatching a location selected!!");
-  	
   	 AppDispatcher.handleViewAction({
       type: ActionTypes.LOCATION_SELECTED,
       lat: latlng[0],
@@ -39,7 +38,6 @@ module.exports = {
   },
   
   rangechange: function(range){
-    
     AppDispatcher.handleViewAction({
       type: ActionTypes.RANGE_CHANGE,
       range: range,
@@ -59,4 +57,9 @@ module.exports = {
   	});
   },
 
+  reset: function(){
+  	AppDispatcher.handleViewAction({
+  		type: ActionTypes.RESET,
+  	});
+  },
 };

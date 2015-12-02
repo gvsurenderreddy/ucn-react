@@ -110,16 +110,18 @@ router.get('/activity', function(req,res, next){
   });	
 });
 
-router.get('/location', function(req,res, next){
-  var from = req.query.from;
-  var to   = req.query.to;
-  var device = req.query.device;
-  
-  pgdb.fetch_device_id_for_device(device).then(function(deviceid){
-  	return deviceid;
-  }).then(function(deviceid){
-   	return pgdb.fetch_locations_for_device(deviceid, from, to);
+router.post('/location', function(req,res, next){
+  //var from = req.query.from;
+  //var to   = req.query.to;
+  var devices = req.body.devices;
+  pgdb.fetch_device_ids_for_selected(devices).then(function(deviceids){
+  	return deviceids;
+  }).then(function(deviceids){
+   	return pgdb.fetch_locations_for_devices(deviceids);
   }).then(function(data){
+  	console.log("sending ");
+  	console.log(data);
+  	
   	res.send({locations:data});
   });
 });

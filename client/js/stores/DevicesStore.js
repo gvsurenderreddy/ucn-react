@@ -24,6 +24,10 @@ _fetch_browsing_in_location = function(lat,lng){
 	WebAPIUtils.fetch_browsing_in_location(_family, _selected, lat, lng);
 };
 
+_reset = function(){
+	WebAPIUtils.fetch_browsing(_family, _selected); 
+};
+
 var _fetch_data_in_range = function(range){
 	WebAPIUtils.fetch_browsing_range(_family, _selected, {
      	from: Math.floor(range[0]/1000),
@@ -66,7 +70,9 @@ var DevicesStore = assign({}, EventEmitter.prototype, {
 	_devices.push(params.device);
   	_selected.push(params.device);
   	_family = params.device.split(".")[0];
-  	
+	
+	//this kicks off everything!
+	console.log("initing devices store!");  	
   	WebAPIUtils.fetch_browsing(_family, _selected);
   },
 
@@ -107,21 +113,26 @@ DevicesStore.dispatchToken = AppDispatcher.register(function(action) {
 
   	case ActionTypes.RAW_BROWSING_DATA:
       	_update_devices(action.rawData);   
-      	DevicesStore.emitChange();
+      	//DevicesStore.emitChange();
       	break;
     
     case ActionTypes.TOGGLE_DEVICE:
     	_toggle_device_selected(action.device);
-    	DevicesStore.emitChange();
+    	//DevicesStore.emitChange();
       	break;
     
     case ActionTypes.RANGE_CHANGE:
       _fetch_data_in_range(action.range);
       break;
+      
+    case ActionTypes.RESET:
+      _reset();
+      break;
     
     case ActionTypes.LOCATION_SELECTED:
       _fetch_browsing_in_location(action.lat, action.lng);
       break;
+    
        
     default:
       // no op

@@ -24,7 +24,7 @@ BrowsingBar.prototype.initialise = function(data, node, opts){
                   .on("brushend", function(){
                       var xrange = this.brush.empty() ? this.x.domain() : this.brush.extent();
                       
-                      //check the range is sane - can't gop back more than 2 years, and range
+                      //check the range is sane - can't go back more than 2 years, and range
                       //must be greater than a minute.
                       
                       var from = xrange[0].getTime();
@@ -161,6 +161,8 @@ BrowsingBar.prototype.update = function(data){
           
 	if (data.urlhistory){
         this.urlhistory(data.urlhistory);
+	}else{
+		this.urlhistory([]);
 	}
 	if (data.locations){
 	  this.locations(data.locations);

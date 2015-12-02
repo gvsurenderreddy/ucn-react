@@ -84,16 +84,23 @@ Zoom.prototype.initialise = function(data, node, opts){
   this.svg.append("g")
           .attr("class","historyoverlay");
 
-  this.update(data);
+  //this.update(data);
 };
 
 Zoom.prototype.update = function(data){
   var self = this;
+  
   //guard against empty data;
   if (!data || !data.browsing){
-    console.log("no data yet..");
     return;
   }
+  
+  /*
+  //if this is fresh data, reset the brush
+  if (data.reset){
+ 	this.brush.extent([0,0]);
+    this.svg.select(".brush").select("rect.extent").attr("width",0);
+  }*/
   
   //stack relies on y.domain, and y.domain relies on stack (d.y0!);
   var browsers = this.stack(data.browsing);
@@ -125,7 +132,6 @@ Zoom.prototype.update = function(data){
   //update
   zoom.selectAll("path.zoomarea")
   	  .style("fill", function(d){
-  	  	console.log("colour for " + d.name + " is " + self.colour(d.name));
   	  	return self.colour(d.name);
   	  })
       .style("fill-opacity", 0.6)
@@ -145,12 +151,12 @@ Zoom.prototype.update = function(data){
 
   if (data.urlhistory){
     this.urlhistory(data.urlhistory);
+  }else{
+    this.urlhistory([]);
   }
  
   if (data.locations){
     this.locations(data.locations);
-  }else{
-  	console.log("not rendingi locatons");
   }
   //exit!
   zoom.exit()

@@ -135,14 +135,15 @@ module.exports ={
      });
   },
   
-  fetch_locations: function() {
+  fetch_locations: function(devices) {
+  
   	if (_netaccess)
   		return;
   	_netaccess=true;
     request
-      .get('/viz/location')
+      .post('/viz/location')
       .set('Accept', 'application/json')
-      .query(params)
+      .send({devices:devices})
       .end(function(err, res){
       	_netaccess = false;
         if (err){
