@@ -5,7 +5,6 @@ var WebAPIUtils = require('../utils/WebAPIUtils');
 module.exports = {
 
   clicked: function() {
-   
     AppDispatcher.handleViewAction({
       type: ActionTypes.MAIN_CLICKED,
       data: {},
@@ -50,16 +49,30 @@ module.exports = {
    	});
   },
   
-  toggleselected: function(device){
+  toggleselected: function(device, screen){
   	AppDispatcher.handleViewAction({
   		type: ActionTypes.TOGGLE_DEVICE,
   		device: device,
+  		screen: screen,
   	});
   },
 
   reset: function(){
   	AppDispatcher.handleViewAction({
   		type: ActionTypes.RESET,
+  	});
+  },
+  
+  fetchcategories: function(classifier){
+  		AppDispatcher.handleViewAction({
+  		type: ActionTypes.FETCH_CATEGORIES,
+  		classifier: classifier,
+  	});
+  },
+  
+  fetchunclassified: function(){
+  	AppDispatcher.handleViewAction({
+  		type: ActionTypes.FETCH_UNCLASSIFIED,
   	});
   },
 };

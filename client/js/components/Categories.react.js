@@ -1,9 +1,11 @@
 var React = require('react');
 var ActionCreators = require('../actions/ActionCreators');
 var CategoryStore = require('../stores/CategoryStore');
+var DevicesStore = require('../stores/DevicesStore');
 var WebAPIUtils = require('../utils/WebAPIUtils');
 var Chart = require('./Chart.react');
 var Classifier = require('./Classifier.react');
+var cx = require('react/lib/cx');
 injectTapEventPlugin = require("react-tap-event-plugin");
 injectTapEventPlugin();
 
@@ -14,6 +16,8 @@ function getStateFromStores() {
     return {
       categories: CategoryStore.data(),
       urls: CategoryStore.urlmatches(),
+      devices: DevicesStore.devices(),
+      selected: DevicesStore.selected(),
     };
 }
 
@@ -25,7 +29,7 @@ var Categories = React.createClass({
 
   componentDidMount: function(){
     CategoryStore.addChangeListener(this._onChange);
-    WebAPIUtils.fetch_category_data();
+    ActionCreators.fetchcategories();
   },
 
   componentWillUnmount: function(){
@@ -40,24 +44,40 @@ var Categories = React.createClass({
                       };
 
     
-    var chart = <h5> ..waiting for data </h5>;
+    var chart = <i className="fa fa-circle-o-notch fa-spin fa-4"></i>;
     
     var chartdata = {
       categories: this.state.categories,
       expanded: this.state.urls,
     };
     
-    console.log("chart data is");
-    console.log(chartdata);
+   
 
     if (this.state.categories.children){
-    	console.log("CRAETONG CHART>>");
-      chart = <Chart type="Categories" data={chartdata} options={options}/>;
-    }else{
-    	console.log("hmm nthing chanegs");
-    } 
-    
+       chart = <Chart type="Categories" data={chartdata} options={options}/>;
+    }
+    var devices;
+   
+  
+   if (this.state.devices){
+  	  var buttons = this.state.devices.map(function(device){
+  	  	var className= cx({ 	
+  	  		button: true,
+  	  		tiny: true,
+  	  		alert: this.state.selected.indexOf(device) != -1,
+  	  	});
+  	  	
+  	  	return <li><a onClick={this._selectDevice.bind(this,device)} className={className}>{device}</a></li>
+  	  }.bind(this));
+  	  devices = <ul className="button-group">{buttons}</ul>
+   }
+  
     return  <div>
+    		  <div className="row fullWidth">
+   			  	<div className="small-11 columns">
+   			  		{devices}
+   			  	</div>
+   			  </div>
               <div className="row fullWidth">
                   <div className="small-8 columns">
                       <LocateURL />
@@ -83,18 +103,21 @@ var Categories = React.createClass({
   },
   
   _fetchUnclassified: function(){
-  		WebAPIUtils.fetch_unclassified();
+  	ActionCreators.fetchunclassified();
   },
 
   _fetchUserclassified: function(){
-  		console.log("fetching user classified data");
-  		WebAPIUtils.fetch_category_data("user");
+  	ActionCreators.fetchcategories("user");
   },
   
   _fetchClassified: function(){
-  		console.log("fetching user classified data");
-  		WebAPIUtils.fetch_category_data();
+  	ActionCreators.fetchcategories();
   },
+  
+  _selectDevice: function(device){
+  	ActionCreators.toggleselected(device, "categories");
+  },
+  
   
   _onChange: function() {
      this.setState(getStateFromStores());

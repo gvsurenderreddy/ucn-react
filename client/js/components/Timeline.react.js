@@ -164,7 +164,7 @@ var Timeline = React.createClass({
   },
   
   _selectDevice: function(device){
-  	ActionCreators.toggleselected(device);
+  	ActionCreators.toggleselected(device, "browsing");
   },
   
   _fetchActivity: function(){

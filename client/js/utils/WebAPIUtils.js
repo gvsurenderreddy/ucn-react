@@ -209,15 +209,18 @@ module.exports ={
      });
   },*/
 
-  fetch_unclassified: function(){
+  fetch_unclassified: function(selected){
   	 if (_netaccess)
   		return;
   	 _netaccess=true;
-  	
+  	 var data = {
+  		devices: selected,
+  	 }
+  	 
   	 request
-      .get('/viz/urls/unclassified')
+      .post('/viz/urls/unclassified')
       .set('Accept', 'application/json')
-      .query(params)
+      .send(data)
       .end(function(err, res){
       	_netaccess = false;
         if (err){
@@ -232,7 +235,38 @@ module.exports ={
      });
   },
   
-  
+  fetch_category_data: function(selected, classifier){
+  	if (_netaccess)
+  		return;
+  	_netaccess=true;
+  	
+  	var data = {
+  		devices: selected,
+  	}
+  	if (classifier){
+  		data.classifier = classifier;
+  	}
+  	
+    request
+      .post('/viz/categories')
+      .set('Accept', 'application/json')
+      .send(data)
+      .end(function(err, res){
+      	_netaccess = false;
+        if (err){
+          console.log("hmm errror");
+          console.log(err);
+        }else{
+          	console.log("ok - firing receieved category data");
+          	if (res.body == null){
+				window.location.replace(REDIRECT);
+			}else{
+          		ServerActionCreators.receivedCategoryData(res.body);
+          	}
+        }
+     });
+  },
+
   //this needs to be called with device, family!
   fetch_url_history: function(devices, url) {
   	if (_netaccess)
@@ -263,33 +297,7 @@ module.exports ={
      });
   },
 
-  fetch_category_data: function(classifier){
-  	if (_netaccess)
-  		return;
-  	_netaccess=true;
-  	
-  	var query = classifier ? extend({classifier:classifier},params): params;
-  	
-    request
-      .get('/viz/categories')
-      .set('Accept', 'application/json')
-      .query(query)
-      .end(function(err, res){
-      	_netaccess = false;
-        if (err){
-          console.log("hmm errror");
-          console.log(err);
-        }else{
-          	console.log("ok - firing receieved category data");
-          	if (res.body == null){
-				window.location.replace(REDIRECT);
-			}else{
-          		ServerActionCreators.receivedCategoryData(res.body);
-          	}
-        }
-     });
-  },
-
+  
   match_categories: function(partial){
   	if (_netaccess)
   		return;

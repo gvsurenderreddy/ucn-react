@@ -129,16 +129,7 @@ module.exports = {
 		});
 	},
 	
-    fetch_unclassified_for_device: function(deviceid){
-    	var sql="SELECT h.httphost as url, count(h.httphost) as count FROM browsing h LEFT JOIN CLASSIFICATION c ON (c.deviceid = h.id AND h.httphost = c.tld) WHERE id=$1 AND (c.success = 0 OR c.success IS NULL) GROUP BY h.httphost ORDER BY count DESC";
-      	var params = [deviceid];
-      	//_print_query(sql,params);
-      	return _execute_sql(sql,params).then(function(results){
-			return results.map(function(result){
-				return result.url;
-			});
-		});
-    },
+  
 	
 	fetch_ts_for_url: function(deviceids, url){
 	 	var sql = "SELECT timestamp/1000 as ts from browsing WHERE id IN " + _convert_to_tuple(deviceids) + " AND httphost=$1 ORDER BY timestamp ASC ";
@@ -238,24 +229,35 @@ module.exports = {
 		});
 	},
 	
-	fetch_categories_for_device: function(deviceid, classifier){
+	fetch_unclassified_for_devices: function(deviceids){
+		
+    	var sql="SELECT h.httphost as url, count(h.httphost) as count FROM browsing h LEFT JOIN CLASSIFICATION c ON (c.deviceid = h.id AND h.httphost = c.tld) WHERE id IN " + _convert_to_tuple(deviceids) + "  AND (c.success = 0 OR c.success IS NULL) GROUP BY h.httphost ORDER BY count DESC";
+      	var params = [];
+      	//_print_query(sql,params);
+      	return _execute_sql(sql,params).then(function(results){
+			return results.map(function(result){
+				return result.url;
+			});
+		});
+    },
+    
+	fetch_categories_for_devices: function(deviceids, classifier){
 		
 		var sql,params;
 		
-		var tldcount = "SELECT httphost, count(httphost) as count FROM browsing WHERE id=$1 GROUP BY httphost";
-		var tldparams = [deviceid];
+		var tldcount = "SELECT httphost, count(httphost) as count FROM browsing WHERE id IN " + _convert_to_tuple(deviceids) + " GROUP BY httphost";
 		
 		if (!classifier){
-			sql = "SELECT c.classification, array_agg(distinct c.tld) AS tld FROM CLASSIFICATION c WHERE deviceid=$1 AND c.success=1 GROUP BY c.classification"
-			params = [deviceid]
+			sql = "SELECT c.classification, array_agg(distinct c.tld) AS tld FROM CLASSIFICATION c WHERE deviceid IN " + _convert_to_tuple(deviceids) + " AND c.success=1 GROUP BY c.classification"
+			params = []
 		}else{
-			sql = "SELECT c.classification, array_agg(distinct c.tld) AS tld FROM CLASSIFICATION c WHERE c.classifier=$1  AND deviceid=$2 AND c.success=1 GROUP BY c.classification"
-			params= [classifier, deviceid]
+			sql = "SELECT c.classification, array_agg(distinct c.tld) AS tld FROM CLASSIFICATION c WHERE c.classifier=$1  AND deviceid IN " + _convert_to_tuple(deviceids) + "  AND c.success=1 GROUP BY c.classification"
+			params= [classifier]
 		}
 		
 		//first get the counts of all tlds
 		
-		return _execute_sql(tldcount, tldparams).then(function (results){
+		return _execute_sql(tldcount).then(function (results){
 			return results.reduce(function(acc, item){
 				acc[item.httphost] = item.count; 
 				return acc;

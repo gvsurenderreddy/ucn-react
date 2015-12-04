@@ -18,7 +18,15 @@ var _family = "";
 var _devices = [];
 var _selected = [];
 var _primary;
+var _tmp;
 
+_fetch_unclassified = function(){
+	WebAPIUtils.fetch_unclassified(_selected);
+};
+
+_fetch_categories = function(classifier){
+	WebAPIUtils.fetch_category_data(_selected, classifier);
+};
 
 _fetch_browsing_in_location = function(lat,lng){
 	WebAPIUtils.fetch_browsing_in_location(_family, _selected, lat, lng);
@@ -36,22 +44,37 @@ var _fetch_data_in_range = function(range){
 };
 
 var _update_devices = function(data){
-   _devices = data.devices;
-   _selected = data.selected;
+	
+	if (data && data.devices && data.selected){
+   		_devices = data.devices;
+   		_selected = data.selected;
+	}else if (_tmp && _tmp.length > 0){
+		_selected = extend([], _tmp);
+		_tmp = [];
+	}
 };
 
-var _toggle_device_selected = function(device){
-
+var _toggle_device_selected = function(device, screen){
+	
 	var idx = _selected.indexOf(device);	
-	var _tmp = extend([],_selected);
+	
+	_tmp = extend([],_selected);
 	
 	if (idx == -1){
 		_tmp.push(device);
-		WebAPIUtils.fetch_browsing(_family, _tmp);
+		if (screen==="categories"){
+			WebAPIUtils.fetch_category_data(_tmp);
+		}else{
+			WebAPIUtils.fetch_browsing(_family, _tmp);
+		}
 	}else{
 		if (_selected.length > 1){  //always leave at least one device selected
 			_tmp.splice(idx,1);
-			WebAPIUtils.fetch_browsing(_family, _tmp);
+			if (screen==="categories"){
+				WebAPIUtils.fetch_category_data(_tmp);
+			}else{
+				WebAPIUtils.fetch_browsing(_family, _tmp);
+			}
 		}
 	}
 };
@@ -71,8 +94,7 @@ var DevicesStore = assign({}, EventEmitter.prototype, {
   	_selected.push(params.device);
   	_family = params.device.split(".")[0];
 	
-	//this kicks off everything!
-	console.log("initing devices store!");  	
+	//this kicks off everything!  	
   	WebAPIUtils.fetch_browsing(_family, _selected);
   },
 
@@ -113,12 +135,15 @@ DevicesStore.dispatchToken = AppDispatcher.register(function(action) {
 
   	case ActionTypes.RAW_BROWSING_DATA:
       	_update_devices(action.rawData);   
-      	//DevicesStore.emitChange();
       	break;
     
+    case ActionTypes.RAW_CATEGORY_DATA:
+    	_update_devices();
+    	DevicesStore.emitChange();
+    	break;
+    	
     case ActionTypes.TOGGLE_DEVICE:
-    	_toggle_device_selected(action.device);
-    	//DevicesStore.emitChange();
+    	_toggle_device_selected(action.device, action.screen);
       	break;
     
     case ActionTypes.RANGE_CHANGE:
@@ -133,7 +158,14 @@ DevicesStore.dispatchToken = AppDispatcher.register(function(action) {
       _fetch_browsing_in_location(action.lat, action.lng);
       break;
     
-       
+    case ActionTypes.FETCH_CATEGORIES:
+      _fetch_categories(action.classifier)
+      break;
+    
+    case ActionTypes.FETCH_UNCLASSIFIED:
+      _fetch_unclassified();
+      break;
+      
     default:
       // no op
   }

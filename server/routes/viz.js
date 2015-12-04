@@ -53,23 +53,15 @@ router.post('/browsing', function(req, res, next){
 	});
   })
   .then(function(devices){
-  	console.log("here, selected are ");
-  	console.log(selected);
   	return [devices, pgdb.fetch_device_ids_for_selected(selected)]
   })
   .spread(function(devices, deviceids){
-  	console.log("here, deviceids are");
-  	console.log(deviceids);
   	return [devices, deviceids, to ? {ts:to} : pgdb.fetch_max_ts_for_devices(deviceids)];
   })
   .spread(function(devices, deviceids, max){
-  console.log("here, max is ");
-  console.log(max);
     return [devices, deviceids, max.ts, from ? {ts:from} : pgdb.fetch_min_ts_for_deviceids(deviceids, max.ts-SINCE)];
   })
   .spread(function(devices, deviceids, maxts, min){
-  	console.log("heer, min i s");
-  	console.log(min);
   	var difference = maxts-min.ts;
     var timerange = {from:min.ts, to:maxts};
 
@@ -119,9 +111,6 @@ router.post('/location', function(req,res, next){
   }).then(function(deviceids){
    	return pgdb.fetch_locations_for_devices(deviceids);
   }).then(function(data){
-  	console.log("sending ");
-  	console.log(data);
-  	
   	res.send({locations:data});
   });
 });
@@ -131,8 +120,6 @@ router.post('/browsinginlocation', function(req,res,next){
 	var selected = req.body.devices;
 	var lat = req.body.lat;
 	var lng = req.body.lng;
-	console.log("am here");
-	console.log(req.body);
 	
 	pgdb.fetch_device_ids_for_selected(selected).then(function(selected){
 		return pgdb.fetch_browsing_in_location_for_devices(selected, lat, lng);	
@@ -174,27 +161,27 @@ router.post('/urls/history', function(req,res, next){
     });
 });
 
-router.get('/urls/unclassified', function(req,res, next){
-    var device = req.query.device;
+router.post('/urls/unclassified', function(req,res, next){
+    var devices = req.body.devices;
     
-    pgdb.fetch_device_id_for_device(device).then(function(deviceid){
-  		return deviceid;
-  	}).then(function(deviceid){
-  		return pgdb.fetch_unclassified_for_device(deviceid);
+    pgdb.fetch_device_ids_for_selected(devices).then(function(deviceids){
+  		return deviceids;
+  	}).then(function(deviceids){
+  		return pgdb.fetch_unclassified_for_devices(deviceids);
   	}).then(function(urls){
         res.send(urls);
     });
 });
 
-router.get('/categories', function(req,res, next){
+router.post('/categories', function(req,res, next){
 	
-	var device = req.query.device;
-	var classifier = req.query.classifier || null;
+	var devices = req.body.devices;	
+	var classifier = req.body.classifier || null;
 	
-	pgdb.fetch_device_id_for_device(device).then(function(deviceid){
-  		return deviceid;
-  	}).then(function(deviceid){
-    	return pgdb.fetch_categories_for_device(deviceid, classifier)
+	pgdb.fetch_device_ids_for_selected(devices).then(function(deviceids){
+  		return deviceids;
+  	}).then(function(deviceids){
+    	return pgdb.fetch_categories_for_devices(deviceids, classifier)
     }).then(function(categories){
         res.send(categories);
     });

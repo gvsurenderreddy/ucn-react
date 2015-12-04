@@ -80,9 +80,12 @@ var _url_selected = function(url){
 };
 
 var _updatetree = function(data){
-	_resetglobal();
-    var _tree = _buildtree(data);
-    _data = {name:"browsing", size:_totalsize, children:_tree};
+	
+	if (data && data.length > 0){
+		_resetglobal();
+    	var _tree = _buildtree(data);
+    	_data = {name:"browsing", size:_totalsize, children:_tree};
+    }
 };
 
 var _buildtree = function(data){

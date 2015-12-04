@@ -21,6 +21,8 @@ module.exports = {
 		CATEGORY_SELECTED: null,
 		CATEGORY_URL_SELECTED: null,
 		CATEGORISE: null,
+		FETCH_CATEGORIES: null,
+		FETCH_UNCLASSIFIED: null,
 		RESET: null,
   }),
 
