@@ -5,20 +5,74 @@ var ActionCreators = require('../actions/ActionCreators');
 var Colours = require('../utils/Colours');
 
 var ANIMATION_DURATION = 1000;
+var RIGHTKEY = 39;
+var LEFTKEY = 37;
 
 BrowsingBar = function(){};
 
 BrowsingBar.prototype.initialise = function(data, node, opts){
  
-  var self = this;
-  this.opts = opts;
- 
-  this.x  = d3.time.scale().range([0,opts.width]);
-  this.y  = d3.scale.linear().range([opts.height,0]);
+  	var self = this;
+  	this.opts = opts;
+  	this.focused = null, this.locationdata = null;
+  	this.focusedindex = -1;
+  
+  	this.x  = d3.time.scale().range([0,opts.width]);
+  	this.y  = d3.scale.linear().range([opts.height,0]);
 
-  this.xAxis = d3.svg.axis().scale(this.x).orient("bottom");
-  this.yAxis = d3.svg.axis().scale(this.y).orient("left");
+  	this.xAxis = d3.svg.axis().scale(this.x).orient("bottom");
+  	this.yAxis = d3.svg.axis().scale(this.y).orient("left");
 
+ 	d3.select("body").on("keydown", function(){
+   
+  	if (d3.event.keyCode === RIGHTKEY || d3.event.keyCode == LEFTKEY){
+  		this.locationtip.hide();
+		if (this.focusedindex == -1){
+			this.focusedindex = this.locationdata.map(function(item){
+				return item.enter + " " + item.exit;
+			}.bind(this)).indexOf(this.focused.enter + " " + this.focused.exit);
+		}
+	
+		if (d3.event.keyCode === RIGHTKEY){
+			if (this.focusedindex >= this.locationdata.length-1){
+			
+				this.focusedindex = 0;
+			}else{
+				this.focusedindex += 1;
+			}	
+		}else if (d3.event.keyCode === LEFTKEY){
+			if (this.focusedindex == 0){
+				this.focusedindex = this.locationdata.length-1;
+			}else{
+				this.focusedindex -= 1;
+			}
+		}
+		
+		
+		this.focused = (this.locationdata[this.focusedindex]);
+		var xrange = this.brush.empty() ? this.x.domain() : this.brush.extent();
+		
+		//shift the zoomed in chart left or right if get to end of current view..
+		
+		if (this.focused.enter > xrange[1].getTime()/1000){
+			var window = (xrange[1].getTime() - xrange[0].getTime())/2;
+			var from = xrange[0].getTime() + window;
+			var to = xrange[1].getTime() + window;
+			ActionCreators.rangechange([from,to]);
+		}
+		
+		else if (this.focused.exit < xrange[0].getTime()/1000){
+			var window = (xrange[1].getTime() - xrange[0].getTime())/2;
+			var from = xrange[0].getTime() - window;
+			var to = xrange[1].getTime() - window;
+			ActionCreators.rangechange([from,to]);
+		}
+		
+		ActionCreators.locationhighlighted([this.focused.lat, this.focused.lng]);
+		this.locations(this.locationdata);
+	}
+  }.bind(this))
+  
   this.brush = d3.svg.brush()
                   .x(this.x)
                   .on("brushend", function(){
@@ -165,8 +219,11 @@ BrowsingBar.prototype.update = function(data){
 		this.urlhistory([]);
 	}
 	if (data.locations){
+	  this.locationdata = data.locations;
 	  this.locations(data.locations);
-	}    
+	}else{
+		this.locationdata = null;
+	}   
 };
 
 BrowsingBar.prototype.locations = function(locations){
@@ -191,6 +248,8 @@ BrowsingBar.prototype.locations = function(locations){
 		 .style("fill-opacity", 1.0)	
 		 .style("stroke", "none")
 		 .on('mouseover', function(d){
+		 	this.focusedindex = -1;
+		 	this.focused = d;
 		 	this.locationtip.show(d);
 		 	ActionCreators.locationhighlighted([d.lat, d.lng]);
 		 	
@@ -208,6 +267,9 @@ BrowsingBar.prototype.locations = function(locations){
 		 .style("fill-opacity", function(d){return 0.1})	
 		 .style("stroke", "none")
 		 .on('mouseover', function(d){
+		 	
+		 	self.focused = d;
+		 	self.focusedindex = -1;
 		 	self.locationtip.show(d);
 		 	d3.select(this).style("fill-opacity", 0.5);
 		 	ActionCreators.locationhighlighted([d.lat, d.lng]);
@@ -228,6 +290,15 @@ BrowsingBar.prototype.locations = function(locations){
 		.attr("width" , function(d){return this.x(d.exit*1000) - this.x(d.enter*1000)}.bind(this))
 	
 	zones.selectAll("rect.zone")
+		.style("fill-opacity", function(d){
+			if (this.focused){
+		 		if (d.enter == this.focused.enter && d.exit == this.focused.exit){
+		 			return 0.5;
+		 		}
+		 	}
+		 	return 0.1;
+		
+		}.bind(this))
 		.transition()
 		.duration(1000)
 		.attr("x", function(d){return this.x(d.enter*1000)}.bind(this))

@@ -7,10 +7,12 @@ var db = Promise.promisifyAll(pg);
 
 //var _client = new pg.Client(config.database.url);
 var _translate = function(classification){
+	if (classification === "/technology and computing/internet technology/email")
+		return "/email";
 	
 	if (classification === "/technology and computing/internet technology/social network")
 		return "/social network";
-		
+			
 	return classification;	
 }
 
@@ -48,6 +50,8 @@ var _print_query = function(sql, params){
 };
 
 var _convert_to_tuple = function(devices){
+	if (devices.length <= 0)
+		return "(-1)";
 	return "(" + devices.map(function(item){return "'" + item + "'"}).join(",") + ")";
 };
 
@@ -153,7 +157,7 @@ module.exports = {
 	},  
 	
 	fetch_locations_for_devices: function(deviceids){
-		var sql = "SELECT name, enter, exit, lat, lng FROM ZONES where deviceid IN " +  _convert_to_tuple(deviceids);
+		var sql = "SELECT name, enter, exit, lat, lng FROM ZONES where deviceid IN " +  _convert_to_tuple(deviceids) + " ORDER BY enter ASC ";
 		return _execute_sql(sql).then(function(results){
 			return results.map(function(result){
 				return {
@@ -307,11 +311,17 @@ module.exports = {
 	
 	fetch_matching_categories_for_device: function(partial, deviceid){
 		//var sql = "SELECT DISTINCT(h.httphost) as tld, c.classification FROM browsing h LEFT JOIN CLASSIFICATION c ON c.tld = h.httphost WHERE h.httphost LIKE $1 AND h.id=$2 AND c.success = 1";
-       	var sql = "SELECT c.tld, c.classification FROM classification c where c.deviceid=$1 AND c.tld LIKE $2 AND c.success= 1";
+       	var sql = "SELECT DISTINCT(c.tld), c.classification FROM classification c where c.deviceid=$1 AND c.tld LIKE $2 AND c.success= 1";
+       	//console.log(sql);
        	var params = [deviceid,'%'+partial+'%'];
     	//_print_query(sql,params);
        	return _execute_sql(sql,params).then(function(results){
-       		return results;
+       		return results.map(function(item){
+       			return{
+       				tld: item.tld,
+       				classification: _translate(item.classification)
+       			}
+       		});
        	});
 	},
 	

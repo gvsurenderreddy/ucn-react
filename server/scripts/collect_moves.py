@@ -42,6 +42,7 @@ def fetchlocations():
  		logger.debug("got token")
  		logger.debug(token)
  		result = None
+ 		latestUpdate = None
  		payload = {'access_token':token['token']}
  		url = cfg.API_URL + "/user/places/daily"
  					
@@ -53,9 +54,7 @@ def fetchlocations():
  		try:
 			result = r.json()
 			
-			latestUpdate = None
 			zones = []
-		
 			for row in result:	
  				if row['segments'] is not None:
  					for segment in row['segments']:

@@ -16,7 +16,7 @@ def duplicate(ts,host, domain, lastline):
 
 def lookup(host):
 	device = datalogger.deviceid_for_host(host)
-	return datalogger.deviceid_for_host(host)
+	return device
 		
 def insert_dns(datafile):
 	
@@ -49,6 +49,7 @@ def insert_dns(datafile):
 						hlist = hlist[:4]
 				
 					host = ".".join(hlist)
+					#fine to only search for device once as each file if for a specific device!
 					if device is None:
 						if host not in lookedup:
 							device = lookup(host)

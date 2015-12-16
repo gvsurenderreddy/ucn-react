@@ -2,6 +2,7 @@ var ActionCreators = require('../actions/ActionCreators');
 var d3 = require('../lib/d3.min');
 var d3tip = require('../lib/d3.tip')(d3);
 var Colours = require('../utils/Colours');
+
 /*
  * This is the overview chart that is used to select areas to zoom in on!
  */
@@ -13,12 +14,16 @@ Zoom = function(){
 Zoom.prototype.initialise = function(data, node, opts){
 
   var self = this;
+ 
+  
   this.opts = opts;
   this.x  = d3.time.scale().range([0,opts.width]);
   this.y  = d3.scale.linear().range([opts.height,0]);
   this.xAxis = d3.svg.axis().scale(this.x).orient("bottom");
   this.yAxis = d3.svg.axis().scale(this.y).orient("left");
 
+  
+  
   this.brush = d3.svg.brush()
                   .x(this.x)
                   .on("brushend", function(){
@@ -57,7 +62,11 @@ Zoom.prototype.initialise = function(data, node, opts){
               .append('g')
               .attr('transform', 'translate(' + opts.margin.left + ',' + opts.margin.top + ')');
 
-  
+  this.svg.append("defs").append("clipPath")
+                .attr("id", "zoomclip")
+                .append("rect")
+                .attr("width", opts.width)
+                .attr("height", opts.height);
 
   var zoom = this.svg.append("g")
                      .attr("class", "zoom");
@@ -79,10 +88,10 @@ Zoom.prototype.initialise = function(data, node, opts){
              .call(this.yAxis);
 
   this.svg.append("g")
-          .attr("class","locationoverlay");
+          .attr("class","zlocationoverlay");
   
   this.svg.append("g")
-          .attr("class","historyoverlay");
+          .attr("class","zhistoryoverlay");
 
   //this.update(data);
 };
@@ -156,6 +165,7 @@ Zoom.prototype.update = function(data){
   }
  
   if (data.locations){
+  	
     this.locations(data.locations);
   }
   //exit!
@@ -165,7 +175,7 @@ Zoom.prototype.update = function(data){
 
 Zoom.prototype.locations = function(locations){
  	var self = this;
- 	var overlay = this.svg.select("g.locationoverlay");
+ 	var overlay = this.svg.select("g.zlocationoverlay");
  	overlay.call(this.locationtip)
  	
 	var height = this.opts.height;
@@ -185,20 +195,22 @@ Zoom.prototype.locations = function(locations){
 		 .style("fill-opacity", 1.0)	
 		 .style("stroke", "none")
 		 .on('mouseover', function(d){
+		 	
 		 	this.locationtip.show(d);
+		 	
 		 	ActionCreators.locationhighlighted([d.lat, d.lng]);
 		 }.bind(this))
 		 .on('mouseout', this.locationtip.hide)
 		 .on('click', function(d){
 		 	ActionCreators.locationselected([d.lat, d.lng]);
-		 });
+		 })
 	
 	zone.append("rect")
 		 .attr("class", "zone")
 		 .attr("height", height-15)
 		 .attr("y", 15)		
 		 .style("fill", function(d,i,j){return this.colour(d.name)}.bind(this))	
-		 .style("fill-opacity", function(d){return 0.1})	
+		 .style("fill-opacity",0.1)
 		 .style("stroke", "none")
 		 .on('mouseover', function(d){
 		 	self.locationtip.show(d);
@@ -206,8 +218,8 @@ Zoom.prototype.locations = function(locations){
 		 	ActionCreators.locationhighlighted([d.lat, d.lng]);
 		 })
 		 .on('mouseout', function(){
-		 		self.locationtip.hide();
-		 		d3.select(this).style("fill-opacity", 0.1);
+		 	self.locationtip.hide();
+		 	d3.select(this).style("fill-opacity", 0.1);
 		 })
 		 .on('click', function(d){
 		 	ActionCreators.locationselected([d.lat, d.lng]);
@@ -238,7 +250,7 @@ Zoom.prototype.locationtip = d3tip().attr('class', 'd3-tip')
 
 Zoom.prototype.urlhistory = function(data){
 
-    var overlay = this.svg.select("g.historyoverlay");
+    var overlay = this.svg.select("g.zhistoryoverlay");
 
     var timestamps = overlay.selectAll("line.ts")
                             .data(data, function(d){return d;});

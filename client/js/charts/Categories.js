@@ -227,6 +227,7 @@ Categories.prototype.generate = function(data){
       .attr("transform", function(d) { return "translate(" + data.y0 + "," + data.x0 + ")"; })
       .on("click", function(d) { 
       		if (this.root.name !== d.name){
+      			
             	this.toggle(d);
             	this.selectnode(d); 
             	this.generate(d);  

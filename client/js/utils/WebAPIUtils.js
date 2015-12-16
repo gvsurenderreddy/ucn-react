@@ -56,7 +56,7 @@ module.exports ={
    	if (_netaccess)
   		return;
   	_netaccess=true;
-  	console.log("fetching browsing range!!!");
+  	
     request
       .post('/viz/browsing')
       .set('Accept', 'application/json')
@@ -257,7 +257,7 @@ module.exports ={
           console.log("hmm errror");
           console.log(err);
         }else{
-          	console.log("ok - firing receieved category data");
+          
           	if (res.body == null){
 				window.location.replace(REDIRECT);
 			}else{
