@@ -1,9 +1,13 @@
 var Promise = require("bluebird");
 var config = require("./config");
 var pg = require("pg");
-
+var ignore = require("./ignore");
 var db = Promise.promisifyAll(pg);
 
+
+var _categorised = 0;
+var _uncategorised = 0;
+var _total = 0;
 
 //var _client = new pg.Client(config.database.url);
 var _translate = function(classification){
@@ -103,6 +107,7 @@ module.exports = {
 	fetch_binned_browsing_for_device: function(deviceid, bin, from, to){
 		var sql = "SELECT (timestamp/1000/$1) * $2 as bin, id as host,  COUNT(DISTINCT httphost) as total from browsing WHERE id = $3 AND (timestamp/1000 >= $4 AND timestamp/1000 <= $5) GROUP BY id, bin ORDER BY id, bin";
       	var params = [bin,bin,deviceid,from,to]
+      	 _print_query(sql,params);
       	return _execute_sql(sql,params).then(function(results){
 			return results;
 		});
@@ -111,6 +116,7 @@ module.exports = {
 	fetch_binned_browsing_for_devices: function(deviceids, bin, from, to){
 		var sql = "SELECT (timestamp/1000/$1) * $2 as bin, id as host,  COUNT(DISTINCT httphost) as total from browsing WHERE id IN " + _convert_to_tuple(deviceids) + " AND (timestamp/1000 >= $3 AND timestamp/1000 <= $4) GROUP BY id, bin ORDER BY id, bin";
       	var params = [bin,bin,from,to]
+      	_print_query(sql,params);
       	return _execute_sql(sql,params).then(function(results){
 			return results;
 		});
@@ -393,4 +399,307 @@ module.exports = {
 		
 	},
 	
+	
+	categorised: function(value){
+		if (value){
+			_categorised += 1;
+		}else{
+			_uncategorised += 1;
+		}
+		_total += 1;
+	},
+	
+	category: function(url){
+		var dict = {
+		
+			"plus": ["communication", "social networking"],
+			"facebook": ["communication", "social networking"],
+			"linkedin": ["communication", "social networking"],
+			"hangouts": ["communication", "social networking"],
+			"twitter": ["communication", "social networking"],
+			"pinterest": ["communication", "social networking"],
+			"instagram": ["communication", "social networking"],
+			
+			"flickr": ["communication", "images"],
+			"tumblr": ["communication", "blog"],
+			"blog": ["communication", "blog"],
+			"wordpress": ["communication","blog"],
+			"skype": ["communication", "conferencing"],
+			"mail": ["communication", "email"],
+			"email": ["communication", "email"],
+			
+			"reed.co.uk": ["information", "jobs"],
+			"indeed": ["information", "jobs"],
+			"job": ["information", "jobs"],
+			"candidate": ["information", "jobs"],
+			"career": ["information", "jobs"],
+			"monster": ["information", "jobs"],
+			"appointment": ["information", "jobs"],
+			"recruit":["information", "jobs"],
+			"hired": ["information", "jobs"],
+			"milkround": ["information", "jobs"],
+			"talent": ["information", "jobs"],
+			"experiencepg.com": ["information", "jobs"],
+			"tutor":["information", "tutoring"],
+			
+			"masters": ["information", "courses"],
+			"phd": ["information", "courses"],
+			"mba": ["information", "courses"],
+			"study" : ["information", "courses"],
+			"doctorate": ["information", "courses"],
+			"degrees": ["information", "courses"],
+			
+			"student": ["information", "university"],
+			"graduate": ["information", "university"],
+			".edu": ["information", "university"],
+			".ac.uk": ["information", "university"],
+			"ucas" : ["information", "health"],
+			
+			"trustpilot": ["information", "reviews"],
+			"reviews": ["information", "reviews"],
+			
+			"home": ["information", "property"],
+			"fish4": ["information", "property"],
+			
+			"library": ["information", "books"],
+			"book": ["information", "books"],
+			"scholar": ["information", "academic"],
+			"wiley": ["information", "academic"],
+			"science": ["information", "academic"],
+			"academic": ["information", "academic"],
+			
+			"uni": ["information", "university"],
+			"news": ["information", "news"],
+			"cnbc": ["information", "news"],
+			"times": ["information", "news"],
+			"press": ["information", "news"],
+			"post" : ["information", "news"],
+			
+			"chronicle": ["information", "news"],
+			"today" : ["information", "news"],
+			"mirror" : ["information", "news"],
+			"reuters" : ["information", "news"],
+			"independent.co.uk" :  ["information", "news"],
+			"guardian": ["information", "news"],
+			"telegraph": ["information", "news"],
+			
+			"techinsider":["information", "news", "technology"],
+			"techcrunch":["information", "news", "technology"],
+			"techradar": ["information", "news", "technology"],
+			
+			"economic": ["information", "finance", "business"],
+			"business": ["information", "finance", "business"],
+			"forbes":["information", "finance", "business"],
+			"bloomburg":["information", "finance", "business"],
+			"biz":["information", "finance", "business"],
+			
+			"stocks": ["information", "finance", "stockmarket"],
+			"shares": ["information", "finance", "stockmarket"],
+			"invest": ["information","finance", "stockmarket"],
+			"market": ["information", "finance", "stockmarket"],
+			"wealth": ["information", "finance", "stockmarket"],
+			"trading": ["information", "finance", "stockmarket"],
+			"nikkei": ["information", "finance", "stockmarket"],
+			
+			"goldman": ["information", "finance", "banking"],
+			"jpmorgan": ["information", "finance", "banking"],
+			"chase.com" : ["information", "finance", "banking"],
+			"morganstanley": ["information", "finance", "banking"],
+			"bankofengland": ["information", "finance", "banking"],
+			
+			"finan": ["information", "finance"],
+			"ft.com": ["information", "finance"],
+			"currency" : ["information", "finance"],
+			"money":["information", "finance"],
+			"weather": ["information", "weather"],
+			"accountant": ["information", "finance", "accounting"],
+			"accounting": ["information", "finance", "accounting"],
+			"accountancy": ["information", "finance", "accounting"],
+			"acca": ["information", "finance", "accounting"],
+			"acfe":  ["information", "finance", "accounting"],
+			"pwc": ["information", "finance", "accounting"],
+			
+			"programmer": ["information", "technology", "programming"],
+			"apple": ["information", "technology", "hardware"],
+			"windowsphone": ["information", "technology", "hardware"],
+			"health": ["information","health"],
+			"clinic": ["information", "health"],
+			"diabetes": ["information", "health"],
+			"gov.uk": ["information", "government"],
+			".gov": ["information", "government"],
+			
+			"quora": ["information", "forum"],
+			"answers": ["information", "forum"],
+			"stackexchange":["information", "forum"],
+			"stackoverflow":["information", "forum", "tech"],
+			"wiki":["information"],
+			"reddit":["information", "forum"],
+			
+			"google.com" : ["support", "search engine"],
+			"www.google.com": ["support", "search engine"],
+			"www.google.co.uk": ["support", "search engine"],
+			"bing.com": ["support", "search engine"],
+			"bing.co.uk": ["support", "search engine"],
+			"www.yahoo.co.uk": ["support", "search engine"],
+			"www.yahoo.com": ["support", "search engine"],
+			"ask.com": ["support", "search engine"],
+			
+			"energy": ["support", "energy"],
+			
+			"mediafire": ["support", "backups"],
+			"icloud": ["support", "backups"],
+			"dropbox": ["support", "backups", "documents"],
+			"play.google": ["support", "software", "apps"],
+			"survey": ["support", "surveys"],
+			"gwallet": ["support", "payment"],
+			
+			"doodle": ["support", "calendar"],
+			"calendar": ["support", "calendar"],
+			
+			"translate": ["support", "translate"],
+			
+			"shop": ["support", "shopping"],
+			"asda": ["support", "shopping"],
+			"argos": ["support", "shopping"],
+			"tesco": ["support", "shopping"],
+			"waitrose": ["support", "shopping"],
+			"boots": ["support", "shopping"],
+			"amazon": ["support", "shopping"],
+			"houseoffraser": ["support","shopping"],
+			"barclays":["support", "banking"],
+			"santander": ["support", "banking"],
+			"lloyds":["support", "banking"],
+			"natwest":["support", "banking"],
+			"paypal":["support", "banking"],
+			 
+			 
+			 "travel":["support", "travel"],
+			"air":["support", "travel"],
+			"map":["support", "travel"],
+			"booking":["support", "travel"],
+			"heathrow":["support", "travel"],
+			"gatwick":["support", "travel"],
+			
+			"workout": ["entertainment", "fitness"],
+			
+			"car":  ["entertainment", "interest", "cars"],
+			"motor": ["entertainment", "interest", "cars"],
+			"wheels": ["entertainment", "interest", "cars"],
+			"dine" : ["entertainment", "interest", "food"],
+			"food" : ["entertainment", "interest", "food"],
+			"nutrition": ["entertainment", "interest", "food", "health"],
+		
+			"holiday": ["entertainment", "travel"],
+			"secretescapes" : ["entertainment", "travel"],
+			
+			"league": ["entertainment", "interest", "sport"],
+			"sport": ["entertainment", "interest", "sport"],
+			"football": ["entertainment", "interest", "sport", "football"],
+			"fashion": ["entertainment", "interest", "fashion"],
+			"style": ["entertainment", "interest", "fashion"],
+			"celebrity": ["entertainment", "interest", "celebrity"],
+			"astro": ["entertainment", "interest", "astrology"],
+			"puzzle" :  ["entertainment", "interest", "puzzles"],
+			
+			"readersdigest": ["entertainment", "interest", "magazine"],
+			
+			"dating" : ["entertainment", "dating"],
+			
+			"gamble" : ["entertainment", "gambling"],
+			"gambling": ["entertainment", "gambling"],
+			"skybet" : ["entertainment", "gambling"],
+			
+			"flix" : ["entertainment", "streaming"],
+			"video": ["entertainment", "films"],
+			"movie": ["entertainment", "films"],
+			"youtube": ["entertainment", "streaming"],
+			"www.vice.com" :["entertainment", "streaming"],
+			"itv.com":["entertainment", "streaming"],
+			"vimeo" :["entertainment", "streaming"],
+			"ustream":["entertainment", "streaming"],
+			"destination": ["entertainment", "travel"],
+			
+			"film": ["entertainment", "films"],
+			"game":  ["entertainment", "gaming"],
+			"gaming": ["entertainment", "gaming"],
+			"music": ["entertainment", "music"],
+			"mp3": ["entertainment", "music"],
+			"tunes": ["entertainment", "music"],
+			
+			
+			"audible":["entertainment", "audiobook"],
+		}
+		
+		var category = "";
+		
+		this.categorised(Object.keys(dict).some(function(key){
+			//console.log("checking for " + key + " in url " + url);
+			if (url.indexOf(key) != -1){
+				category = dict[key];
+				return true;
+			}
+			return false;
+		}.bind(this)));
+		
+		return category;
+	},
+	
+	categorise: function(urls){
+		var categorised = urls.map(function(url){
+			return {url: url.url, category: this.category(url.url), total: url.value};
+		}.bind(this));
+		console.log("categorised " + _categorised + "(" + ((_categorised/_total)*100) + "% )");
+		console.log("uncategorised " + _uncategorised + "(" + ((_uncategorised/_total)*100) + "% )");
+		console.log("total " + _total);
+		return categorised;
+	},
+	
+	stats_top_urls_for_device: function(deviceid, bin){
+		var sql = "SELECT (timestamp/1000/$1) * $2 as bin, id as host,  array_agg(DISTINCT httphost) as total from browsing WHERE id = $3 GROUP BY id, bin ORDER BY id, bin";
+      	var params = [bin,bin,deviceid]
+      	
+      	 _print_query(sql,params);
+      	
+      	return _execute_sql(sql,params).then(function(results){
+			
+			var dict = results.reduce(function(acc, row){
+				return row.total.reduce(function(acc2, url){
+					acc2[url] = acc2[url] ? acc2[url] + 1: 1;
+					return acc2;
+				},acc);
+			},{});
+			
+			//return dict;
+			var added = {}
+			var urls = Object.keys(dict).map(function(key){
+				return {url: key, value:dict[key]}
+			}).filter(function (item){
+				if (!ignore.ignore[item.url]){
+					added[item.url] = true;
+					return true;
+				}
+				return false;
+			});
+			
+			urls.sort(function(a,b){
+				if (a.value < b.value){
+					return 1;
+				}
+				if (a.value > b.value){
+					return -1;
+				}
+				return 0;
+			});
+			
+			urls = urls.filter(function(item){
+				return !added["www."+item.url];
+			});
+			
+			console.log(urls.length);
+			return this.categorise(urls).filter(function(item){
+				return item.category === "";
+			});
+			
+		}.bind(this));
+	},
 }

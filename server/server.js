@@ -43,6 +43,8 @@ app.use('/viz/movescallback', require('./routes/moves'));
 
 // main (authenticated) routes
 app.use('/viz/admin/', require('./routes/vizadmin'));
+app.use('/viz/stats', require('./routes/stats'));
 app.use('/viz', require('./routes/viz'));
+
 
 server.listen(8001);
