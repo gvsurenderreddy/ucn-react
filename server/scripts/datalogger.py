@@ -100,8 +100,8 @@ class DataLogger( object ):
 			logger.error(e)
 			logger.error("error bulk committing dns")				
 			
- 	@reconnect
- 	def bulk_insert_urls(self, content):
+	@reconnect
+	def bulk_insert_urls(self, content):
 		
 		for line in content:
 
@@ -167,3 +167,58 @@ class DataLogger( object ):
 			self.conn.commit()				
 		except Exception, e:
 			logger.error("error bulk committing urls")				
+
+	@reconnect
+	def bulk_insert_images(self, content):
+		
+		for line in content:
+			items = line.split()
+			
+			
+			if len(items) < 9:
+				logger.error("error parsing line")
+				logger.error(line)
+			else:
+				if ("http" in items[8]  and "//" in items[8]):
+					parts  = items[8].split("//")[1].split("/")
+
+					domain = parts[0]	
+					res = get_tld(items[8], as_object=True, fail_silently=True)
+
+					if res is not None:
+						tld = "%s.%s" % (res.domain, res.suffix)
+					else:
+						tld = parts[0]
+						
+					
+					path = ""
+					if len(parts) > 0:
+						path = "/".join(parts[1:])
+					
+					#sometimes dest can just be a '-', need to set it to a valid host so postgres does not barf
+					if items[11].split("/")[1].strip() == "-":
+						dest = "0.0.0.0"
+					else:
+						dest = items[11].split("/")[1]
+					
+					for img in ["svg", "jpg", "jpeg", "png", "gif"]:
+						if img in parts[-1]:
+							try:
+						
+								sql = "SELECT deviceid from vpnips WHERE ip=%s"
+								data = (items[4],)
+								self.cur.execute(sql,data)
+								deviceid =  self.cur.fetchone()
+								if deviceid is not None:
+									print "%s %s %s %s" % (deviceid[0], items[2].replace(".",""), domain, items[8])
+									sql = "INSERT INTO images (id, ts, domain, path) VALUES (%s, %s, %s, %s)"
+									data = (deviceid[0],items[2].replace(".",""),domain,items[8])			
+									self.cur.execute(sql,data)
+							except Exception, e:
+								print "hmm error"
+								print e
+						
+					try:
+						self.conn.commit()				
+					except Exception, e:
+						logger.error("error bulk committing images")	
