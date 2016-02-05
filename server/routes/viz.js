@@ -183,6 +183,8 @@ router.post('/categories', function(req,res, next){
   	}).then(function(deviceids){
     	return pgdb.fetch_categories_for_devices(deviceids, classifier)
     }).then(function(categories){
+    	console.log("----- viz, sending ====");
+    	console.log(categories);
         res.send(categories);
     });
 });

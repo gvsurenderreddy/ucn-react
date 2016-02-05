@@ -1,0 +1,4 @@
+export const ActionTypes= {
+	CATEGORY_DATA:'CATEGORY_DATA',
+	NODE_SELECTED:'NODE_SELECTED',
+};

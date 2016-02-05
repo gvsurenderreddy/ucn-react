@@ -123,6 +123,9 @@ Categories.prototype.initialise = function(data, node, opts){
  
   this.root.x0 = opts.height / 2;
   this.root.y0 = 0;
+  
+  
+
   this.reset();
   this.generate(this.root);
 };
@@ -211,6 +214,8 @@ Categories.prototype.generate = function(data){
   // Normalize for fixed-depth.
   nodes.forEach(function(d) { d.y = d.depth * 180; });
 
+console.log("OK NODES RAE");
+console.log(nodes);
   // Update the nodes…
   //need to d3 to know this node is new if the number of associated urls changes?
   //perhaps better to llokup urls in Category store...when category actuon creators fires.

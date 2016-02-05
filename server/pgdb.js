@@ -20,6 +20,7 @@ var _translate = function(classification){
 	return classification;	
 }
 
+
 var _gettotal = function(counts, tlds){
 	
 	return tlds.reduce(function(acc, item){
@@ -427,63 +428,138 @@ module.exports = {
 	
 	categorise: function(urls){
 	
-		console.log(categorise.categories);
+		//console.log(categorise.categories);
 	
 		var categorised = urls.map(function(url){
-			return {url: url.url, category: this.category(url.url), total: url.value};
+			return {url: url, category: this.category(url)};
 		}.bind(this));
+		
 		console.log("categorised " + _categorised + "(" + ((_categorised/_total)*100) + "% )");
 		console.log("uncategorised " + _uncategorised + "(" + ((_uncategorised/_total)*100) + "% )");
 		console.log("total " + _total);
 		return categorised;
 	},
 	
-	stats_top_urls_for_device: function(deviceid, bin){
-		var sql = "SELECT (timestamp/1000/$1) * $2 as bin, id as host,  array_agg(DISTINCT httphost) as total from browsing WHERE id = $3 GROUP BY id, bin ORDER BY id, bin";
-      	var params = [bin,bin,deviceid]
-      	
-      	 _print_query(sql,params);
+	stats_classify: function(deviceid){
+		var sql = "SELECT DISTINCT (httphost) as url from browsing WHERE id = $1";
+		var params = [deviceid];
+		
+		_print_query(sql,params);
       	
       	return _execute_sql(sql,params).then(function(results){
 			
 			var dict = results.reduce(function(acc, row){
-				return row.total.reduce(function(acc2, url){
-					acc2[url] = acc2[url] ? acc2[url] + 1: 1;
-					return acc2;
-				},acc);
+				acc[row.url] = true;
+				return acc;
 			},{});
 			
 			//return dict;
 			var added = {}
 			var urls = Object.keys(dict).map(function(key){
-				return {url: key, value:dict[key]}
+				return key;
 			}).filter(function (item){
-				if (!ignore.ignore[item.url]){
-					added[item.url] = true;
+				if (!ignore.ignore[item]){
+					added[item] = true;
 					return true;
 				}
 				return false;
 			});
 			
 			urls.sort(function(a,b){
-				if (a.value < b.value){
+				if (a < b){
 					return 1;
 				}
-				if (a.value > b.value){
+				if (a > b){
 					return -1;
 				}
 				return 0;
 			});
 			
 			urls = urls.filter(function(item){
-				return !added["www."+item.url];
+				return !added["www."+item];
 			});
 			
-			console.log(urls.length);
-			return this.categorise(urls).filter(function(item){
-				return item.category === "";
+			
+			var remaining = this.categorise(urls).filter(function(item){
+				return item.category == "";
+			}).map(function(item){
+				return item.url;
+			});
+			
+			var categories = this.categorise(urls).filter(function(item){
+				return item.category != "";
+			}).map(function(item){
+				return {url:item.url, category:item.category.join("/")};
+			});
+			
+			
+			var results = categories.map(function(item){
+		  		var sql = "INSERT INTO classification_v2 (deviceid, tld, success, classifier, score, classification) SELECT $1,$2,$3,$4,$5,$6 WHERE NOT EXISTS (SELECT 1 FROM classification_v2 WHERE deviceid=$7 AND tld=$8) "
+				
+				var params = [deviceid,item.url, 1, 'user', 1.0, item.category, deviceid, item.url]
+				return _execute_sql(sql,params);
+			});
+		
+			return Promise.all(results).then(function(results){
+		 		return remaining;	
+			}, function(err){
+		  	 	console.log(err);
+		   		throw(err);
 			});
 			
 		}.bind(this));
 	},
+	
+	
+	
+	stats_top_urls_for_device: function(deviceid, bin){
+		
+		
+		var sql = "SELECT (b.timestamp/1000/$1) * $2 as bin, b.id as host,  array_agg(DISTINCT b.httphost) as total from browsing b, classification_v2 c WHERE b.id = $3 AND b.id = c.deviceid AND c.tld = b.httphost GROUP BY id, bin ORDER BY id, bin";
+      	
+      	
+      	var params = [bin,bin,deviceid]
+      	
+      	 _print_query(sql,params);
+      	
+      	return _execute_sql(sql,params).then(function(results){
+			
+			return results.map(function(result){
+				return {ts: result.bin, id: result.host, hosts: result.total}
+			});
+			
+		}.bind(this));
+	},
+	
+	
+	stats_categories_for_device: function(deviceid){
+			
+		var tldcount = "SELECT b.httphost, count(b.httphost) as count FROM browsing b, classification_v2 c WHERE b.id = $1 AND b.id = c.deviceid AND c.tld = b.httphost GROUP BY httphost";
+		
+		var tldparams = [deviceid]
+		
+		var sql = "SELECT c.classification, array_agg(distinct c.tld) AS tld FROM classification_v2 c WHERE deviceid = $1 GROUP BY c.classification"
+		
+		var params = [deviceid]
+		
+		//first get the counts of all tlds
+		
+		return _execute_sql(tldcount, tldparams).then(function (results){
+			return results.reduce(function(acc, item){
+				acc[item.httphost] = item.count; 
+				return acc;
+			},{});
+		}).then(function(counts){
+			return [counts, _execute_sql(sql,params)];
+		})
+		.spread(function(counts, results){
+			console.log("counts are");
+			console.log(counts);
+			
+			return results.map(function(result){
+				var classification = result.classification.split("/");
+				return {classification:classification, tld:result.tld, size: _gettotal(counts, result.tld)};
+			});
+		});
+	}
 }
