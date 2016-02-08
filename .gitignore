@@ -1,5 +1,6 @@
 client/node_modules
 server/node_modules
+stats/node_modules
 server/netdata.db
 server/config.js
 *.db
