@@ -5,10 +5,12 @@ import CategoryStore from './CategoryStore';
 import d3 from 'd3';
 
 let root;
-let width = 500, height = 500;
+let width = 1000, height = 500;
 let nodes;
+let paths;
 let tree = d3.layout.tree().size([height, width]);	
 let diagonal = d3.svg.diagonal().projection(function(d) { return [d.y, d.x]; });
+let total;
 
 
 function toggle(d){
@@ -42,9 +44,13 @@ function reset(){
 }
 
 function _create_nodes(data){
+	console.log("seend ata");
+	console.log(data);
+	
 	root = data;
 	root.x0 = height / 2;
   	root.y0 = 0;
+  	total   = data.size;  
   	
   	reset(root);
 	
@@ -56,11 +62,21 @@ function _create_nodes(data){
   	nodes = _treenodes.map((item,i)=>{
   		item.x0 = root.x0;
   		item.y0 = root.y0;
+  		item.r  = Math.max(3,(item.size/total) * 20);
+  		item.text =  item.name ? `${item.name}(${((item.size/total)*100).toFixed(2)})` : "";
   		return item;
   	});
+  	
+  	paths = _treenodes.map((item, i)=>{
+  		let s = {x: root.x0, y: root.y0};
+  		let t = {x: item.x, y: item.y}; 
+  		return {d: diagonal({source: s, target: t})}
+  	});
+  	
 }	
 
 function _update_tree(){
+
 	let _treenodes = tree.nodes(root).reverse();
   	
   	// Normalize for fixed-depth.
@@ -69,7 +85,15 @@ function _update_tree(){
   	nodes = _treenodes.map((item,i)=>{
   		item.x0 = root.x0;
   		item.y0 = root.y0;
+  		item.r  = Math.max(3,(item.size/total) * 20);
+  		item.text =  item.name ? `${item.name}(${((item.size/total)*100).toFixed(2)})` : "";
   		return item;
+  	});
+  	
+  	paths = _treenodes.map((item, i)=>{
+		let s = {x: item.parent ? item.parent.x : item.x, y: item.parent ? item.parent.y : item.y}
+  		let t = {x: item.x, y: item.y}; 
+  		return {d: diagonal({source: s, target: t})}
   	});
 }
 
@@ -81,6 +105,10 @@ class TreeStore extends Store{
 	
 	nodes(){
 		return nodes;
+	}
+	
+	paths(){
+		return paths;
 	}
 }
 
@@ -98,7 +126,7 @@ treeStoreInstance.dispatchToken = AppDispatcher.register(action => {
 		
 		case ActionTypes.NODE_SELECTED:
 			toggle(action.action.node);
-			_update_tree();
+			_update_tree(action.action.node);
 			break;
 			
 		default:
