@@ -2,12 +2,20 @@ module.exports =
 {
 	categories: {
 			
+		//specifics
+		"eyecareplus" : ["lifestyle", "health"],
+		"dating.birminghammail" : ["support", "dating"],
+		"birminghammail": ["information", "news", "local"],
+		"mailcashback":["support", "shopping", "cashback"],
+		
+		
 		//participation
 		"callforparticipants":["participation"],
 		"visualdna":["participation", "profiling"],
 		"ucnproject":["participation", "data collection"],
 		"toluna":["participation", "surveys"],
 		"yourword":["participation", "surveys"],
+		"thinkindia":["participation", "policy", "india"],
 		
 		//communication
 		
@@ -19,6 +27,9 @@ module.exports =
 		"pinterest": ["communication", "social networking"],
 		"instagram": ["communication", "social networking"],
 		"stumbleupon": ["communication", "social networking"],
+		"yorkspace": ["communication", "social networking", "university"],
+		"shelfari": ["communication", "social networking", "books"],
+		
 		
 		"flickr": ["communication", "images"],
 		"tumblr": ["communication", "blog"],
@@ -27,12 +38,14 @@ module.exports =
 		"wp.com":["communication","blog"],
 		"wp.me":["communication","blog"],
 		"wp.pl":["communication","blog"],
+		"gummy-stuff": ["communication","blog", "finance"],
 		"skype": ["communication", "conferencing"],
 		"mail": ["communication", "email"],
 		"email": ["communication", "email"],
 		
 		//information
 		
+		"stepstone": ["information", "jobs"],
 		"adzuna": ["information", "jobs"],
 		"reed.co.uk": ["information", "jobs"],
 		"indeed": ["information", "jobs"],
@@ -49,6 +62,7 @@ module.exports =
 		"internships": ["information", "jobs"],
 		"cebglobal":["information", "jobs"],
 		"shl.com":["information", "jobs"],
+		"workcircle": ["information", "jobs"],
 		
 		"experiencepg.com": ["information", "jobs"],
 		"tutor":["information", "tutoring"],
@@ -60,16 +74,28 @@ module.exports =
 		"study" : ["information", "courses"],
 		"doctorate": ["information", "courses"],
 		"degrees": ["information", "courses"],
-	
+		"chances4.me": ["information", "courses"],
+		
+		"iggi.org.uk": ["information", "courses", "gaming"],
+		
 		"student": ["information", "university"],
 		"graduate": ["information", "university"],
 		".edu": ["information", "university"],
 		".ac.uk": ["information", "university"],
 		"ucas" : ["information", "university"],
-	
+		"uio.no": ["support", "university"],
+		"ualberta.ca" :  ["support", "university"],
+		
+		
+		
+		
+		"hrsummit": ["information", "conference", "human resources"],
+		"inytartfortomorrow.com": ["information", "conference", "art"],
+		
 		"trustpilot": ["information", "reviews"],
 		"reviews": ["information", "reviews"],
 	
+		
 		
 		"scribd": ["information", "books"],
 		"library": ["information", "books"],
@@ -80,20 +106,28 @@ module.exports =
 		"academic": ["information", "academic"],
 	
 		"uni": ["information", "university"],
+		
+		"indiatimes": ["information", "news", "india"],
+		"ibnlive": ["information", "news", "india"],
+		
 		"news": ["information", "news"],
 		"cnbc": ["information", "news"],
-		"indiatimes": ["information", "news", "india"],
 		"times": ["information", "news"],
 		"press": ["information", "news"],
 		"post" : ["information", "news"],
 		
+		
 		"consultancy.uk" : ["information", "news", "consultancy"],
 	
+		"wsj.com":["information", "news"],
+		"wsj.net":["information", "news"],
+		"theweek.co.uk":["information", "news"],
 		"standard.co.uk": ["information", "news"],
 		"news.bbc": ["information", "news"],
 		"chronicle": ["information", "news"],
 		"today" : ["information", "news"],
 		"mirror" : ["information", "news"],
+		"thesun" :  ["information", "news"],
 		"reuters" : ["information", "news"],
 		"independent.co.uk" :  ["information", "news"],
 		"guardian": ["information", "news"],
@@ -101,6 +135,7 @@ module.exports =
 		"aajtak.in": ["information", "news", "india"],
 		
 		
+		"gogreenindia":  ["information", "news", "conservation"],
 		"who.int": ["information", "news", "world health"],
 		
 		"techinsider":["information", "news", "technology"],
@@ -111,12 +146,16 @@ module.exports =
 		
 		"cambridge":["information", "region", "cambridge"],
 		
+		"ey.com": ["information", "finance", "business"],
 		"economic": ["information", "finance", "business"],
 		"business": ["information", "finance", "business"],
 		"forbes":["information", "finance", "business"],
 		"bloomberg":["information", "finance", "business"],
 		"biz":["information", "finance", "business"],
 	
+		
+		"macquarie" : ["information", "finance", "investment"], 
+		"brandcapital.co": ["information", "finance", "investment"], 
 		"fidelity.com": ["information", "finance", "investment"], 
 		"stocks": ["information", "finance", "investment"],
 		"shares": ["information", "finance", "investment"],
@@ -144,9 +183,9 @@ module.exports =
 		"money":["information", "finance"],
 		"weather": ["information", "weather"],
 		
-		"aicpa": ["information"," finance", "accounting"],
-		"icaew": ["information"," finance", "accounting"],
-		"cimaglobal": ["information"," finance", "accounting"],
+		"aicpa": ["information","finance", "accounting"],
+		"icaew": ["information","finance", "accounting"],
+		"cimaglobal": ["information","finance", "accounting"],
 		"accountant": ["information", "finance", "accounting"],
 		"accounting": ["information", "finance", "accounting"],
 		"accountancy": ["information", "finance", "accounting"],
@@ -154,6 +193,11 @@ module.exports =
 		"acfe":  ["information", "finance", "accounting"],
 		"pwc": ["information", "finance", "accounting"],
 	
+	
+		"cipd.co.uk":  ["information", "human resources"],
+		
+		"www.ihbc.org.uk": ["information", "building conservation"],
+		 
 		"youronlinechoices": ["information", "technology", "privacy"],
 		"cis-india": ["information", "technology", "society"],
 		"programmer": ["information", "technology", "programming"],
@@ -169,7 +213,8 @@ module.exports =
 		"gov.uk": ["information", "government"],
 		".gov": ["information", "government"],
 		"insidegov": ["information", "government"],
-		
+		"publicnotices":["information", "local"],
+		"public-notices":["information", "local"],
 		"mathoverflow": ["information", "forum", "maths"],
 		
 		"quora": ["information", "forum"],
@@ -228,6 +273,8 @@ module.exports =
 		"amazon": ["support", "shopping"],
 		"newlook": ["support", "shopping", "clothes"],
 		"houseoffraser": ["support","shopping"],
+		"dorothyperkins":  ["support","shopping"],
+		
 		"certum.pl":["support","shopping", "tech"], 
 		
 		"home": ["support", "property"],
@@ -246,6 +293,8 @@ module.exports =
 		"paypal":["support", "banking"],
 	 	"nwolb":["support", "banking"],
 	 
+	 	"hiscox.co.uk": ["support", "insurance"],
+	 	
 		"travel":["support", "travel"],
 		"liverail":["support", "travel"],
 		"air":["support", "travel"],
@@ -262,28 +311,51 @@ module.exports =
 		"coursera": ["support", "online course"],
 		"saylor": ["support", "online course"],
 		
-		"scaledb" : ["support", "tech", "database"],
-		"everesttech.net" : ["support", "tech", "creative tools"],
-		"www.adobe.com" : ["support", "tech", "creative tools"],
-		"trustwave": ["support", "tech", "security"],
+		"scaledb" : ["support", "tools", "database"],
+		"mongodb" : ["support", "tools", "database"],
+		"srmo.sagepub" : ["support", "tools", "research"],
+		"everesttech.net" : ["support", "tools", "creative"],
+		"www.adobe.com" : ["support", "tools", "creative"],
+		"printfriendly" : ["support", "tools", "printing"],
+		"trustwave": ["support", "tools", "security"],
+		"regressit": ["support", "tools", "statistics"],
+		"statmodel": ["support", "tools", "statistics"],
+		
 		
 		"grammarly": ["support", "writing"],
 		"essay": ["support", "writing"],
 		
+		"idioms" : ["support", "language"],
 		"eviews.com": ["support", "econometrics"],
 		
 		"liferichpublishing": ["support", "writing"],
 		"markedbyteachers":  ["support", "writing"],
 		"freelancewriters": ["support", "writing"],
+		
+		"getrevising": ["support", "coursework or exams"],
+		"topperlearning": ["support", "coursework or exams"],
+		
 		"statistics" : ["support", "statistics"],
+		"robjhyndman": ["support", "statistics"],
+		"jeremyjaytaylor": ["support", "statistics"],
+		"statsmakemecry": ["support", "statistics"],
+		
 		"price": ["support", "price comparison"],
 		"theecoexperts.co.uk": ["support", "price comparison"],
+		
+		"profitaccumulator":  ["support", "gambling"],
+		"gamble" : ["support", "gambling"],
+		"gambling": ["support", "gambling"],
+		"skybet" : ["support", "gambling"],
+		
+		
 		//entertainment
 		
 		"workout": ["entertainment", "fitness"],
 	
 		"honestjohn": ["entertainment", "interest", "cars"],
-		"car":  ["entertainment", "interest", "cars"],
+		"carbuyer":  ["entertainment", "interest", "cars"],
+		"fixmycar":  ["entertainment", "interest", "cars"],
 		"motor": ["entertainment", "interest", "cars"],
 		"wheels": ["entertainment", "interest", "cars"],
 	
@@ -304,6 +376,7 @@ module.exports =
 		"astro": ["entertainment", "interest", "astrology"],
 		"puzzle" :  ["entertainment", "interest", "puzzles"],
 		
+		"quirker":["entertainment", "magazine", "humour"],
 		"dailymotion":["entertainment", "magazine", "humour"],
 		"idistracted": ["entertainment", "magazine", "humour"],
 		"mashable":["entertainment", "magazine", "humour"],
@@ -325,14 +398,15 @@ module.exports =
 		"readersdigest": ["entertainment", "magazine"],
 		"rd.com": ["entertainment", "magazine"],
 		"www.wired.co.uk":["entertainment", "magazine", "tech"],
-		"gamble" : ["entertainment", "gambling"],
-		"gambling": ["entertainment", "gambling"],
-		"skybet" : ["entertainment", "gambling"],
+		
+		
 	
 		"flix" : ["entertainment", "streaming", "films"],
 		"video": ["entertainment", "films"],
 		"movie": ["entertainment", "films"],
+		"bollywood": ["entertainment", "films", "bollywood"],
 		"bbc.com":["entertainment", "tv"],
+		"historyindia":["entertainment", "tv"],
 		".tv":["entertainment", "tv"],
 		"youtube": ["entertainment", "streaming", "video"],
 		
@@ -349,30 +423,51 @@ module.exports =
 		"film": ["entertainment", "films"],
 		"game":  ["entertainment", "gaming"],
 		"gaming": ["entertainment", "gaming"],
+		"plarium": ["entertainment", "gaming"],
+		"lilplay":["entertainment", "gaming"],
+		"codebreaker.codes":["entertainment", "gaming"],
 		
 		"audible":["entertainment", "audiobook"],
 		
-			
-		"dine" : ["entertainment", "lifestyle", "food"],
-		"food" : ["entertainment", "lifestyle", "food"],
-		"jusrol" : ["entertainment", "lifestyle", "food"],
-		"nutrition": ["entertainment", "lifestyle", "food", "health"],
 		
-		"eatclean": ["entertainment", "lifestyle", "food", "health"],
-		"examine.com": ["entertainment", "lifestyle", "health"],
-		"rodale": ["entertainment", "lifestyle", "health"],
-		"chriskresser": ["entertainment", "lifestyle", "health"],
-		"mindbodygreen": ["entertainment", "lifestyle", "health"],
-		"preventionpulse":  ["entertainment", "lifestyle", "health"],
-		"alternativedaily": ["entertainment", "lifestyle", "health"],
-		"interesticle" : ["entertainment", "lifestyle", "health"],
+		"mother" : [ "lifestyle", "parenthood"],
+		"family" : ["lifestyle", "parenthood"],
+		"parent" : ["lifestyle", "parenthood"],
+		"child" : ["lifestyle", "parenthood"],
 		
-		"destination": ["entertainment", "lifestyle", "travel"],
-		"4daysin": ["entertainment", "lifestyle", "travel"],
-		"happytrips": ["entertainment", "lifestyle", "travel"],
-		"holiday": ["entertainment", "lifestyle", "travel"],
-		"secretescapes" : ["entertainment", "lifestyle", "travel"],
+		"seriouseats": ["lifestyle", "food"],
+		"recipes": ["lifestyle", "food"],
+		"davesgourmet":   ["lifestyle", "food"],
+		"croftersorganic": ["lifestyle", "food"],
+		"dine" : ["lifestyle", "food"],
+		"food" : ["lifestyle", "food"],
+		"jusrol" : ["lifestyle", "food"],
+		"bellabdevans": ["lifestyle", "food"],
+		"bionaturae": ["lifestyle", "food"],
+		"sirkensingtons" : ["lifestyle", "food"],
+		"bobsredmill":  [ "lifestyle", "food"],
+		"colavita.com" : ["lifestyle", "food"],
+		"nutiva" :["lifestyle", "food", "health"],
+		"nutrition": ["lifestyle", "food", "health"],
+		
+		"eatclean": [ "lifestyle", "food", "health"],
+		"examine.com": ["lifestyle", "health"],
+		"rodale": [ "lifestyle", "health"],
+		"chriskresser": ["lifestyle", "health"],
+		"mindbodygreen": [ "lifestyle", "health"],
+		"preventionpulse":  [ "lifestyle", "health"],
+		
+		"alternativedaily": [ "lifestyle", "health"],
+		"interesticle" : ["lifestyle", "health"],
+		"safeordangerous": ["lifestyle", "health"],
+		
+		"destination": [ "lifestyle", "travel"],
+		"lonelyplanet": [ "lifestyle", "travel"],
+		"4daysin": [ "lifestyle", "travel"],
+		"happytrips": [ "lifestyle", "travel"],
+		"holiday": [ "lifestyle", "travel"],
+		"secretescapes" : ["lifestyle", "travel"],
 	
-		"lifehacker": ["entertainment", "lifestyle"],
+		"lifehacker": ["lifestyle"],
 	}
 };

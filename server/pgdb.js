@@ -178,7 +178,7 @@ module.exports = {
 		});
 	},
 	
-	/*fetch_locations_for_device: function(deviceid, from, to){
+	fetch_locations_for_device: function(deviceid, from, to){
 		
 		var sql = "SELECT name, enter, exit, lat, lng FROM ZONES where deviceid=$1";
 		var params = [deviceid];
@@ -187,7 +187,6 @@ module.exports = {
 			sql += " AND (enter >= $2 AND exit <= $3)";
 			params = [deviceid,from,to]
 		}
-		
 		
 		return _execute_sql(sql,params).then(function(results){
 			return results.map(function(result){
@@ -200,7 +199,7 @@ module.exports = {
 				}
 			});
 		});
-	},*/
+	},
 	
 	fetch_browsing_in_location_for_devices: function(deviceids, lat, lng){
 		var sql = "SELECT b.httphost as url, count(DISTINCT(b.timestamp/1000)) as total from browsing b, zones z WHERE"
@@ -216,14 +215,12 @@ module.exports = {
 
 	
 	fetch_device_ids_for_selected: function(selected){
-		var sql = "SELECT id FROM devices WHERE devicename IN " + _convert_to_tuple(selected);
-		console.log(sql);
-		//var params = [_convert_to_tuple(selected)];
-		//_print_query(sql,params);
+		var sql = "SELECT id, devicename FROM devices WHERE devicename IN " + _convert_to_tuple(selected);
+		
 		return _execute_sql(sql).then(function(results){
 			console.log(results);
 			return results.map(function(device){
-				return device.id;
+				return {id:device.id, name:device.devicename};
 			});
 		});
 	},
@@ -512,10 +509,135 @@ module.exports = {
 	
 	
 	
+	fullstats_histogram_for_device: function(deviceid){
+		var sql = "SELECT (b.timestamp) from browsing b WHERE b.id=$1";
+		var params = [deviceid]
+		
+		return _execute_sql(sql,params).then(function(results){
+      		var grandtotal = results.length;
+      			
+      		var binned = results.reduce(function(acc, ts){
+      			var key = (new Date(parseInt(ts.timestamp))).getHours();	
+      			acc[key] = acc[key] || {total: 0, percent:  0}
+      			acc[key].total = acc[key].total + 1;
+      			acc[key].percent = (acc[key].total / grandtotal) * 100;
+      			return acc;
+      		},{});
+      		
+      		return  Object.keys(binned).map(function(key){
+      			return {hour: parseInt(key), value: binned[key].percent}
+      		});
+		});
+	},
+		
+	
+	stats_category_browsing_for_device: function(deviceid, path){
+		var sql = "SELECT b.timestamp, c.tld, c.classification from browsing b, classification_v2 c WHERE b.id=$1 AND b.id=c.deviceid AND c.tld = b.httphost AND c.classification LIKE $2";
+		
+		var params = [deviceid, '%'+path+'%']
+      	return _execute_sql(sql,params).then(function(results){
+      		return results;
+      	});
+	},
+	
+	_zonelookup: function(devices){
+		return this.fetch_locations_for_devices(devices).then(function(locations){
+			return locations;
+		});
+	},
+	
+	_findzone: function(key, _zonelookup){
+
+		var i, z;
+		
+		for (i=0; i < _zonelookup.length; i++){
+			z = _zonelookup[i]; 
+			if (z.enter <= key && z.exit >= key){
+				break;
+			}
+		}
+		return z;
+	},
+	
+	
+	fetch_companion_devices: function(deviceid){
+		var sql = "SELECT devicename FROM devices WHERE id = $1"
+		var params = [deviceid]; 
+		
+		return _execute_sql(sql, params).then(function(results){
+			return results.reduce(function(acc, obj){
+				return obj.devicename;
+			},"");
+		}).then(function(devicename){
+			var username = devicename.split(".")[0];
+			var sql = "SELECT id from devices WHERE devicename LIKE $1";
+			var params = ['%'+username+".%"]
+			
+			return _execute_sql(sql, params).then(function(results){
+				return results.map(function(item){
+					return item.id;
+				});
+			});
+		});
+	},
+	
+	//gives a histogram of browsing in 24 hour bins for a particular category and a breakdown of locations for each 
+	
+	stats_histogram_for_device: function(deviceid, devices, path){
+	
+		path = path || "";
+		
+		return this._zonelookup(devices).then(function(_zonelookup){
+			
+			var sql = "SELECT b.timestamp, c.tld, c.classification from browsing b,  classification_v2 c WHERE b.id=$1 AND b.id=c.deviceid AND c.tld = b.httphost AND c.classification LIKE $2 ORDER BY c.classification, b.timestamp";
+		
+			var params = [deviceid, '%'+path+'%']
+	  
+			return _execute_sql(sql,params).then(function(results){
+				
+				var grandtotal = results.length;
+				
+				var binned = results.reduce(function(acc, row){
+					var key = (new Date(parseInt(row.timestamp))).getHours();
+					acc[key] = acc[key] || {total: 0, percent:  0}
+					acc[key].total = acc[key].total + 1;
+					acc[key].percent = (acc[key].total / grandtotal) * 100;
+					return acc;
+				},{});
+			
+				var browsing = results.reduce(function(acc, row){
+					var key = row.classification;
+					acc[key] = acc[key] || [];
+					acc[key].push({ts:parseInt(row.timestamp), tld:row.tld})
+					return acc;
+				},{});
+			
+				var locations = results.reduce(function(acc, row){
+					var key = parseInt((parseInt(row.timestamp)/1000));
+					var zone = this._findzone(key, _zonelookup);
+					if (zone){
+						acc[zone.name] = acc[zone.name] || {total: 0, percent:  0}
+						acc[zone.name].total += 1;
+						acc[zone.name].percent = (acc[zone.name].total / grandtotal) * 100;
+					}
+					return acc;
+				}.bind(this),{});
+			
+			
+			
+				var histogram =  Object.keys(binned).map(function(key){
+					return {hour: parseInt(key), value: binned[key].percent}
+				});
+			
+				return {histogram:histogram, browsing:browsing, locations:locations}
+			}.bind(this));
+		}.bind(this));
+	},
+	
 	stats_top_urls_for_device: function(deviceid, bin){
 		
 		
-		var sql = "SELECT (b.timestamp/1000/$1) * $2 as bin, b.id as host,  array_agg(DISTINCT b.httphost) as total from browsing b, classification_v2 c WHERE b.id = $3 AND b.id = c.deviceid AND c.tld = b.httphost GROUP BY id, bin ORDER BY id, bin";
+		var sql = "SELECT (b.timestamp/1000/$1) * $2 as bin, b.id as host,  array_agg(DISTINCT b.httphost) as total from classification_v2 c, browsing b WHERE c.deviceid = $3 AND b.id = c.deviceid AND c.tld = b.httphost GROUP BY id, bin ORDER BY id, bin";
       	
       	
       	var params = [bin,bin,deviceid]
@@ -530,11 +652,11 @@ module.exports = {
 			
 		}.bind(this));
 	},
-	
+
 	
 	stats_categories_for_device: function(deviceid){
 			
-		var tldcount = "SELECT b.httphost, count(b.httphost) as count FROM browsing b, classification_v2 c WHERE b.id = $1 AND b.id = c.deviceid AND c.tld = b.httphost GROUP BY httphost";
+		var tldcount = "SELECT b.httphost, count(b.httphost) as count FROM classification_v2 c, browsing b WHERE c.deviceid = $1 AND b.id = c.deviceid AND c.tld = b.httphost GROUP BY httphost";
 		
 		var tldparams = [deviceid]
 		
@@ -545,16 +667,18 @@ module.exports = {
 		//first get the counts of all tlds
 		
 		return _execute_sql(tldcount, tldparams).then(function (results){
+			
 			return results.reduce(function(acc, item){
 				acc[item.httphost] = item.count; 
 				return acc;
 			},{});
 		}).then(function(counts){
+			
+			_print_query(sql,params);
 			return [counts, _execute_sql(sql,params)];
 		})
 		.spread(function(counts, results){
-			console.log("counts are");
-			console.log(counts);
+			
 			
 			return results.map(function(result){
 				var classification = result.classification.split("/");

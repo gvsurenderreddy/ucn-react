@@ -18,14 +18,37 @@ router.get('/', function(req, res, next){
 	res.render('stats')
 });
 
+router.get('/devices', function(req,res,next){
+	var user = req.query.user;
+	return Device.findDevicesForUser(user).then(function(results){
+		return results.map(function(device){
+			return device.username + "." + device.devname;
+		});
+	}).then(function(devices){
+		return pgdb.fetch_device_ids_for_selected(devices)
+	}).then(function(ids){
+		res.send(ids);
+	});
+});
+
 router.get('/categories', function(req,res,next){
 	var deviceid = req.query.id;
+	
 	pgdb.stats_categories_for_device(deviceid).then(function(categories){
-		console.log("----- stats, sending ====");
-    	console.log(categories);
   		res.send(categories);
   	});
 });
+
+router.get('/histogram', function(req,res,next){
+	var deviceid = req.query.id;
+	var path = req.query.path;
+	return pgdb.fetch_companion_devices(deviceid).then(function(deviceids){
+		return pgdb.stats_histogram_for_device(deviceid, deviceids, path)
+  	}).then(function(histogram){
+  		res.send(histogram);
+  	});
+});
+
 
 router.get('/classify', function(req,res,next){
 	var deviceid = req.query.id;
@@ -41,6 +64,16 @@ router.get('/browsing', function(req,res,next){
   		res.send(urls);
   	});
 });
+
+router.get('/full', function(req,res,next){
+	var deviceid = req.query.id;
+	pgdb.fullstats_histogram_for_device(deviceid).then(function(histogram){
+		console.log("----- full stats, sending ====");
+    	console.log(histogram);
+  		res.send(histogram);
+	});
+});
+
 
 
 module.exports = router;
