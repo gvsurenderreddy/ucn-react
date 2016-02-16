@@ -16,7 +16,7 @@ export default class CategoryTree extends React.Component {
 		this.state = {}
 		this.state.nodes = TreeStore.nodes();
 		this.state.paths = TreeStore.paths();
-		getCategories('29');
+		this.state.selected = TreeStore.selected();
 	}
 	
 	componentDidMount(){
@@ -34,7 +34,7 @@ export default class CategoryTree extends React.Component {
 		if (!this.state.nodes)
 			return <h3> waiting for data.. </h3>;
 		
-		let width = 1000, height = 500;
+		let width = this.props.width, height = this.props.height;
 		let marginright = 50, marginleft = 100, marginbottom = 10, margintop = 0;
 		
 		let chartprops = {
@@ -49,6 +49,10 @@ export default class CategoryTree extends React.Component {
 		
 		
 		let nodes = this.state.nodes.map( (node,i)=>{
+		
+		
+			let selected = node.path === this.state.selected.path;
+		
 			let props = {
   				key: i,
   				transform: "translate(" + node.y + "," + node.x + ")",
@@ -57,7 +61,11 @@ export default class CategoryTree extends React.Component {
   			
   			let cprops = {
   				r:  node.r,
-  				fill: 'lightsteelblue'
+  			}
+  			
+  			let cstyle ={
+  				fill: selected ? "#ff2a2a" : node._children || node.children ? "lightsteelblue" : "#fff", 
+  				stroke: selected ? "#d40000" : "steelblue"
   			}
   			
   			let textprops = {
@@ -68,7 +76,7 @@ export default class CategoryTree extends React.Component {
 
   			
   			return  <g className="node" {...props}> 
-  					 	<circle {...cprops} />
+  					 	<circle {...cprops} style={cstyle}/>
   					 	<text {...textprops}>{node.text}</text>
   					</g>
   					
@@ -81,18 +89,25 @@ export default class CategoryTree extends React.Component {
   			}
 			return <path className="link" {...pathprops}/>
 		});
-  		
-		return <svg {...chartprops}>
-               	<g {...gprops}>
-               		{paths}
-               		{nodes}
-               	</g>
-               </svg>
-              
+  		  		
+		return	<div>
+					<h5> category tree <small>{this.state.selected.path || ""}</small></h5>
+					<hr/>
+					<svg {...chartprops}>
+						<g {...gprops}>
+							{paths}
+							{nodes}
+						</g>
+					</svg>	
+              	</div>
 	}
 	
 	_onChange(){
-		this.setState({nodes:TreeStore.nodes(), paths: TreeStore.paths()});
+		this.setState({
+							nodes:TreeStore.nodes(), 
+							paths: TreeStore.paths(),
+							selected: TreeStore.selected(),	
+						});
 	}
 
 }

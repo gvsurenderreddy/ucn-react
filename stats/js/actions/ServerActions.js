@@ -7,3 +7,17 @@ export function receivedCategories(data){
 		data: data,
 	});
 }
+
+export function receivedHistogram(data){
+	AppDispatcher.handleServerAction({
+		type: ActionTypes.HISTOGRAM_DATA,
+		data: data,
+	});
+}
+
+export function receivedDevices(devices){
+	AppDispatcher.handleServerAction({
+		type: ActionTypes.DEVICES_DATA,
+		devices: devices,
+	});
+}

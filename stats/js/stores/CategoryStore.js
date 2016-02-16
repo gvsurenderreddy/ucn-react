@@ -8,6 +8,9 @@ let _nodefor = {};
 let _parentfor = {};
 
 function reset(){
+	_totalsize = 0;
+	_nodefor = {};
+	_parentfor = {};
 	appState = {};
 }
 
@@ -16,7 +19,7 @@ function _buildtree(data){
      _totalsize = 0;
     var _tree = {};
 
-    data.forEach(function(node){
+    data.forEach((node)=>{
     	
         var size = node.size;
         var tld = node.tld;
@@ -26,7 +29,7 @@ function _buildtree(data){
        
         var lastkey;
         //can either be a sub of
-        node.classification.forEach(function(key){
+        node.classification.forEach((key)=>{
 
             var n = _nodefor[key];
 
@@ -115,12 +118,16 @@ categoryStoreInstance.dispatchToken = AppDispatcher.register(action => {
 	switch(action.action.type){
 	
 		case ActionTypes.CATEGORY_DATA:
+			console.log("got new category data!");
+			reset();
+			
 			appState = _buildtree(action.action.data);
+			console.log("tree is now");
+			console.log(appState);
 			break;
-			
+		
 		default:
-			return;
-			
+			return;		
 	}
 	
 	categoryStoreInstance.emitChange();
