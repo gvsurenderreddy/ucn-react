@@ -25,7 +25,7 @@ router.get('/devices', function(req,res,next){
 			return device.username + "." + device.devname;
 		});
 	}).then(function(devices){
-		return pgdb.fetch_device_ids_for_selected(devices)
+		return pgdb.fetch_devices_for_selected(devices)
 	}).then(function(ids){
 		res.send(ids);
 	});

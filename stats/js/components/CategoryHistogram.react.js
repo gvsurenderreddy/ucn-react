@@ -12,7 +12,7 @@ export default class CategoryHistogram extends React.Component {
 		super(props);
 		this._onChange = this._onChange.bind(this);
 		this.state = {}
-		this.state.data = HistogramStore.data();
+		this.state.data = HistogramStore.browsing();
 	}
 	
 	componentDidMount(){
@@ -92,7 +92,7 @@ export default class CategoryHistogram extends React.Component {
 	
 	_onChange(){
 		this.setState({
-						data:  HistogramStore.data(), 
+						data:  HistogramStore.browsing(), 
 						
 					 });
 	}

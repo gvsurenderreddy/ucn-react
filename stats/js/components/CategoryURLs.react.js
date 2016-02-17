@@ -20,14 +20,20 @@ export default class CategoryURLs extends React.Component {
 	
 	render(){		
 	
+		let maxheight = {
+			height: 240,
+			overflowY: 'auto',
+			overflowX: 'hidden',
+		}
+		
   		let urls = this.state.urls ? this.state.urls.map( (url, i)=>{
   			let style={
-  				fontSize: "0.8rem",
+  				fontSize: "0.6rem",
   			}
   			return <li style={style} key={i}>{url}</li>
   		}) : [];
   		
-		return	<ul className="no-bullet">
+		return	<ul className="no-bullet" style={maxheight}>
                		{urls}
                	</ul> 
 	}

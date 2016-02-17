@@ -213,8 +213,18 @@ module.exports = {
 		});
 	},
 
-	
 	fetch_device_ids_for_selected: function(selected){
+		var sql = "SELECT id FROM devices WHERE devicename IN " + _convert_to_tuple(selected);
+		
+		return _execute_sql(sql).then(function(results){
+			return results.map(function(device){
+				return device.id;
+			});
+		});
+	},
+	
+	
+	fetch_devices_for_selected: function(selected){
 		var sql = "SELECT id, devicename FROM devices WHERE devicename IN " + _convert_to_tuple(selected);
 		
 		return _execute_sql(sql).then(function(results){
@@ -612,13 +622,16 @@ module.exports = {
 					return acc;
 				},{});
 			
-				var locations = results.reduce(function(acc, row){
+				var zones = results.reduce(function(acc, row){
+					
 					var key = parseInt((parseInt(row.timestamp)/1000));
 					var zone = this._findzone(key, _zonelookup);
 					if (zone){
 						acc[zone.name] = acc[zone.name] || {total: 0, percent:  0}
 						acc[zone.name].total += 1;
 						acc[zone.name].percent = (acc[zone.name].total / grandtotal) * 100;
+						acc[zone.name].lat = zone.lat;
+						acc[zone.name].lng = zone.lng;
 					}
 					return acc;
 				}.bind(this),{});
@@ -629,6 +642,10 @@ module.exports = {
 					return {hour: parseInt(key), value: binned[key].percent}
 				});
 			
+				var locations = Object.keys(zones).map(function(key){
+					var row = zones[key];
+					return {name:key, lat:row.lat, lng:row.lng, value:row.percent}
+				});
 				return {histogram:histogram, browsing:browsing, locations:locations}
 			}.bind(this));
 		}.bind(this));

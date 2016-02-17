@@ -25,6 +25,8 @@ export function getHistogram(device,path){
 	.set('Accept', 'application/json')
 	.end((err, response)=>{
 		if (err) console.error(err);
+		console.log("got");
+		console.log(response.body);
 		receivedHistogram(response.body)
 	});	
 }

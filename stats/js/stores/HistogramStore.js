@@ -2,7 +2,9 @@ import Store from './Store';
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import {ActionTypes} from '../constants/AppConstants';
 import {getHistogram} from '../utils/WebAPIUtils';
-let _data;
+let _browsing;
+let _locations;
+
 let _deviceid;
 
 function _fetch_histogram(path){
@@ -15,8 +17,12 @@ function _set_deviceid(device){
 	_deviceid = device.id;
 };
 
-function _set_data(data){
-	_data = data;
+function _set_browsing(data){
+	_browsing = data;
+};
+
+function _set_locations(data){
+	_locations = data;
 };
 
 class HistogramStore extends Store{
@@ -25,10 +31,13 @@ class HistogramStore extends Store{
 		super();
 	}
 	
-	data(){
-		return _data || [];
+	browsing(){
+		return _browsing || [];
 	}	
 
+	locations(){
+		return _locations || [];
+	}
 }
 
 let histogramStoreInstance = new HistogramStore();
@@ -42,7 +51,8 @@ histogramStoreInstance.dispatchToken = AppDispatcher.register(action => {
 			break;
 		
 		case ActionTypes.HISTOGRAM_DATA:
-			_set_data(action.action.data.histogram);
+			_set_browsing(action.action.data.histogram);
+			_set_locations(action.action.data.locations);
 			break;	
 		
 		case ActionTypes.DEVICE_SELECTED:
