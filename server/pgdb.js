@@ -617,6 +617,8 @@ module.exports = {
 					acc[zone.name].histogram[starthour] = acc[zone.name].histogram[starthour] || 0
 					acc[zone.name].histogram[starthour] += 1;
 					acc[zone.name].total += 1;
+					acc[zone.name].lat = zone.lat;
+					acc[zone.name].lng = zone.lng;
 					starthour+=1;
 					
 				}
@@ -631,6 +633,8 @@ module.exports = {
 				var zone = data[key];
 				return {
 					name: key,
+					lat: zone.lat,
+					lng: zone.lng,
 					overallpercentage : parseFloat((zone.seconds / totalseconds) * 100).toFixed(2),
 					hours: parseFloat((zone.seconds / 60 / 60)).toFixed(2),
 					histogram: Object.keys(zone.histogram).map(function(hkey){
