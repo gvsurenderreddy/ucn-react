@@ -591,6 +591,70 @@ module.exports = {
 		});
 	},
 	
+	stats_zone_histogram_for_devices: function(devices){
+		return this.fetch_locations_for_devices(devices).then(function(zones){
+			
+			var totalseconds = 0;
+			
+			var data = zones.reduce(function(acc, zone){
+				acc[zone.name] = acc[zone.name] || {seconds:0, total:0, histogram:{}};
+				var enter = parseInt(zone.enter);
+				var exit = parseInt(zone.exit);
+				var start = (parseInt(enter/3600) * 3600) * 1000;
+				var end   = (parseInt(exit/3600 ) * 3600) * 1000;
+				
+				
+				var starthour = new Date(start).getHours();
+				var endhour = new Date(end).getHours();
+				
+				if (starthour > endhour){ //swap them
+					var tmp = starthour;
+					starthour = endhour;
+					endhour = tmp;
+				}
+				
+				while (starthour <= endhour){
+					acc[zone.name].histogram[starthour] = acc[zone.name].histogram[starthour] || 0
+					acc[zone.name].histogram[starthour] += 1;
+					acc[zone.name].total += 1;
+					starthour+=1;
+					
+				}
+				
+				totalseconds += (exit-enter);
+				acc[zone.name].seconds += (exit-enter);
+				
+				return acc;
+			},{});
+			
+			var zones =  Object.keys(data).map(function(key){
+				var zone = data[key];
+				return {
+					name: key,
+					overallpercentage : parseFloat((zone.seconds / totalseconds) * 100).toFixed(2),
+					hours: parseFloat((zone.seconds / 60 / 60)).toFixed(2),
+					histogram: Object.keys(zone.histogram).map(function(hkey){
+						return {hour: hkey, value: (zone.histogram[hkey] / zone.total) * 100};
+					}),
+				}
+			});
+			
+			zones.sort(function(a,b){
+				var x = parseFloat(a.overallpercentage);
+				var y = parseFloat(b.overallpercentage);
+				if (x < y){
+					return 1
+				}
+				if (x > y){
+					return -1
+				}
+				return 0;
+			});
+					
+			return zones;
+		});
+	},
+	
 	//gives a histogram of browsing in 24 hour bins for a particular category and a breakdown of locations for each 
 	
 	stats_histogram_for_device: function(deviceid, devices, path){

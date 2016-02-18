@@ -31,6 +31,20 @@ router.get('/devices', function(req,res,next){
 	});
 });
 
+
+router.get('/bootstrap', function(req,res,next){
+	var deviceid = req.query.id;
+	pgdb.stats_categories_for_device(deviceid).then(function(categories){
+  		return categories;
+  	}).then(function(categories){
+  		return [categories, pgdb.fetch_companion_devices(deviceid)]
+  	}).spread(function(categories, deviceids){
+  		return [categories, pgdb.stats_zone_histogram_for_devices(deviceids)]
+  	}).spread(function(categories, zones){
+  		res.send({categories:categories, zones: zones})
+  	});
+});
+
 router.get('/categories', function(req,res,next){
 	var deviceid = req.query.id;
 	
@@ -49,6 +63,14 @@ router.get('/histogram', function(req,res,next){
   	});
 });
 
+router.get('/zonehistogram', function(req,res,next){
+	var deviceid = req.query.id;
+	return pgdb.fetch_companion_devices(deviceid).then(function(deviceids){
+		return pgdb.stats_zone_histogram_for_devices(deviceids)
+  	}).then(function(histogram){
+  		res.send(histogram);
+  	});
+});
 
 router.get('/classify', function(req,res,next){
 	var deviceid = req.query.id;
