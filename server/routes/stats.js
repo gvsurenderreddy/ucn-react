@@ -39,10 +39,10 @@ router.get('/bootstrap', function(req,res,next){
   	}).then(function(categories){
   		return [categories, pgdb.fetch_companion_devices(deviceid)]
   	}).spread(function(categories, deviceids){
-  		return [categories, pgdb.stats_zone_histogram_for_devices(deviceids)]
-  	}).spread(function(categories, zones){
-  		res.send({categories:categories, zones: zones})
-  	});
+  		return [categories, pgdb.stats_zone_histogram_for_devices(deviceids), pgdb.stats_experiment_duration(deviceids)]
+  	}).spread(function(categories, zones, duration){
+  		res.send({categories:categories, zones: zones, duration: duration})
+  	})
 });
 
 router.get('/categories', function(req,res,next){
