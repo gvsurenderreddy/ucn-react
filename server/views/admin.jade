@@ -9,6 +9,7 @@ html(lang="en")
 				tr
 					th family
 					th devices
+					th stats
 			tbody
 				each family in families
 					tr
@@ -18,3 +19,6 @@ html(lang="en")
 								each device in family.devices
 									li
 										a(href="/viz/device?device="+family.username+"."+device)!=device
+						td
+							a(href="/viz/stats?user="+family.username)!="stats"
+							

@@ -40,7 +40,7 @@ router.post('/browsing', function(req, res, next){
   
   var user = req.user;
   
-  console.log(req.body);
+ 
   
   var selected 	= req.body.devices;
   var family 	= req.body.family;
@@ -183,8 +183,6 @@ router.post('/categories', function(req,res, next){
   	}).then(function(deviceids){
     	return pgdb.fetch_categories_for_devices(deviceids, classifier)
     }).then(function(categories){
-    	console.log("----- viz, sending ====");
-    	console.log(categories);
         res.send(categories);
     });
 });

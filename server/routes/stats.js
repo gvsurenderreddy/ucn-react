@@ -33,16 +33,35 @@ router.get('/devices', function(req,res,next){
 
 
 router.get('/bootstrap', function(req,res,next){
+	console.log("ok bootstrapping");
+	
 	var deviceid = req.query.id;
 	pgdb.stats_categories_for_device(deviceid).then(function(categories){
   		return categories;
   	}).then(function(categories){
   		return [categories, pgdb.fetch_companion_devices(deviceid)]
   	}).spread(function(categories, deviceids){
-  		return [categories, pgdb.stats_zone_histogram_for_devices(deviceids), pgdb.stats_experiment_duration(deviceids)]
+  		return [deviceids, categories, pgdb.stats_zone_histogram_for_devices(deviceids)]
+  	}).spread(function(deviceids, categories, zones){
+  		return [categories, zones, pgdb.stats_experiment_duration(deviceids)]
   	}).spread(function(categories, zones, duration){
-  		res.send({categories:categories, zones: zones, duration: duration})
+  		return [categories, zones, duration, pgdb.stats_routine_for_device(deviceid)]
   	})
+  	.spread(function(categories, zones, duration, routine){	
+  		res.send({categories:categories, zones: zones,  duration: duration, routine: routine})
+  	});
+});
+
+router.get('/zonebreakdown', function(req,res,next){
+	var deviceid = req.query.id;
+	var zone = req.query.zone;
+	var from = req.query.from;
+	var to = req.query.to;
+	return pgdb.fetch_companion_devices(deviceid).then(function(deviceids){
+		return pgdb.stats_zone_breakdown(deviceids, from, to);
+	}).then(function(breakdown){
+		res.send(breakdown);
+	});
 });
 
 router.get('/categories', function(req,res,next){
@@ -70,6 +89,23 @@ router.get('/zonehistogram', function(req,res,next){
   	}).then(function(histogram){
   		res.send(histogram);
   	});
+});
+
+//show all urls that have not yet been classified!
+router.get('/unclassified', function(req,res,next){
+	var deviceid = req.query.id;
+	pgdb.stats_unclassified(deviceid).then(function(unclassified){
+  		res.send(unclassified);
+  	});
+});
+
+
+router.get('/routine', function(req,res,next){
+	console.log("seen routine reqiest..");
+	var deviceid = req.query.id;
+	pgdb.stats_routine_for_device(deviceid).then(function(routines){
+		res.send(routines);
+	});
 });
 
 router.get('/classify', function(req,res,next){
