@@ -46,12 +46,11 @@ var _execute_sql = function(sql,params){
 }
 
 var _print_query = function(sql, params){
-	var query = params.reduce(function(acc, param, index){
+	
+	return params.reduce(function(acc, param, index){
 		return acc.replace("$"+(index+1), "'"+param+"'");
 	},sql);
-	console.log("******");
-	console.log(query);
-	console.log("*******");
+	
 };
 
 var _convert_to_tuple = function(devices){
@@ -231,7 +230,6 @@ module.exports = {
 		var sql = "SELECT id, devicename FROM devices WHERE devicename IN " + _convert_to_tuple(selected);
 		
 		return _execute_sql(sql).then(function(results){
-			console.log(results);
 			return results.map(function(device){
 				return {id:device.id, name:device.devicename};
 			});
@@ -261,6 +259,8 @@ module.exports = {
 			});
 		});
     },
+    
+    
     
 	fetch_categories_for_devices: function(deviceids, classifier){
 		
@@ -618,14 +618,17 @@ module.exports = {
 	},
 	
 	_zonelookup: function(devices){
-		return this.fetch_locations_for_devices(devices).then(function(locations){
+		
+		return this.fetch_locations_for_devices(devices).then(function(locations){	
 			return locations;
 		});
+
 	},
 	
 	_findzone: function(key, _zonelookup){
-
+	
 		var i, z;
+		
 		
 		for (i=0; i < _zonelookup.length; i++){
 			z = _zonelookup[i]; 
@@ -633,6 +636,7 @@ module.exports = {
 				break;
 			}
 		}
+		
 		return z;
 	},
 	
@@ -735,34 +739,85 @@ module.exports = {
 			
 			var coverage = parseFloat((totalseconds / (maxts-mints)) * 100).toFixed(2);
 			var duration = parseFloat((maxts-mints)/3600).toFixed(2);
+			
 			return {duration: duration, coverage:coverage, zones: zones};
 		});
 	},
 	
+	//
+	
+	stats_browsing_times: function(deviceid){
+		
+		return this.fetch_companion_devices(deviceid).then(function(deviceids){
+			
+			var sql = "SELECT count(distinct c.tld) as total, array_agg(distinct b.id) as ids,  (b.timestamp/3600) * 3600 as ts FROM classification_v2 c, browsing b WHERE c.deviceid IN " + _convert_to_tuple(deviceids) + " AND  c.tld=b.httphost AND c.deviceid=b.id GROUP BY  ts ORDER BY ts"
+		
+			return _execute_sql(sql);
+		
+		}).then(function(results){	
+			return results.reduce(function(acc, result){
+				acc[result.ts] = {devices:result.ids, total:result.total};
+				return acc;
+			},{});
+		});
+	},
+	
+	_browsingfor: function(enter, exit, times){
+		var startday = (parseInt(enter/3600) * 3600);
+		var endday   = (parseInt(exit/3600) * 3600);
+		
+		browsing = [];
+		
+		while (startday <= endday){
+			
+			if (times[startday]){
+				
+				browsing.push({
+									ts: startday,
+									count: parseInt(times[startday].total),
+									devices: times[startday].devices,
+							   });
+			}
+			startday += 3600;
+		}	
+				
+		return browsing;
+	},
 	
 	stats_routine_for_device: function(deviceid){
 		var DAY = 60*60*24;
 		
-		return this.fetch_locations_for_device(deviceid).then(function(zones){
-			 var days =  zones.reduce(function(acc, zone){
+		var timeframes = {};
+		
+		return this.stats_browsing_times(deviceid).then(function(results){
+			return results;
+		}).then(function(times){
+			return [times, this.fetch_locations_for_device(deviceid)];
+		}.bind(this)).spread(function(times, zones){
+			console.log(times);
+			var days =  zones.reduce(function(acc, zone){
 				var startday = (parseInt(zone.enter/DAY) * DAY) * 1000;
 				var endday   = (parseInt(zone.exit/DAY) * DAY) * 1000;					
 				var day = startday;
 				
 				while(day <= endday){
 					acc[day] = acc[day] || []
+					var enter = day == startday ? zone.enter*1000 : day;
+					var exit  = Math.min(zone.exit*1000, (day + (DAY*1000))-1000);
+					
 					acc[day].push({
 						name: zone.name,
 						lat: zone.lat,
 						lng: zone.lng,
-						enter: day == startday ? zone.enter*1000 : day,
-						exit: Math.min(zone.exit*1000, (day + (DAY*1000))-1000),
+						enter: enter,
+						exit: exit,
+						browsing: this._browsingfor(enter, exit, times),
 					});
 					day += (DAY*1000);
 				}
 				
 				return acc;
-			},{});
+			}.bind(this),{});
 			
 			var routine =  Object.keys(days).map(function(key){
 				return {date:key, values:days[key]};
@@ -781,23 +836,17 @@ module.exports = {
 			});
 			
 			return routine;
-		});
-		
-		//return days;
-		
-		/*return Object.keys(days).map(function(key){
-			return {date:key, values:days[key]};
-		});*/
-		
+	   }.bind(this));	
 	},
 	//gives a histogram of browsing in 24 hour bins for a particular category and a breakdown of locations for each 
 	
+
 	stats_histogram_for_device: function(deviceid, devices, path){
 	
 		path = path || "";
-		console.log("getting stats for device");
 		
 		return this._zonelookup(devices).then(function(_zonelookup){
+			
 			
 			var sql = "SELECT b.timestamp, c.tld, c.classification from browsing b,  classification_v2 c WHERE b.id=$1 AND b.id=c.deviceid AND c.tld = b.httphost AND c.classification LIKE $2 ORDER BY c.classification, b.timestamp";
 		
@@ -811,27 +860,25 @@ module.exports = {
 				
 				var binned = results.reduce(function(acc, row){
 					var key = (new Date(parseInt(row.timestamp))).getHours();
-					if (key >= 0 && key <= 2){
-						console.log("timestamp " + row.timestamp + " " +  (new Date(parseInt(row.timestamp))).toString() + " " + key + " " + row.tld);
-						
-					}
 					acc[key] = acc[key] || {total: 0, percent:  0}
 					acc[key].total = acc[key].total + 1;
 					acc[key].percent = (acc[key].total / grandtotal) * 100;
 					return acc;
 				},{});
-			
+			  
+			   
 				var browsing = results.reduce(function(acc, row){
 					var key = row.classification;
 					acc[key] = acc[key] || [];
 					acc[key].push({ts:parseInt(row.timestamp), tld:row.tld})
 					return acc;
 				},{});
-			
+				
 				var zones = results.reduce(function(acc, row){
 					
 					var key = parseInt((parseInt(row.timestamp)/1000));
 					var zone = this._findzone(key, _zonelookup);
+					
 					if (zone){
 						acc[zone.name] = acc[zone.name] || {total: 0, percent:  0}
 						acc[zone.name].total += 1;
@@ -842,7 +889,7 @@ module.exports = {
 					return acc;
 				}.bind(this),{});
 			
-			
+				
 			
 				var histogram =  Object.keys(binned).map(function(key){
 					return {hour: parseInt(key), value: binned[key].percent}
@@ -853,7 +900,8 @@ module.exports = {
 					return {name:key, lat:row.lat, lng:row.lng, value:row.percent}
 				});
 				
-				console.log("done!");
+				
+				
 				return {histogram:histogram, browsing:browsing, locations:locations}
 			}.bind(this));
 		}.bind(this));

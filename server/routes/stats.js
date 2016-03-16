@@ -14,7 +14,6 @@ router.use(function(req, res, next) {
 
 router.get('/', function(req, res, next){
 	//get and display all devices for this user
-	console.log("ok here");
 	res.render('stats')
 });
 
@@ -33,7 +32,6 @@ router.get('/devices', function(req,res,next){
 
 
 router.get('/bootstrap', function(req,res,next){
-	console.log("ok bootstrapping");
 	
 	var deviceid = req.query.id;
 	pgdb.stats_categories_for_device(deviceid).then(function(categories){
@@ -57,6 +55,7 @@ router.get('/zonebreakdown', function(req,res,next){
 	var zone = req.query.zone;
 	var from = req.query.from;
 	var to = req.query.to;
+	
 	return pgdb.fetch_companion_devices(deviceid).then(function(deviceids){
 		return pgdb.stats_zone_breakdown(deviceids, from, to);
 	}).then(function(breakdown){
@@ -76,8 +75,11 @@ router.get('/histogram', function(req,res,next){
 	var deviceid = req.query.id;
 	var path = req.query.path;
 	return pgdb.fetch_companion_devices(deviceid).then(function(deviceids){
+		
 		return pgdb.stats_histogram_for_device(deviceid, deviceids, path)
+		
   	}).then(function(histogram){
+  		
   		res.send(histogram);
   	});
 });
@@ -101,7 +103,7 @@ router.get('/unclassified', function(req,res,next){
 
 
 router.get('/routine', function(req,res,next){
-	console.log("seen routine reqiest..");
+	
 	var deviceid = req.query.id;
 	pgdb.stats_routine_for_device(deviceid).then(function(routines){
 		res.send(routines);
@@ -126,8 +128,6 @@ router.get('/browsing', function(req,res,next){
 router.get('/full', function(req,res,next){
 	var deviceid = req.query.id;
 	pgdb.fullstats_histogram_for_device(deviceid).then(function(histogram){
-		console.log("----- full stats, sending ====");
-    	console.log(histogram);
   		res.send(histogram);
 	});
 });
