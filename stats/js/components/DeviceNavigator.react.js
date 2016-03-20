@@ -34,7 +34,7 @@ export default class DeviceNavigator extends React.Component {
 		return	<nav className="top-bar">
 					<ul className="title-area">
 						<li className="name">
-							<h1> <a href="#">devices</a></h1>
+							<h1> <a href="/viz/admin">devices</a></h1>
 						</li>
 					</ul>
 					<section className="top-bar-section">

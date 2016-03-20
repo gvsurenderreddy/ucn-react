@@ -32,7 +32,7 @@ export default class CategoryTree extends React.Component {
 	render(){
 		
 		if (!this.state.nodes)
-			return <h3> waiting for data.. </h3>;
+			return <h5> select a device (above) to browse </h5>;
 		
 		let width = this.props.width, height = this.props.height;
 		let marginright = 50, marginleft = 100, marginbottom = 10, margintop = 0;
@@ -50,7 +50,8 @@ export default class CategoryTree extends React.Component {
 		
 		let nodes = this.state.nodes.map( (node,i)=>{
 		
-		
+			console.log(node.path);
+			
 			let selected = node.path === this.state.selected.path;
 		
 			let props = {

@@ -1,5 +1,7 @@
 import React from 'react';
 import TreeStore from '../stores/TreeStore';
+import URLStore from '../stores/URLStore';
+import {urlSelected} from '../actions/URLActions';
 
 export default class CategoryURLs extends React.Component {
 	
@@ -8,14 +10,17 @@ export default class CategoryURLs extends React.Component {
 		this._onChange = this._onChange.bind(this);
 		this.state = {}
 		this.state.urls = TreeStore.urls();
+		this.state.selected = URLStore.selected();
 	}
 	
 	componentDidMount(){
 		TreeStore.addChangeListener(this._onChange);
+		URLStore.addChangeListener(this._onChange);
 	}
 	
 	componentWillUnmount(){
 		TreeStore.removeChangeListener(this._onChange);
+		URLStore.removeChangeListener(this._onChange);
 	}
 	
 	render(){		
@@ -29,8 +34,9 @@ export default class CategoryURLs extends React.Component {
   		let urls = this.state.urls ? this.state.urls.map( (url, i)=>{
   			let style={
   				fontSize: "0.6rem",
+  				fontWeight: this.state.selected === url ? "bold" : "normal",
   			}
-  			return <li style={style} key={i}>{url}</li>
+  			return <li onClick={this._urlSelected.bind(this,url)} style={style} key={i}>{url}</li>
   		}) : [];
   		
 		return	<ul className="no-bullet" style={maxheight}>
@@ -38,8 +44,13 @@ export default class CategoryURLs extends React.Component {
                	</ul> 
 	}
 	
+	
+	_urlSelected(url){
+		urlSelected(url);
+	}
+	
 	_onChange(){
-		this.setState({urls: TreeStore.urls()});
+		this.setState({urls: TreeStore.urls(), selected: URLStore.selected()});
 	}
 
 }

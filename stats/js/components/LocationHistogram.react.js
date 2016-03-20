@@ -3,12 +3,14 @@ import GoogleMapsLoader from 'google-maps';
 import HistogramStore from '../stores/HistogramStore';
 import YAxes from './YAxes.react';
 import d3 from 'd3';
-let map, googleapi, marker;
+import {colour} from '../utils/utils';
+import {zoneSelected} from '../actions/ZoneActions';
 
+let map, googleapi, marker;
+let circles = {};
 let xscale = d3.scale.linear();
 let yscale = d3.scale.linear();
 
-const colours = ["#d50000","#c51162", "#aa00ff", "#6200ea", "#304ffe", "#2962ff", "#01579b", "#006064", "#004d40", "#1b5e20", "#33691e", "#827717", "#f57f17", "#ffd600","#e65100","#3e2723", "#21221", "#37474f"];
 		
 export default class LocationHistogram extends React.Component {
 	
@@ -43,15 +45,6 @@ export default class LocationHistogram extends React.Component {
 		HistogramStore.removeChangeListener(this._onChange);
 	}
 	
-	colour(name){
-		let hash = name.split("").reduce((a,b)=>{
-			a =((a<<5)-a)+b.charCodeAt(0);
-			return a&a;
-		},0);
-		var index = hash % colours.length;
-		return colours[index];
-	}
-	
 	render(){		
 		
 		let width = this.props.width, height = this.props.height;
@@ -73,6 +66,27 @@ export default class LocationHistogram extends React.Component {
 		yscale.domain([0,100]);
 		yscale.range([0,this.props.height]);
 		
+		this.state.data.map((zone,i)=>{
+			
+			if (googleapi && map){
+				if (!circles[zone.name]){
+					let circle = new googleapi.maps.Circle({
+						strokeColor: colour(zone.name),
+						strokeOpacity: 1.0,
+						strokeWeight: 2,
+						fillColor: colour(zone.name),
+						fillOpacity: 0.5,
+						map: map,
+						center: {lat:zone.lat, lng: zone.lng},
+						radius: 10,
+					});
+					
+					googleapi.maps.event.addListener(circle, 'click', this._selectZone.bind(this,zone));
+					circles[zone.name] = circle;
+				}
+			}
+		});
+			
 		let bars = this.state.data.map((item,i)=>{
 			let props = {
 				key: i,
@@ -84,7 +98,7 @@ export default class LocationHistogram extends React.Component {
 			}
 			
 			let style = {
-				fill: this.colour(item.name),
+				fill: colour(item.name),
 				stroke: "#000"
 			} 
 			
@@ -102,10 +116,6 @@ export default class LocationHistogram extends React.Component {
 		yaxiscale.domain([100,0]);
 		yaxiscale.range([0, this.props.height]);
 		
-		var mapstyle={
-			height: 200,
-			width: 330,
-		}
 		return	<div>
 					<h5>location <small>where browsing took place</small></h5>
 					<hr/>
@@ -120,6 +130,7 @@ export default class LocationHistogram extends React.Component {
 	}
 	
 	_selectZone(zone){
+		zoneSelected(zone);
 		if (googleapi && map && zone.lat){
   			map.setCenter({lat: zone.lat, lng: zone.lng});
   			marker.setPosition({lat: zone.lat, lng: zone.lng});

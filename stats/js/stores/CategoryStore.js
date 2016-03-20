@@ -109,6 +109,7 @@ class CategoryStore extends Store{
 		return appState;
 	}
 	
+	
 }
 
 let categoryStoreInstance = new CategoryStore();
@@ -118,14 +119,11 @@ categoryStoreInstance.dispatchToken = AppDispatcher.register(action => {
 	switch(action.action.type){
 	
 		case ActionTypes.CATEGORY_DATA:
-			console.log("got new category data!");
 			reset();
-			
 			appState = _buildtree(action.action.data);
-			console.log("tree is now");
-			console.log(appState);
 			break;
 		
+			
 		default:
 			return;		
 	}

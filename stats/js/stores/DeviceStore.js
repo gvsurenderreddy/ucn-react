@@ -2,7 +2,7 @@ import Store from './Store';
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import {ActionTypes} from '../constants/AppConstants';
 import {fetchDevicesForUser} from '../utils/WebAPIUtils';
-import {getCategories} from '../utils/WebAPIUtils';
+import {bootstrap} from '../utils/WebAPIUtils';
 
 let _devices;
 let _selected;
@@ -13,7 +13,7 @@ function _set_data(devices){
 
 function _fetch_categories(device){
 	_selected = device.id;
-	getCategories(device.id);	
+	bootstrap(device.id);	
 };
 
 class DeviceStore extends Store{

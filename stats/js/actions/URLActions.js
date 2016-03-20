@@ -1,9 +1,9 @@
 import AppDispatcher from  '../dispatcher/AppDispatcher';
 import {ActionTypes} from '../constants/AppConstants';
 
-export function nodeSelected(node){
+export function urlSelected(url){
 	AppDispatcher.handleViewAction({
-		type: ActionTypes.NODE_SELECTED,
-		node: node,
+		type: ActionTypes.URL_SELECTED,
+		url,
 	});
 }

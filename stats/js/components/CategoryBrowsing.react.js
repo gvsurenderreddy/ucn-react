@@ -1,6 +1,7 @@
 import React from 'react';
 import BrowsingStore from '../stores/BrowsingStore';
 import TreeStore from '../stores/TreeStore';
+import URLStore from '../stores/URLStore';
 import XYAxes from './XYAxes.react';
 import d3 from 'd3';
 
@@ -19,16 +20,19 @@ export default class CategoryBrowsing extends React.Component {
 		this.state = {}
 		this.state.data = BrowsingStore.data();
 		this.state.selected = TreeStore.selected();
+		this.state.selectedURL = URLStore.selected();
 	}
 	
 	componentDidMount(){
 		BrowsingStore.addChangeListener(this._onChange);
 		TreeStore.addChangeListener(this._onChange);
+		URLStore.addChangeListener(this._onChange);
 	}
 	
 	componentWillUnmount(){
 		BrowsingStore.removeChangeListener(this._onChange);
 		TreeStore.addChangeListener(this._onChange);
+		URLStore.removeChangeListener(this._onChange);
 	}
 	
 	render(){		
@@ -67,13 +71,14 @@ export default class CategoryBrowsing extends React.Component {
 			width: width,
 		}
 		
-		let rows = Object.keys(this.state.data).map(function(key, i){
+		let rows = Object.keys(this.state.data).map((key, i)=>{
 			let gprops = {
 				transform: `translate(0, ${yscale(i)})`
 			}
 	
 			
-			let lines = this.state.data[key].map(function(row,i){
+			let lines = this.state.data[key].map((row,i)=>{
+			
 				let props = {
 					x1: xscale(row.ts),
 					y1: ROWPADDING,
@@ -82,8 +87,9 @@ export default class CategoryBrowsing extends React.Component {
 					key: i,
 				}
 				let style = {
-					fill: 'lightsteelblue',
-					stroke: 'steelblue',
+					fill:  this.state.selectedURL ? this.state.selectedURL === row.tld ? 'red' : 'black' : 'black',
+					stroke: this.state.selectedURL ? this.state.selectedURL === row.tld ? 'red' : 'black' : 'black',
+					strokeWidth: this.state.selectedURL ? this.state.selectedURL === row.tld ? 1 : 0 : 1,
 				} 
 				return <line {...props} style={style}/>
 			});
@@ -92,7 +98,7 @@ export default class CategoryBrowsing extends React.Component {
 					 {lines}
 				   </g>
 			
-		}.bind(this));
+		});
       
       
       	let dividers = Object.keys(this.state.data).map(function(key, i){
@@ -143,7 +149,7 @@ export default class CategoryBrowsing extends React.Component {
 	}
 	
 	_onChange(){
-		this.setState({data:  BrowsingStore.data(), selected:TreeStore.selected()});
+		this.setState({data:  BrowsingStore.data(), selected:TreeStore.selected(), selectedURL:URLStore.selected()});
 	}
 
 }

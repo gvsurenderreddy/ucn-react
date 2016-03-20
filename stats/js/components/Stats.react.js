@@ -6,6 +6,8 @@ import CategoryHistogram from './CategoryHistogram.react';
 import LocationHistogram from './LocationHistogram.react';
 import CategoryBrowsing from './CategoryBrowsing.react';
 import DeviceNavigator from  './DeviceNavigator.react';
+import ZonesOverview from './ZonesOverview.react';
+import Routine from './Routine.react';
 
 export default class Stats extends React.Component {
 	
@@ -31,6 +33,14 @@ export default class Stats extends React.Component {
 			height: 200,
 		}
 		
+		var overviewprops = {
+			width: 1200,
+			height: 200,
+		}
+		
+		var routineprops = {
+			width: 1200,
+		}
 		
 		var urlstyle = {
 			height: 500,
@@ -42,9 +52,13 @@ export default class Stats extends React.Component {
 			width: 240,
 		}
 		
+		var mapprops = {
+			width: 1200,
+			height: 200,
+		}
+		
 		return 	<div>
 					<DeviceNavigator />
-					<div className="row fullWidth"></div>
 					<div className="row fullWidth">
 						<div className="small-7 large-7 columns">
 							<CategoryTree  {...treeprops}/>
@@ -72,9 +86,23 @@ export default class Stats extends React.Component {
 							</div>
 						</div>
 					</div>
+					
 					<div className="row fullWidth">
 						<div className="small-12 large-12 columns">
 							<CategoryBrowsing {...browsingprops} />
+						</div>
+					</div>
+					
+					<div className="row fullWidth">
+						<div className="small-12 large-12 columns">
+							<ZonesOverview {...overviewprops} />
+						</div>
+					</div>
+					
+					
+					<div className="row fullWidth">
+						<div className="small-12 large-12 columns">
+							<Routine {...routineprops} />
 						</div>
 					</div>
 			 	</div>

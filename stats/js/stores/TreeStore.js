@@ -64,6 +64,11 @@ function _update_urls(data){
 
 function _create_nodes(data){
 	
+	
+	console.log("creating nodes from");
+	console.log(data);
+	console.log("-----");
+	
 	root = data;
 	root.x0 = height / 2;
   	root.y0 = 0;
@@ -73,6 +78,9 @@ function _create_nodes(data){
 	
 	let _treenodes = tree.nodes(root).reverse();
   	
+  	console.log("treenodes are");
+  	console.log(_treenodes);
+  	  	
   	// Normalize for fixed-depth.
   	_treenodes.forEach((d)=>{ d.y = d.depth * 180; });
   	
@@ -159,7 +167,8 @@ treeStoreInstance.dispatchToken = AppDispatcher.register(action => {
 		case ActionTypes.DEVICE_SELECTED:
 			_cleartree();
 			break;	
-			
+		
+
 		default:
 			return;
 			
