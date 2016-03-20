@@ -608,6 +608,7 @@ module.exports = {
 	},
 		
 	
+	
 	stats_category_browsing_for_device: function(deviceid, path){
 		var sql = "SELECT b.timestamp, c.tld, c.classification from browsing b, classification_v2 c WHERE b.id=$1 AND b.id=c.deviceid AND c.tld = b.httphost AND c.classification LIKE $2";
 		
@@ -746,6 +747,37 @@ module.exports = {
 	
 	//
 	
+	_toplevel : function(classification){
+		var toplevel = ["information", "support", "entertainment", "lifestyle", "participation","communication"];
+		var i;
+		for (i = 0; i < toplevel.length; i++){
+			if (classification.lastIndexOf(toplevel[i], 0) === 0){
+				return toplevel[i];
+			}
+		}
+		return "";
+	},
+	
+	stats_browsing_categories: function(deviceid){
+		var DAY = 60*60*24*1000;
+		
+		return this.fetch_companion_devices(deviceid).then(function(deviceids){
+			var sql = "SELECT c.classification, b.timestamp ts FROM classification_v2 c, browsing b WHERE c.deviceid IN " + _convert_to_tuple(deviceids) + " AND  c.tld=b.httphost AND c.deviceid=b.id ORDER BY ts"
+		   
+		    return _execute_sql(sql);
+		}).then(function(results){	
+			
+			days = {};
+			
+			return results.reduce(function(acc, item){
+				var day = (parseInt(item.ts/DAY) * DAY);
+				acc[day] = acc[day] || [];
+				acc[day].push({cat:this._toplevel(item.classification), ts:item.ts})	
+				return acc;
+			}.bind(this),{});;
+		}.bind(this));
+	},
+	
 	stats_browsing_times: function(deviceid){
 		
 		return this.fetch_companion_devices(deviceid).then(function(deviceids){
@@ -794,7 +826,7 @@ module.exports = {
 		}).then(function(times){
 			return [times, this.fetch_locations_for_device(deviceid)];
 		}.bind(this)).spread(function(times, zones){
-			console.log(times);
+			
 			var days =  zones.reduce(function(acc, zone){
 				var startday = (parseInt(zone.enter/DAY) * DAY) * 1000;
 				var endday   = (parseInt(zone.exit/DAY) * DAY) * 1000;					

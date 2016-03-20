@@ -125,6 +125,13 @@ router.get('/browsing', function(req,res,next){
   	});
 });
 
+router.get('/fullclassification', function(req,res,next){
+	var deviceid = req.query.id;	
+	pgdb.stats_browsing_categories(deviceid).then(function(result){
+		res.send(result);
+	});
+});
+
 router.get('/full', function(req,res,next){
 	var deviceid = req.query.id;
 	pgdb.fullstats_histogram_for_device(deviceid).then(function(histogram){
