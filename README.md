@@ -101,4 +101,4 @@ The client code provides an interactive visualisation of browsing and location d
 ### Stats
 
 
-The stats code provided post-experiment analysis of the data, it was used to present classifications of users browsing habits and to pull out routines and activities.  The code is written using [react](https://facebook.github.io/react/), [FLUX](https://facebook.github.io/react/docs/flux-overview.html) and [d3](https://d3js.org/), though it hands all DOM maniputaltion to react rather than d3, and only uses d3 for visualisation functions (i.e no use of enter/exit/remove).
+The stats code provided post-experiment analysis of the data, it was used to present classifications of users browsing habits and to pull out routines and activities.  The code is written using [react](https://facebook.github.io/react/), [FLUX](https://facebook.github.io/react/docs/flux-overview.html) and [d3](https://d3js.org/), though it hands all DOM manipulation to react rather than d3, and only uses d3 for visualisation functions (i.e no use of enter/exit/remove).
