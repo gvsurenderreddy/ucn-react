@@ -93,6 +93,10 @@ User authentication registration is handled by a separate [server](https://githu
 
 The client code provides an interactive visualisation of browsing and location data.  The code is written using [react](https://facebook.github.io/react/), [FLUX](https://facebook.github.io/react/docs/flux-overview.html) and [d3](https://d3js.org/).  
 
+<p align="center">
+	<img src="./screenshots/screen4.png"/>
+	<img src="./screenshots/screen6.png"/>
+</p>
 
 ### Stats
 
